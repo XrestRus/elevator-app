@@ -1,18 +1,24 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, MeshReflectorMaterial } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import './App.css';
 import { Suspense } from 'react';
+import { useSelector } from 'react-redux';
 import UIPanel from './components/ui/UIPanel.tsx';
 import BasicElevator from './components/elevator/BasicElevator';
+import CeilingLights from './components/elevator/CeilingLights';
+import type { RootState } from './store/store';
 
 /**
  * Главный компонент приложения для конструктора лифта
  */
 function App() {
+  // Получаем настройки из Redux
+  const lighting = useSelector((state: RootState) => state.elevator.lighting);
+  
   return (
     <div className="app-container">
       <Canvas
-        shadows
+        shadows={false}
         camera={{ 
           position: [0, 0, 0],
           fov: 75
@@ -32,6 +38,13 @@ function App() {
         
         <Suspense fallback={null}>
           <BasicElevator />
+          
+          {/* Добавляем светильники */}
+          <CeilingLights 
+            count={lighting.count} 
+            color={lighting.color} 
+            intensity={lighting.intensity} 
+          />
         </Suspense>
         
         <OrbitControls 

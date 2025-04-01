@@ -10,6 +10,16 @@ export interface Dimensions {
 }
 
 /**
+ * Интерфейс для настроек освещения лифта
+ */
+export interface LightingOptions {
+  count: number;
+  color: string;
+  intensity: number;
+  enabled: boolean;
+}
+
+/**
  * Интерфейс для материалов лифта
  */
 export interface Materials {
@@ -40,12 +50,28 @@ export interface Materials {
 }
 
 /**
+ * Интерфейс для настроек видимости декоративных элементов
+ */
+export interface VisibilityOptions {
+  decorations: boolean;
+  controlPanel: boolean;
+  handrails: boolean;
+  infoPanel: boolean;
+  floorIndicator: boolean;
+  mirror: boolean;
+  emergencyButton: boolean;
+  floorNumber: boolean;
+}
+
+/**
  * Интерфейс состояния лифта
  */
 export interface ElevatorState {
   dimensions: Dimensions;
   doorsOpen: boolean;
   materials: Materials;
+  lighting: LightingOptions;
+  visibility: VisibilityOptions;
 }
 
 /**
@@ -83,6 +109,22 @@ const initialState: ElevatorState = {
       ceiling: 0.1,
       doors: 0.3
     }
+  },
+  lighting: {
+    count: 4,
+    color: '#ffffff',
+    intensity: 2,
+    enabled: true
+  },
+  visibility: {
+    decorations: true,
+    controlPanel: true,
+    handrails: true,
+    infoPanel: true,
+    floorIndicator: true,
+    mirror: true,
+    emergencyButton: true,
+    floorNumber: true
   }
 };
 
@@ -104,7 +146,7 @@ const elevatorSlice = createSlice({
     },
     
     // Изменение материала
-    setMaterial: (state, action: PayloadAction<{ part: keyof Materials, color: string }>) => {
+    setMaterial: (state, action: PayloadAction<{ part: 'floor' | 'ceiling' | 'walls' | 'doors', color: string }>) => {
       const { part, color } = action.payload;
       state.materials[part] = color;
     },
@@ -131,6 +173,17 @@ const elevatorSlice = createSlice({
     setMetalness: (state, action: PayloadAction<{ part: keyof Materials['metalness'], value: number }>) => {
       const { part, value } = action.payload;
       state.materials.metalness[part] = value;
+    },
+    
+    // Обновление настроек освещения
+    setLighting: (state, action: PayloadAction<Partial<LightingOptions>>) => {
+      state.lighting = { ...state.lighting, ...action.payload };
+    },
+    
+    // Обновление видимости элементов
+    setVisibility: (state, action: PayloadAction<{ element: keyof VisibilityOptions, visible: boolean }>) => {
+      const { element, visible } = action.payload;
+      state.visibility[element] = visible;
     }
   }
 });
@@ -143,7 +196,9 @@ export const {
   setMirrorSurface,
   setTexture,
   setRoughness,
-  setMetalness
+  setMetalness,
+  setLighting,
+  setVisibility
 } = elevatorSlice.actions;
 
 // Экспорт reducer

@@ -7,6 +7,7 @@ import {
   setMirrorSurface,
   setTexture,
   setRoughness,
+  setLighting,
   ElevatorState,
 } from "../../store/elevatorSlice";
 import type { RootState } from "../../store/store";
@@ -32,14 +33,6 @@ const UIPanel = () => {
   // Обработчик открытия/закрытия дверей
   const handleDoorToggle = () => {
     dispatch(toggleDoors());
-  };
-
-  // Обработчик изменения материала
-  const handleMaterialChange = (
-    part: "floor" | "ceiling" | "walls" | "doors",
-    color: string
-  ) => {
-    dispatch(setMaterial({ part, color }));
   };
 
   return (
@@ -394,8 +387,71 @@ const UIPanel = () => {
         
         {activeTab === "elements" && (
           <div>
-            <p>Управление элементами лифта</p>
-            {/* Здесь будут элементы управления дополнительными элементами */}
+            <h3>Управление элементами лифта</h3>
+            
+            {/* Настройки освещения */}
+            <div style={{ marginBottom: '16px' }}>
+              <h4>Освещение</h4>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Количество светильников:</label>
+                <select
+                  value={elevator.lighting.count}
+                  onChange={(e) => dispatch(setLighting({ 
+                    count: parseInt(e.target.value) 
+                  }))}
+                  style={{ width: '100%', padding: '4px' }}
+                >
+                  <option value="1">1 (центральный)</option>
+                  <option value="2">2 (спереди и сзади)</option>
+                  <option value="4">4 (по углам)</option>
+                </select>
+              </div>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Цвет света:</label>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <input 
+                    type="color" 
+                    value={elevator.lighting.color}
+                    onChange={(e) => dispatch(setLighting({ color: e.target.value }))}
+                    style={{ marginRight: '8px' }}
+                  />
+                  <span>{elevator.lighting.color}</span>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Интенсивность:</label>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="5" 
+                  step="0.1" 
+                  value={elevator.lighting.intensity}
+                  onChange={(e) => dispatch(setLighting({ intensity: parseFloat(e.target.value) }))}
+                  style={{ width: '100%' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Слабый</span>
+                  <span>{elevator.lighting.intensity.toFixed(1)}</span>
+                  <span>Яркий</span>
+                </div>
+              </div>
+              
+              {/* Переключатель света */}
+              <div style={{ marginBottom: '8px' }}>
+                <label>
+                  <input 
+                    type="checkbox" 
+                    checked={elevator.lighting.enabled}
+                    onChange={(e) => dispatch(setLighting({ enabled: e.target.checked }))}
+                    style={{ marginRight: '8px' }}
+                  />
+                  Включить свет
+                </label>
+              </div>
+            </div>
           </div>
         )}
       </div>

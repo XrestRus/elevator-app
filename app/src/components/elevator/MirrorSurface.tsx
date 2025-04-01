@@ -19,8 +19,8 @@ const MirrorSurface: React.FC<MirrorSurfaceProps> = ({
   color = '#ffffff' 
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const cubeRenderTargetRef = useRef<THREE.WebGLCubeRenderTarget>();
-  const cubeCamera = useRef<THREE.CubeCamera>();
+  const cubeRenderTargetRef = useRef<THREE.WebGLCubeRenderTarget | null>(null);
+  const cubeCamera = useRef<THREE.CubeCamera | null>(null);
   
   // Инициализация рендер-цели и камеры при первом рендере
   React.useEffect(() => {
