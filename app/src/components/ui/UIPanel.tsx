@@ -9,6 +9,8 @@ import {
   setRoughness,
   setLighting,
   ElevatorState,
+  setVisibility,
+  setCamera,
 } from "../../store/elevatorSlice";
 import type { RootState } from "../../store/store";
 
@@ -33,6 +35,11 @@ const UIPanel = () => {
   // Обработчик открытия/закрытия дверей
   const handleDoorToggle = () => {
     dispatch(toggleDoors());
+  };
+  
+  // Обработчик изменения угла обзора камеры
+  const handleFovChange = (value: number) => {
+    dispatch(setCamera({ fov: value }));
   };
 
   return (
@@ -169,6 +176,28 @@ const UIPanel = () => {
                 <span>1.5</span>
                 <span>{elevator.dimensions.depth.toFixed(1)}</span>
                 <span>3.0</span>
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                Угол обзора (FOV):
+              </label>
+              <input
+                type="range"
+                min="50"
+                max="100"
+                step="1"
+                value={elevator.camera.fov}
+                onChange={(e) =>
+                  handleFovChange(parseFloat(e.target.value))
+                }
+                style={{ width: "100%" }}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Узкий (50°)</span>
+                <span>{elevator.camera.fov.toFixed(0)}°</span>
+                <span>Широкий (100°)</span>
               </div>
             </div>
 
@@ -389,6 +418,39 @@ const UIPanel = () => {
         {activeTab === "elements" && (
           <div>
             <h3>Управление элементами лифта</h3>
+            
+            {/* Переключатели для элементов лифта */}
+            <div style={{ marginBottom: '16px' }}>
+              <h4>Элементы интерьера</h4>
+              
+              <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type="checkbox" 
+                  id="showHandrails"
+                  checked={elevator.visibility.handrails}
+                  onChange={() => dispatch(setVisibility({ 
+                    element: 'handrails', 
+                    visible: !elevator.visibility.handrails 
+                  }))}
+                  style={{ marginRight: '8px' }}
+                />
+                <label htmlFor="showHandrails">Поручни</label>
+              </div>
+              
+              <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type="checkbox" 
+                  id="showControlPanel"
+                  checked={elevator.visibility.controlPanel}
+                  onChange={() => dispatch(setVisibility({ 
+                    element: 'controlPanel', 
+                    visible: !elevator.visibility.controlPanel 
+                  }))}
+                  style={{ marginRight: '8px' }}
+                />
+                <label htmlFor="showControlPanel">Панель управления</label>
+              </div>
+            </div>
             
             {/* Настройки освещения */}
             <div style={{ marginBottom: '16px' }}>

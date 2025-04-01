@@ -1,12 +1,32 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import './App.css';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import * as THREE from 'three';
 import UIPanel from './components/ui/UIPanel.tsx';
 import BasicElevator from './components/elevator/BasicElevator';
 import CeilingLights from './components/elevator/CeilingLights';
 import type { RootState } from './store/store';
+
+/**
+ * Компонент для динамического управления камерой
+ */
+function CameraController() {
+  const { camera } = useThree();
+  const cameraSettings = useSelector((state: RootState) => state.elevator.camera);
+  
+  // Применяем настройки камеры при изменении
+  useEffect(() => {
+    // Проверяем, что камера это PerspectiveCamera, у которой есть свойство fov
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = cameraSettings.fov;
+      camera.updateProjectionMatrix(); // Важно вызвать это для применения изменений
+    }
+  }, [camera, cameraSettings.fov]);
+  
+  return null;
+}
 
 /**
  * Главный компонент приложения для конструктора лифта
@@ -14,6 +34,7 @@ import type { RootState } from './store/store';
 function App() {
   // Получаем настройки из Redux
   const lighting = useSelector((state: RootState) => state.elevator.lighting);
+  const cameraSettings = useSelector((state: RootState) => state.elevator.camera);
   
   return (
     <div className="app-container">
@@ -21,7 +42,7 @@ function App() {
         shadows={false}
         camera={{ 
           position: [0, 0, 0],
-          fov: 75
+          fov: cameraSettings.fov // Начальное значение FOV
         }}
         gl={{ 
           antialias: true,
@@ -29,6 +50,8 @@ function App() {
         }}
         style={{ height: '100vh', width: '100%' }}
       >
+        <CameraController />
+        
         {/* Усиливаем освещение */}
         <ambientLight intensity={1.5} />
         <pointLight position={[0, 1, 0]} intensity={3} />

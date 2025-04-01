@@ -14,7 +14,6 @@ const BasicElevator: React.FC = () => {
   
   // Новый подход: двери занимают почти всю ширину лифта
   // Оставляем только небольшие боковые части для рамки
-  const doorFrameWidth = 0.2; // Ширина боковых частей рамки
   const doorHeight = dimensions.height - 0.3; // Высота дверного проема
 
   // Создаем функцию для клонирования материалов с разным повторением текстур
@@ -324,6 +323,28 @@ const BasicElevator: React.FC = () => {
     }),
     []
   );
+  
+  // Материал для стыка дверей
+  const doorSeamMaterial = useMemo(() => 
+    new THREE.MeshStandardMaterial({
+      color: '#000000',
+      metalness: 0.9,
+      roughness: 0.1,
+      emissive: '#111111'
+    }),
+    []
+  );
+  
+  // Материал для прорези в дверях
+  const doorSlotMaterial = useMemo(() => 
+    new THREE.MeshStandardMaterial({
+      color: '#111111',
+      metalness: 0.9,
+      roughness: 0.2,
+      emissive: '#080808'
+    }),
+    []
+  );
 
   return (
     <group>
@@ -378,53 +399,57 @@ const BasicElevator: React.FC = () => {
         <primitive object={sideWallMaterial} attach="material" />
       </Box>
       
-      {/* Поручень на левой стене - перпендикулярно стене */}
-      <Cylinder
-        position={[-dimensions.width/2 + 0.03, -0.1, 0]} 
-        rotation={[Math.PI/2, 0, 0]} // Повернуто на 90 градусов по часовой
-        args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
-        castShadow
-      >
-        <primitive object={handrailMaterial} attach="material" />
-      </Cylinder>
+      {/* Поручень на левой стене - показываем в зависимости от настроек */}
+      {elevator.visibility.handrails && (
+        <Cylinder
+          position={[-dimensions.width/2 + 0.03, -0.1, 0]} 
+          rotation={[Math.PI/2, 0, 0]} // Повернуто на 90 градусов по часовой
+          args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
+          castShadow
+        >
+          <primitive object={handrailMaterial} attach="material" />
+        </Cylinder>
+      )}
       
-      {/* Панель управления с кнопками на левой стене */}
-      <group position={[-dimensions.width/2 + 0.08, -0.1, dimensions.depth/3]}>
-        {/* Основа панели */}
-        <Box 
-          args={[0.05, 0.4, 0.25]} 
-          castShadow
-        >
-          <primitive object={controlPanelMaterial} attach="material" />
-        </Box>
-        
-        {/* Кнопки лифта (сетка 3x5) */}
-        {Array.from({ length: 3 }).map((_, row) => 
-          Array.from({ length: 5 }).map((_, col) => (
-            <Box 
-              key={`button-${row}-${col}`}
-              position={[
-                0.03, 
-                0.15 - row * 0.06,
-                -0.08 + col * 0.04
-              ]} 
-              args={[0.01, 0.025, 0.025]} 
-              castShadow
-            >
-              <primitive object={buttonMaterial} attach="material" />
-            </Box>
-          ))
-        )}
-        
-        {/* Дисплей этажа */}
-        <Box 
-          position={[0.03, 0.16, 0]} 
-          args={[0.01, 0.04, 0.15]} 
-          castShadow
-        >
-          <meshStandardMaterial color="#000000" emissive="#003300" />
-        </Box>
-      </group>
+      {/* Панель управления с кнопками на левой стене - показываем в зависимости от настроек */}
+      {elevator.visibility.controlPanel && (
+        <group position={[-dimensions.width/2 + 0.08, -0.1, dimensions.depth/3]}>
+          {/* Основа панели */}
+          <Box 
+            args={[0.05, 0.4, 0.25]} 
+            castShadow
+          >
+            <primitive object={controlPanelMaterial} attach="material" />
+          </Box>
+          
+          {/* Кнопки лифта (сетка 3x5) */}
+          {Array.from({ length: 3 }).map((_, row) => 
+            Array.from({ length: 5 }).map((_, col) => (
+              <Box 
+                key={`button-${row}-${col}`}
+                position={[
+                  0.03, 
+                  0.15 - row * 0.06,
+                  -0.08 + col * 0.04
+                ]} 
+                args={[0.01, 0.025, 0.025]} 
+                castShadow
+              >
+                <primitive object={buttonMaterial} attach="material" />
+              </Box>
+            ))
+          )}
+          
+          {/* Дисплей этажа */}
+          <Box 
+            position={[0.03, 0.16, 0]} 
+            args={[0.01, 0.04, 0.15]} 
+            castShadow
+          >
+            <meshStandardMaterial color="#000000" emissive="#003300" />
+          </Box>
+        </group>
+      )}
       
       {/* Правая стена - всегда обычный материал */}
       <Box 
@@ -436,15 +461,17 @@ const BasicElevator: React.FC = () => {
         <primitive object={sideWallMaterial} attach="material" />
       </Box>
       
-      {/* Поручень на правой стене - перпендикулярно стене */}
-      <Cylinder
-        position={[dimensions.width/2 - 0.03, -0.1, 0]} 
-        rotation={[Math.PI/2, 0, 0]} // Повернуто на 90 градусов по часовой
-        args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
-        castShadow
-      >
-        <primitive object={handrailMaterial} attach="material" />
-      </Cylinder>
+      {/* Поручень на правой стене - показываем в зависимости от настроек */}
+      {elevator.visibility.handrails && (
+        <Cylinder
+          position={[dimensions.width/2 - 0.03, -0.1, 0]} 
+          rotation={[Math.PI/2, 0, 0]} // Повернуто на 90 градусов по часовой
+          args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
+          castShadow
+        >
+          <primitive object={handrailMaterial} attach="material" />
+        </Cylinder>
+      )}
       
       {/* Верхняя перемычка над дверью */}
       <Box 
@@ -456,16 +483,48 @@ const BasicElevator: React.FC = () => {
       </Box>
       
       {/* Левая дверь - с небольшим запасом по ширине */}
-      <animated.mesh {...leftDoorSpring} castShadow>
-        <boxGeometry args={[dimensions.width/2 + 0.05, doorHeight, 0.05]} />
-        <primitive object={doorMaterial} attach="material" />
-      </animated.mesh>
+      <animated.group {...leftDoorSpring}>
+        <mesh castShadow>
+          <boxGeometry args={[dimensions.width/2 + 0.05, doorHeight, 0.05]} />
+          <primitive object={doorMaterial} attach="material" />
+        </mesh>
+        
+        {/* Прорезь в левой двери */}
+        <Box 
+          position={[dimensions.width/4 + 0.025, 0, 0.03]} 
+          args={[0.01, doorHeight * 0.8, 0.06]} 
+          castShadow
+        >
+          <primitive object={doorSlotMaterial} attach="material" />
+        </Box>
+      </animated.group>
       
       {/* Правая дверь - с небольшим запасом по ширине */}
-      <animated.mesh {...rightDoorSpring} castShadow>
-        <boxGeometry args={[dimensions.width/2 + 0.05, doorHeight, 0.05]} />
-        <primitive object={doorMaterial} attach="material" />
-      </animated.mesh>
+      <animated.group {...rightDoorSpring}>
+        <mesh castShadow>
+          <boxGeometry args={[dimensions.width/2 + 0.05, doorHeight, 0.05]} />
+          <primitive object={doorMaterial} attach="material" />
+        </mesh>
+        
+        {/* Стык между дверьми (черная полоса) на левом крае правой двери */}
+        <mesh 
+          position={[-dimensions.width/4 - 0.025, 0, 0.05]} 
+          visible={!doorsOpen}
+          castShadow
+        >
+          <boxGeometry args={[0.05, doorHeight, 0.1]} />
+          <primitive object={doorSeamMaterial} attach="material" />
+        </mesh>
+        
+        {/* Прорезь в правой двери */}
+        <Box 
+          position={[-dimensions.width/4 - 0.025, 0, 0.03]} 
+          args={[0.01, doorHeight * 0.8, 0.06]} 
+          castShadow
+        >
+          <primitive object={doorSlotMaterial} attach="material" />
+        </Box>
+      </animated.group>
     </group>
   );
 };

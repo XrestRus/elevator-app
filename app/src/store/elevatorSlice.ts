@@ -20,6 +20,13 @@ export interface LightingOptions {
 }
 
 /**
+ * Интерфейс для настроек камеры
+ */
+export interface CameraOptions {
+  fov: number;
+}
+
+/**
  * Интерфейс для материалов лифта
  */
 export interface Materials {
@@ -72,6 +79,7 @@ export interface ElevatorState {
   materials: Materials;
   lighting: LightingOptions;
   visibility: VisibilityOptions;
+  camera: CameraOptions;
 }
 
 /**
@@ -125,6 +133,9 @@ const initialState: ElevatorState = {
     mirror: true,
     emergencyButton: true,
     floorNumber: true
+  },
+  camera: {
+    fov: 75
   }
 };
 
@@ -185,6 +196,11 @@ const elevatorSlice = createSlice({
     setVisibility: (state, action: PayloadAction<{ element: keyof VisibilityOptions, visible: boolean }>) => {
       const { element, visible } = action.payload;
       state.visibility[element] = visible;
+    },
+    
+    // Обновление настроек камеры
+    setCamera: (state, action: PayloadAction<Partial<CameraOptions>>) => {
+      state.camera = { ...state.camera, ...action.payload };
     }
   }
 });
@@ -199,7 +215,8 @@ export const {
   setRoughness,
   setMetalness,
   setLighting,
-  setVisibility
+  setVisibility,
+  setCamera
 } = elevatorSlice.actions;
 
 // Экспорт reducer
