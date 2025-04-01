@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, MeshReflectorMaterial, useTexture } from '@react-three/drei';
+import { Box, MeshReflectorMaterial, useTexture, Cylinder } from '@react-three/drei';
 import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 import { useSelector } from 'react-redux';
@@ -294,6 +294,37 @@ const BasicElevator: React.FC = () => {
     [materials.walls]
   );
 
+  // Материал для поручней (хромированный металл)
+  const handrailMaterial = useMemo(() => 
+    new THREE.MeshStandardMaterial({
+      color: '#cccccc',
+      metalness: 0.9,
+      roughness: 0.1,
+      envMapIntensity: 1.0
+    }),
+    []
+  );
+  
+  // Материал для панели с кнопками
+  const controlPanelMaterial = useMemo(() => 
+    new THREE.MeshStandardMaterial({
+      color: '#444444',
+      metalness: 0.6,
+      roughness: 0.2
+    }),
+    []
+  );
+  
+  // Материал для кнопок на панели
+  const buttonMaterial = useMemo(() => 
+    new THREE.MeshStandardMaterial({
+      color: '#222222',
+      metalness: 0.5,
+      roughness: 0.3
+    }),
+    []
+  );
+
   return (
     <group>
       {/* Пол */}
@@ -347,6 +378,54 @@ const BasicElevator: React.FC = () => {
         <primitive object={sideWallMaterial} attach="material" />
       </Box>
       
+      {/* Поручень на левой стене - перпендикулярно стене */}
+      <Cylinder
+        position={[-dimensions.width/2 + 0.03, -0.1, 0]} 
+        rotation={[Math.PI/2, 0, 0]} // Повернуто на 90 градусов по часовой
+        args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
+        castShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </Cylinder>
+      
+      {/* Панель управления с кнопками на левой стене */}
+      <group position={[-dimensions.width/2 + 0.08, -0.1, dimensions.depth/3]}>
+        {/* Основа панели */}
+        <Box 
+          args={[0.05, 0.4, 0.25]} 
+          castShadow
+        >
+          <primitive object={controlPanelMaterial} attach="material" />
+        </Box>
+        
+        {/* Кнопки лифта (сетка 3x5) */}
+        {Array.from({ length: 3 }).map((_, row) => 
+          Array.from({ length: 5 }).map((_, col) => (
+            <Box 
+              key={`button-${row}-${col}`}
+              position={[
+                0.03, 
+                0.15 - row * 0.06,
+                -0.08 + col * 0.04
+              ]} 
+              args={[0.01, 0.025, 0.025]} 
+              castShadow
+            >
+              <primitive object={buttonMaterial} attach="material" />
+            </Box>
+          ))
+        )}
+        
+        {/* Дисплей этажа */}
+        <Box 
+          position={[0.03, 0.16, 0]} 
+          args={[0.01, 0.04, 0.15]} 
+          castShadow
+        >
+          <meshStandardMaterial color="#000000" emissive="#003300" />
+        </Box>
+      </group>
+      
       {/* Правая стена - всегда обычный материал */}
       <Box 
         position={[dimensions.width/2, 0, 0]} 
@@ -357,28 +436,20 @@ const BasicElevator: React.FC = () => {
         <primitive object={sideWallMaterial} attach="material" />
       </Box>
       
+      {/* Поручень на правой стене - перпендикулярно стене */}
+      <Cylinder
+        position={[dimensions.width/2 - 0.03, -0.1, 0]} 
+        rotation={[Math.PI/2, 0, 0]} // Повернуто на 90 градусов по часовой
+        args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
+        castShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </Cylinder>
+      
       {/* Верхняя перемычка над дверью */}
       <Box 
         position={[0, dimensions.height/2 - 0.15, dimensions.depth/2]} 
         args={[dimensions.width, 0.3, 0.07]}
-        castShadow
-      >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
-      
-      {/* Левая боковая часть дверной рамки - только тонкая полоса */}
-      <Box 
-        position={[-dimensions.width/2 + doorFrameWidth/2, -0.15, dimensions.depth/2]} 
-        args={[doorFrameWidth, doorHeight, 0.07]}
-        castShadow
-      >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
-      
-      {/* Правая боковая часть дверной рамки - только тонкая полоса */}
-      <Box 
-        position={[dimensions.width/2 - doorFrameWidth/2, -0.15, dimensions.depth/2]} 
-        args={[doorFrameWidth, doorHeight, 0.07]}
         castShadow
       >
         <primitive object={frontWallMaterial} attach="material" />
