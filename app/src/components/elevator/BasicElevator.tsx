@@ -4,58 +4,76 @@ import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
-import type { ElevatorState } from '../../store/elevatorSlice';
 
 /**
  * Компонент, представляющий базовую геометрию лифта с анимированными дверьми
  */
 const BasicElevator: React.FC = () => {
-  // Получаем состояние из Redux
-  const { dimensions, doorsOpen, materials } = useSelector((state: RootState) => state.elevator as ElevatorState);
+  const elevator = useSelector((state: RootState) => state.elevator);
+  const { materials, dimensions, doorsOpen } = elevator;
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: materials.walls });
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: materials.floor });
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: materials.ceiling });
+  const doorMaterial = new THREE.MeshStandardMaterial({ color: materials.doors });
   
-  // Определяем размеры двери
-  const doorWidth = dimensions.width - 0.4;
-  const doorHeight = dimensions.height - 0.3;
-  
+  // Новый подход: двери занимают почти всю ширину лифта
+  // Оставляем только небольшие боковые части для рамки
+  const doorFrameWidth = 0.2; // Ширина боковых частей рамки
+  const doorHeight = dimensions.height - 0.3; // Высота дверного проема
+
+  // Создаем функцию для клонирования материалов с разным повторением текстур
+  const createWallMaterialWithCustomRepeat = (baseMaterial: THREE.Material, repeatX: number, repeatY: number) => {
+    // Клонируем исходный материал
+    const newMaterial = (baseMaterial as THREE.MeshStandardMaterial).clone();
+    
+    // Если материал имеет текстуры, настраиваем их повторение
+    if (newMaterial.map) {
+      newMaterial.map = newMaterial.map.clone();
+      newMaterial.map.repeat.set(repeatX, repeatY);
+      newMaterial.map.needsUpdate = true;
+    }
+    
+    if (newMaterial.normalMap) {
+      newMaterial.normalMap = newMaterial.normalMap.clone();
+      newMaterial.normalMap.repeat.set(repeatX, repeatY);
+      newMaterial.normalMap.needsUpdate = true;
+    }
+    
+    if (newMaterial.roughnessMap) {
+      newMaterial.roughnessMap = newMaterial.roughnessMap.clone();
+      newMaterial.roughnessMap.repeat.set(repeatX, repeatY);
+      newMaterial.roughnessMap.needsUpdate = true;
+    }
+    
+    if (newMaterial.aoMap) {
+      newMaterial.aoMap = newMaterial.aoMap.clone();
+      newMaterial.aoMap.repeat.set(repeatX, repeatY);
+      newMaterial.aoMap.needsUpdate = true;
+    }
+    
+    if (newMaterial.metalnessMap) {
+      newMaterial.metalnessMap = newMaterial.metalnessMap.clone();
+      newMaterial.metalnessMap.repeat.set(repeatX, repeatY);
+      newMaterial.metalnessMap.needsUpdate = true;
+    }
+    
+    return newMaterial;
+  };
+
   // Анимация для левой двери
   const leftDoorSpring = useSpring({
     position: doorsOpen 
-      ? [-dimensions.width/4 - 0.5, -0.15, dimensions.depth/2] 
-      : [-dimensions.width/4 + 0.025, -0.15, dimensions.depth/2],
+      ? [-dimensions.width/2 - 0.3, -0.15, dimensions.depth/2] // Позиция открытия
+      : [-dimensions.width/4, -0.15, dimensions.depth/2], // Смещена влево от центра
     config: { mass: 1, tension: 120, friction: 14 }
   });
   
   // Анимация для правой двери
   const rightDoorSpring = useSpring({
     position: doorsOpen 
-      ? [dimensions.width/4 + 0.5, -0.15, dimensions.depth/2] 
-      : [dimensions.width/4 - 0.025, -0.15, dimensions.depth/2],
+      ? [dimensions.width/2 + 0.3, -0.15, dimensions.depth/2] // Позиция открытия
+      : [dimensions.width/4, -0.15, dimensions.depth/2], // Смещена вправо от центра
     config: { mass: 1, tension: 120, friction: 14 }
-  });
-  
-  // Стандартные материалы для не-зеркальных поверхностей
-  const floorMaterial = new THREE.MeshStandardMaterial({ 
-    color: materials.floor, 
-    roughness: materials.roughness.floor,
-    metalness: materials.metalness.floor
-  });
-  
-  const ceilingMaterial = new THREE.MeshStandardMaterial({ 
-    color: materials.ceiling, 
-    roughness: materials.roughness.ceiling,
-    metalness: materials.metalness.ceiling
-  });
-  
-  const wallMaterial = new THREE.MeshStandardMaterial({ 
-    color: materials.walls, 
-    roughness: materials.roughness.walls,
-    metalness: materials.metalness.walls
-  });
-  
-  const doorMaterial = new THREE.MeshStandardMaterial({ 
-    color: materials.doors, 
-    roughness: materials.roughness.doors,
-    metalness: materials.metalness.doors
   });
   
   // Создаем текстуры если они указаны
@@ -69,7 +87,8 @@ const BasicElevator: React.FC = () => {
         // Настройка текстуры после загрузки
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2); // Повторение текстуры
+        // Отключаем повторение текстуры, чтобы избежать растягивания
+        texture.repeat.set(1, 1);
         texture.needsUpdate = true;
       },
       (progress) => {
@@ -83,7 +102,8 @@ const BasicElevator: React.FC = () => {
     // Настройка базовых параметров текстуры
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 2);
+    // Отключаем повторение текстуры, чтобы избежать растягивания
+    texture.repeat.set(1, 1);
     
     // Стараемся предотвратить черные текстуры
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -101,95 +121,281 @@ const BasicElevator: React.FC = () => {
     
     console.log(`Создаю PBR-материал из директории: ${baseTexturePath}`);
     
+    // Исправляем путь, чтобы он правильно начинался с /public
+    // Для Vite и React в режиме разработки, пути могут быть относительными от корня public
+    // Но для загрузчика текстур нужен полный URL
+    const fixedBasePath = baseTexturePath.startsWith('/') ? baseTexturePath : `/${baseTexturePath}`;
+    
     // Определяем тип текстуры из пути
-    const textureType = baseTexturePath.includes('wood') ? 'wood' 
-      : baseTexturePath.includes('marble') ? 'marble'
-      : baseTexturePath.includes('metal') ? 'metal'
-      : baseTexturePath.includes('fabric') ? 'fabrics'
+    const textureType = fixedBasePath.includes('wood') ? 'wood' 
+      : fixedBasePath.includes('marble') ? 'marble'
+      : fixedBasePath.includes('metal') ? 'metal'
+      : fixedBasePath.includes('fabric') ? 'fabrics'
       : null;
       
     if (!textureType) {
-      console.error(`Неизвестный тип текстуры: ${baseTexturePath}`);
+      console.error(`Неизвестный тип текстуры: ${fixedBasePath}`);
       return null;
     }
     
     // Получаем ID текстуры из пути
-    const regexResult = baseTexturePath.match(/(\w+)_(\d+)_(\w+)_(\w+)/);
+    const regexResult = fixedBasePath.match(/(\w+)_(\d+)_(\w+)_(\w+)/);
     if (!regexResult) {
-      console.error(`Не удалось извлечь ID текстуры из пути: ${baseTexturePath}`);
+      console.error(`Не удалось извлечь ID текстуры из пути: ${fixedBasePath}`);
       return null;
     }
     
     const texturePrefix = `${textureType}_${regexResult[2]}`;
     
     // Формируем пути к файлам текстур
-    const colorMapPath = `${baseTexturePath}/${texturePrefix}_color_1k.jpg`;
-    const normalMapPath = `${baseTexturePath}/${texturePrefix}_normal_directx_1k.png`;
-    const roughnessMapPath = `${baseTexturePath}/${texturePrefix}_roughness_1k.jpg`;
-    const aoMapPath = `${baseTexturePath}/${texturePrefix}_ao_1k.jpg`;
+    const colorMapPath = `${fixedBasePath}/${texturePrefix}_color_1k.jpg`;
+    const normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_directx_1k.png`;
+    const roughnessMapPath = `${fixedBasePath}/${texturePrefix}_roughness_1k.jpg`;
+    const aoMapPath = `${fixedBasePath}/${texturePrefix}_ao_1k.jpg`;
     
     // Дополнительно проверяем, есть ли карта металличности (только для металла)
     const metalnessMapPath = textureType === 'metal' 
-      ? `${baseTexturePath}/${texturePrefix}_metallic_1k.jpg`
+      ? `${fixedBasePath}/${texturePrefix}_metallic_1k.jpg`
       : null;
+    
+    console.log(`Пути к текстурам:`);
+    console.log(`- Базовый цвет: ${colorMapPath}`);
+    console.log(`- Нормали: ${normalMapPath}`);
+    console.log(`- Шероховатость: ${roughnessMapPath}`);
+    console.log(`- Окклюзия: ${aoMapPath}`);
+    if (metalnessMapPath) {
+      console.log(`- Металличность: ${metalnessMapPath}`);
+    }
+    
+    // Настройки масштабирования текстур в зависимости от типа материала и поверхности
+    const getTextureScale = (surface: 'walls' | 'floor' | 'ceiling') => {
+      switch(textureType) {
+        case 'wood':
+          return surface === 'floor' ? 2 : // Для пола делаем доски помельче
+                 surface === 'walls' ? 0.8 : // Для стен доски покрупнее
+                 0.9; // Для потолка средний размер
+        case 'marble':
+          return surface === 'floor' ? 1.5 : // Для пола плиты помельче
+                 surface === 'walls' ? 0.5 : // Для стен крупные плиты
+                 0.8; // Для потолка средний размер
+        case 'metal':
+          return surface === 'floor' ? 2 : // Для пола мелкие элементы
+                 surface === 'walls' ? 0.7 : // Для стен средние
+                 1; // Для потолка стандартный размер
+        case 'fabrics':
+          return surface === 'floor' ? 3 : // Для пола много повторений (как ковер)
+                 surface === 'walls' ? 0.6 : // Для стен крупная фактура
+                 1; // Для потолка стандартный размер
+        default:
+          return 1; // По умолчанию без масштабирования
+      }
+    };
+    
+    // Определяем поверхность из пути текстуры
+    let surface: 'walls' | 'floor' | 'ceiling' = 'walls'; // По умолчанию стены
+    
+    if (baseTexturePath) {
+      // Определим для какой части лифта применяется текстура
+      // исходя из того, где эта текстура используется в коде
+      if (materials.texture.floor === baseTexturePath) {
+        surface = 'floor';
+      } else if (materials.texture.ceiling === baseTexturePath) {
+        surface = 'ceiling';
+      } else if (materials.texture.walls === baseTexturePath) {
+        surface = 'walls';
+      }
+      
+      console.log(`Определена поверхность для текстуры ${baseTexturePath}: ${surface}`);
+    }
+    
+    // Определяем масштаб для текущей текстуры
+    const scale = getTextureScale(surface);
     
     // Создаем загрузчик текстур
     const textureLoader = new THREE.TextureLoader();
     
-    // Загружаем все карты
-    const colorMap = textureLoader.load(colorMapPath, 
-      texture => {
-        console.log(`Базовая текстура загружена: ${colorMapPath}`);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2);
-      },
-      undefined,
-      error => console.error(`Ошибка загрузки базовой текстуры: ${colorMapPath}`, error)
-    );
-    
-    const normalMap = textureLoader.load(normalMapPath,
-      texture => {
-        console.log(`Карта нормалей загружена: ${normalMapPath}`);
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2);
-      },
-      undefined,
-      error => console.error(`Ошибка загрузки карты нормалей: ${normalMapPath}`, error)
-    );
-    
-    const roughnessMap = textureLoader.load(roughnessMapPath,
-      texture => {
-        console.log(`Карта шероховатости загружена: ${roughnessMapPath}`);
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2);
-      },
-      undefined,
-      error => console.error(`Ошибка загрузки карты шероховатости: ${roughnessMapPath}`, error)
-    );
-    
-    const aoMap = textureLoader.load(aoMapPath,
-      texture => {
-        console.log(`Карта окклюзии загружена: ${aoMapPath}`);
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(2, 2);
-      },
-      undefined,
-      error => console.error(`Ошибка загрузки карты окклюзии: ${aoMapPath}`, error)
-    );
-    
-    // Загружаем карту металличности, если она существует
-    let metalnessMap = null;
-    if (metalnessMapPath) {
-      metalnessMap = textureLoader.load(metalnessMapPath,
+    // Загружаем все карты с дополнительными проверками и обработкой ошибок
+    let colorMap: THREE.Texture;
+    try {
+      colorMap = textureLoader.load(
+        colorMapPath, 
         texture => {
-          console.log(`Карта металличности загружена: ${metalnessMapPath}`);
+          console.log(`Базовая текстура загружена: ${colorMapPath}`);
+          texture.colorSpace = THREE.SRGBColorSpace;
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(2, 2);
+          // Настраиваем масштаб в зависимости от типа и поверхности
+          texture.repeat.set(scale, scale);
         },
         undefined,
-        error => console.error(`Ошибка загрузки карты металличности: ${metalnessMapPath}`, error)
+        error => {
+          console.error(`Ошибка загрузки базовой текстуры: ${colorMapPath}`, error);
+          // Создаем временную текстуру для предотвращения ошибок рендеринга
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 4;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#888888';
+            ctx.fillRect(0, 0, 4, 4);
+          }
+          return new THREE.CanvasTexture(canvas);
+        }
       );
+    } catch (error) {
+      console.error(`Критическая ошибка при загрузке текстуры: ${colorMapPath}`, error);
+      // В случае ошибки создаем временную текстуру
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 4;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#888888';
+        ctx.fillRect(0, 0, 4, 4);
+      }
+      colorMap = new THREE.CanvasTexture(canvas);
+    }
+    
+    // Аналогично для остальных текстур, создаем запасные текстуры для предотвращения ошибок
+    let normalMap: THREE.Texture;
+    try {
+      normalMap = textureLoader.load(
+        normalMapPath,
+        texture => {
+          console.log(`Карта нормалей загружена: ${normalMapPath}`);
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(scale, scale);
+        },
+        undefined,
+        error => {
+          console.error(`Ошибка загрузки карты нормалей: ${normalMapPath}`, error);
+          // Создаем временную текстуру нормалей (по умолчанию плоская поверхность)
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 4;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#8080ff'; // Стандартная карта нормалей смотрящая вверх (синий цвет)
+            ctx.fillRect(0, 0, 4, 4);
+          }
+          return new THREE.CanvasTexture(canvas);
+        }
+      );
+    } catch (error) {
+      console.error(`Критическая ошибка при загрузке текстуры: ${normalMapPath}`, error);
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 4;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#8080ff';
+        ctx.fillRect(0, 0, 4, 4);
+      }
+      normalMap = new THREE.CanvasTexture(canvas);
+    }
+    
+    // Создаём запасные текстуры для других карт аналогичным образом
+    let roughnessMap: THREE.Texture;
+    try {
+      roughnessMap = textureLoader.load(
+        roughnessMapPath,
+        texture => {
+          console.log(`Карта шероховатости загружена: ${roughnessMapPath}`);
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(scale, scale);
+        },
+        undefined,
+        error => {
+          console.error(`Ошибка загрузки карты шероховатости: ${roughnessMapPath}`, error);
+          // Создаем временную текстуру шероховатости (средняя шероховатость)
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 4;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#808080'; // Средняя шероховатость (50%)
+            ctx.fillRect(0, 0, 4, 4);
+          }
+          return new THREE.CanvasTexture(canvas);
+        }
+      );
+    } catch (error) {
+      console.error(`Критическая ошибка при загрузке текстуры: ${roughnessMapPath}`, error);
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 4;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#808080';
+        ctx.fillRect(0, 0, 4, 4);
+      }
+      roughnessMap = new THREE.CanvasTexture(canvas);
+    }
+    
+    let aoMap: THREE.Texture;
+    try {
+      aoMap = textureLoader.load(
+        aoMapPath,
+        texture => {
+          console.log(`Карта окклюзии загружена: ${aoMapPath}`);
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(scale, scale);
+        },
+        undefined,
+        error => {
+          console.error(`Ошибка загрузки карты окклюзии: ${aoMapPath}`, error);
+          // Создаем временную текстуру окклюзии (белая - без окклюзии)
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 4;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#ffffff'; // Белый - без окклюзии
+            ctx.fillRect(0, 0, 4, 4);
+          }
+          return new THREE.CanvasTexture(canvas);
+        }
+      );
+    } catch (error) {
+      console.error(`Критическая ошибка при загрузке текстуры: ${aoMapPath}`, error);
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 4;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 4, 4);
+      }
+      aoMap = new THREE.CanvasTexture(canvas);
+    }
+    
+    // Загружаем карту металличности, если она существует
+    let metalnessMap: THREE.Texture | null = null;
+    if (metalnessMapPath) {
+      try {
+        metalnessMap = textureLoader.load(
+          metalnessMapPath,
+          texture => {
+            console.log(`Карта металличности загружена: ${metalnessMapPath}`);
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(scale, scale);
+          },
+          undefined,
+          error => {
+            console.error(`Ошибка загрузки карты металличности: ${metalnessMapPath}`, error);
+            // Создаем временную текстуру металличности (черная - неметаллическая)
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = 4;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.fillStyle = textureType === 'metal' ? '#ffffff' : '#000000';
+              ctx.fillRect(0, 0, 4, 4);
+            }
+            return new THREE.CanvasTexture(canvas);
+          }
+        );
+      } catch (error) {
+        console.error(`Критическая ошибка при загрузке текстуры: ${metalnessMapPath}`, error);
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 4;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = textureType === 'metal' ? '#ffffff' : '#000000';
+          ctx.fillRect(0, 0, 4, 4);
+        }
+        metalnessMap = new THREE.CanvasTexture(canvas);
+      }
     }
     
     // Настраиваем свойства материала в зависимости от типа текстуры
@@ -240,6 +446,17 @@ const BasicElevator: React.FC = () => {
   const actualWallMaterial = wallPBRMaterial || wallMaterial;
   const actualFloorMaterial = floorPBRMaterial || floorMaterial;
   const actualCeilingMaterial = ceilingPBRMaterial || ceilingMaterial;
+  
+  // Материалы с разным повторением текстур для разных стен
+  const sideWallMaterial = createWallMaterialWithCustomRepeat(actualWallMaterial, 1, 1); // Для боковых стен используем нормальное повторение
+  const backWallMaterial = createWallMaterialWithCustomRepeat(actualWallMaterial, 1, 1); // Для задней стены - стандартное повторение
+
+  // Создаем материал для стены с дверью без текстуры
+  const frontWallMaterial = new THREE.MeshStandardMaterial({
+    color: materials.walls,
+    metalness: 0.2,
+    roughness: 0.3
+  });
   
   // Применяем обычные текстуры, если не используем PBR
   if (wallTexture && !wallPBRMaterial) {
@@ -296,7 +513,7 @@ const BasicElevator: React.FC = () => {
             mirror={1.0}      // Максимальное отражение (100%)
           />
         ) : (
-          <primitive object={actualWallMaterial} attach="material" />
+          <primitive object={backWallMaterial} attach="material" />
         )}
       </Box>
       
@@ -307,7 +524,7 @@ const BasicElevator: React.FC = () => {
         castShadow
         receiveShadow
       >
-        <primitive object={actualWallMaterial} attach="material" />
+        <primitive object={sideWallMaterial} attach="material" />
       </Box>
       
       {/* Правая стена - всегда обычный материал */}
@@ -317,7 +534,7 @@ const BasicElevator: React.FC = () => {
         castShadow
         receiveShadow
       >
-        <primitive object={actualWallMaterial} attach="material" />
+        <primitive object={sideWallMaterial} attach="material" />
       </Box>
       
       {/* Верхняя перемычка над дверью */}
@@ -326,36 +543,36 @@ const BasicElevator: React.FC = () => {
         args={[dimensions.width, 0.3, 0.07]}
         castShadow
       >
-        <primitive object={actualWallMaterial} attach="material" />
+        <primitive object={frontWallMaterial} attach="material" />
       </Box>
       
-      {/* Левая боковая часть дверной рамки */}
+      {/* Левая боковая часть дверной рамки - только тонкая полоса */}
       <Box 
-        position={[-dimensions.width/2 + 0.2, -0.15, dimensions.depth/2]} 
-        args={[dimensions.width - doorWidth, doorHeight, 0.07]}
+        position={[-dimensions.width/2 + doorFrameWidth/2, -0.15, dimensions.depth/2]} 
+        args={[doorFrameWidth, doorHeight, 0.07]}
         castShadow
       >
-        <primitive object={actualWallMaterial} attach="material" />
+        <primitive object={frontWallMaterial} attach="material" />
       </Box>
       
-      {/* Правая боковая часть дверной рамки */}
+      {/* Правая боковая часть дверной рамки - только тонкая полоса */}
       <Box 
-        position={[dimensions.width/2 - 0.2, -0.15, dimensions.depth/2]} 
-        args={[dimensions.width - doorWidth, doorHeight, 0.07]}
+        position={[dimensions.width/2 - doorFrameWidth/2, -0.15, dimensions.depth/2]} 
+        args={[doorFrameWidth, doorHeight, 0.07]}
         castShadow
       >
-        <primitive object={actualWallMaterial} attach="material" />
+        <primitive object={frontWallMaterial} attach="material" />
       </Box>
       
-      {/* Левая дверь - всегда обычный материал */}
+      {/* Левая дверь - с небольшим запасом по ширине */}
       <animated.mesh {...leftDoorSpring} castShadow>
-        <boxGeometry args={[dimensions.width/2 - 0.05 + 0.025, doorHeight, 0.05]} />
+        <boxGeometry args={[dimensions.width/2 + 0.05, doorHeight, 0.05]} />
         <primitive object={doorMaterial} attach="material" />
       </animated.mesh>
       
-      {/* Правая дверь - всегда обычный материал */}
+      {/* Правая дверь - с небольшим запасом по ширине */}
       <animated.mesh {...rightDoorSpring} castShadow>
-        <boxGeometry args={[dimensions.width/2 - 0.05 + 0.025, doorHeight, 0.05]} />
+        <boxGeometry args={[dimensions.width/2 + 0.05, doorHeight, 0.05]} />
         <primitive object={doorMaterial} attach="material" />
       </animated.mesh>
     </group>
