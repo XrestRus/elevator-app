@@ -17,6 +17,28 @@ export interface Materials {
   ceiling: string;
   walls: string;
   doors: string;
+  isMirror: {
+    walls: boolean;
+    ceiling: boolean;
+    doors: boolean;
+  };
+  texture: {
+    walls: string | null;
+    floor: string | null;
+    ceiling: string | null;
+  };
+  roughness: {
+    walls: number;
+    floor: number;
+    ceiling: number;
+    doors: number;
+  };
+  metalness: {
+    walls: number;
+    floor: number;
+    ceiling: number;
+    doors: number;
+  };
 }
 
 /**
@@ -42,7 +64,29 @@ const initialState: ElevatorState = {
     floor: '#8B4513',
     ceiling: '#F5F5F5',
     walls: '#E8E8E8',
-    doors: '#A9A9A9'
+    doors: '#A9A9A9',
+    isMirror: {
+      walls: false,
+      ceiling: false,
+      doors: false
+    },
+    texture: {
+      walls: null,
+      floor: null,
+      ceiling: null
+    },
+    roughness: {
+      walls: 0.4,
+      floor: 0.7,
+      ceiling: 0.2,
+      doors: 0.3
+    },
+    metalness: {
+      walls: 0.1,
+      floor: 0.1,
+      ceiling: 0.1,
+      doors: 0.3
+    }
   }
 };
 
@@ -67,12 +111,44 @@ const elevatorSlice = createSlice({
     setMaterial: (state, action: PayloadAction<{ part: keyof Materials, color: string }>) => {
       const { part, color } = action.payload;
       state.materials[part] = color;
+    },
+    
+    // Обновление зеркальных поверхностей
+    setMirrorSurface: (state, action: PayloadAction<{ part: keyof Materials['isMirror'], value: boolean }>) => {
+      const { part, value } = action.payload;
+      state.materials.isMirror[part] = value;
+    },
+    
+    // Обновление текстур
+    setTexture: (state, action: PayloadAction<{ part: keyof Materials['texture'], value: string | null }>) => {
+      const { part, value } = action.payload;
+      state.materials.texture[part] = value;
+    },
+    
+    // Обновление шероховатости
+    setRoughness: (state, action: PayloadAction<{ part: keyof Materials['roughness'], value: number }>) => {
+      const { part, value } = action.payload;
+      state.materials.roughness[part] = value;
+    },
+    
+    // Обновление металличности
+    setMetalness: (state, action: PayloadAction<{ part: keyof Materials['metalness'], value: number }>) => {
+      const { part, value } = action.payload;
+      state.materials.metalness[part] = value;
     }
   }
 });
 
 // Экспорт actions
-export const { setElevatorDimensions, toggleDoors, setMaterial } = elevatorSlice.actions;
+export const { 
+  setElevatorDimensions, 
+  toggleDoors, 
+  setMaterial,
+  setMirrorSurface,
+  setTexture,
+  setRoughness,
+  setMetalness
+} = elevatorSlice.actions;
 
 // Экспорт reducer
 export default elevatorSlice.reducer; 

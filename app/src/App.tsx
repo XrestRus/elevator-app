@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, MeshReflectorMaterial } from '@react-three/drei';
 import './App.css';
 import { Suspense } from 'react';
 import UIPanel from './components/ui/UIPanel.tsx';
@@ -14,40 +14,31 @@ function App() {
       <Canvas
         shadows
         camera={{ 
-          position: [0, 0, 0], // Камера точно в центре лифта
-          fov: 75 // Широкий угол обзора
+          position: [0, 0, 0],
+          fov: 75
+        }}
+        gl={{ 
+          antialias: true,
+          pixelRatio: window.devicePixelRatio
         }}
         style={{ height: '100vh', width: '100%' }}
       >
-        {/* Мягкое окружающее освещение */}
-        <ambientLight intensity={0.6} />
-        
-        {/* Основной источник света сверху */}
-        <pointLight
-          position={[0, 2, 0]}
-          intensity={1}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-        />
-        
-        {/* Дополнительные источники света для лучшего освещения стен */}
-        <pointLight position={[-1, 0, 0]} intensity={0.5} />
-        <pointLight position={[1, 0, 0]} intensity={0.5} />
-        <pointLight position={[0, 0, -1]} intensity={0.5} />
+        {/* Усиливаем освещение */}
+        <ambientLight intensity={1.5} />
+        <pointLight position={[0, 1, 0]} intensity={3} />
+        <pointLight position={[-1, 0, 0]} intensity={1} />
+        <pointLight position={[1, 0, 0]} intensity={1} />
+        <pointLight position={[0, 0, -1]} intensity={1} />
         
         <Suspense fallback={null}>
           <BasicElevator />
         </Suspense>
         
-        {/* Настройки управления камерой */}
         <OrbitControls 
           enablePan={false}
           enableZoom={false}
-          minDistance={0.1}
-          maxDistance={0.1} // Фиксируем расстояние - камера не может двигаться от центра
-          target={[0, 0, -0.1]} // Легкий сдвиг цели, чтобы камера "смотрела" в лифт
-          minPolarAngle={0.1} // Ограничиваем вращение
+          target={[0, 0, -0.1]}
+          minPolarAngle={0.1}
           maxPolarAngle={Math.PI - 0.1}
         />
       </Canvas>
