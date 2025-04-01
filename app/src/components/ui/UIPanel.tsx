@@ -340,10 +340,14 @@ const UIPanel = () => {
                   style={{ width: '100%', padding: '4px' }}
                 >
                   <option value="">Без текстуры</option>
-                  <option value="/textures/wall_wood.jpg">Дерево</option>
-                  <option value="/textures/wall_marble.jpg">Мрамор</option>
-                  <option value="/textures/wall_metal.jpg">Металл</option>
-                  <option value="/textures/wall_fabric.jpg">Ткань</option>
+                  <option value="/textures/wall_wood.jpg">Дерево (простая)</option>
+                  <option value="/textures/wall_marble.jpg">Мрамор (простая)</option>
+                  <option value="/textures/wall_metal.jpg">Металл (простая)</option>
+                  <option value="/textures/wall_fabric.jpg">Ткань (простая)</option>
+                  <option value="/textures/example/wood_0066_1k_HoQeAg">Дерево (PBR)</option>
+                  <option value="/textures/example/marble_0018_1k_pq6AtM">Мрамор (PBR)</option>
+                  <option value="/textures/example/metal_0084_1k_uJitA0">Металл (PBR)</option>
+                  <option value="/textures/example/fabrics_0080_1k_1jAg4B">Ткань (PBR)</option>
                 </select>
               </div>
               
@@ -358,10 +362,14 @@ const UIPanel = () => {
                   style={{ width: '100%', padding: '4px' }}
                 >
                   <option value="">Без текстуры</option>
-                  <option value="/textures/floor_wood.jpg">Дерево</option>
-                  <option value="/textures/floor_marble.jpg">Мрамор</option>
-                  <option value="/textures/floor_carpet.jpg">Ковёр</option>
-                  <option value="/textures/floor_tile.jpg">Плитка</option>
+                  <option value="/textures/floor_wood.jpg">Дерево (простая)</option>
+                  <option value="/textures/floor_marble.jpg">Мрамор (простая)</option>
+                  <option value="/textures/floor_carpet.jpg">Ковёр (простая)</option>
+                  <option value="/textures/floor_tile.jpg">Плитка (простая)</option>
+                  <option value="/textures/example/wood_0066_1k_HoQeAg">Дерево (PBR)</option>
+                  <option value="/textures/example/marble_0018_1k_pq6AtM">Мрамор (PBR)</option>
+                  <option value="/textures/example/metal_0084_1k_uJitA0">Металл (PBR)</option>
+                  <option value="/textures/example/fabrics_0080_1k_1jAg4B">Ткань (PBR)</option>
                 </select>
               </div>
               
@@ -376,9 +384,13 @@ const UIPanel = () => {
                   style={{ width: '100%', padding: '4px' }}
                 >
                   <option value="">Без текстуры</option>
-                  <option value="/textures/ceiling_panel.jpg">Панели</option>
-                  <option value="/textures/ceiling_grid.jpg">Решётка</option>
-                  <option value="/textures/ceiling_smooth.jpg">Гладкий</option>
+                  <option value="/textures/ceiling_panel.jpg">Панели (простая)</option>
+                  <option value="/textures/ceiling_grid.jpg">Решётка (простая)</option>
+                  <option value="/textures/ceiling_smooth.jpg">Гладкий (простая)</option>
+                  <option value="/textures/example/wood_0066_1k_HoQeAg">Дерево (PBR)</option>
+                  <option value="/textures/example/marble_0018_1k_pq6AtM">Мрамор (PBR)</option>
+                  <option value="/textures/example/metal_0084_1k_uJitA0">Металл (PBR)</option>
+                  <option value="/textures/example/fabrics_0080_1k_1jAg4B">Ткань (PBR)</option>
                 </select>
               </div>
             </div>

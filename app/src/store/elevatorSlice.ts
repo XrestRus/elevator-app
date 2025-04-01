@@ -160,6 +160,7 @@ const elevatorSlice = createSlice({
     // Обновление текстур
     setTexture: (state, action: PayloadAction<{ part: keyof Materials['texture'], value: string | null }>) => {
       const { part, value } = action.payload;
+      console.log(`Устанавливаю текстуру для ${part}:`, value);
       state.materials.texture[part] = value;
     },
     

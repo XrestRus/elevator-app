@@ -61,7 +61,169 @@ const BasicElevator: React.FC = () => {
   // Создаем текстуры если они указаны
   const createTexture = (texturePath: string | null) => {
     if (!texturePath) return null;
-    return new THREE.TextureLoader().load(texturePath);
+    console.log(`Попытка загрузки текстуры: ${texturePath}`);
+    const texture = new THREE.TextureLoader().load(
+      texturePath,
+      (texture) => {
+        console.log(`Текстура успешно загружена: ${texturePath}`);
+        // Настройка текстуры после загрузки
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2); // Повторение текстуры
+        texture.needsUpdate = true;
+      },
+      (progress) => {
+        console.log(`Загрузка текстуры ${texturePath}: ${(progress.loaded / progress.total * 100)}%`);
+      },
+      (error) => {
+        console.error(`Ошибка загрузки текстуры ${texturePath}:`, error);
+      }
+    );
+    
+    // Настройка базовых параметров текстуры
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 2);
+    
+    // Стараемся предотвратить черные текстуры
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+    
+    return texture;
+  };
+  
+  // Создаем PBR-материал из набора текстур
+  const createPBRMaterial = (baseTexturePath: string | null) => {
+    if (!baseTexturePath || !baseTexturePath.includes('example')) {
+      return null; // Возвращаем null для не-PBR текстур
+    }
+    
+    console.log(`Создаю PBR-материал из директории: ${baseTexturePath}`);
+    
+    // Определяем тип текстуры из пути
+    const textureType = baseTexturePath.includes('wood') ? 'wood' 
+      : baseTexturePath.includes('marble') ? 'marble'
+      : baseTexturePath.includes('metal') ? 'metal'
+      : baseTexturePath.includes('fabric') ? 'fabrics'
+      : null;
+      
+    if (!textureType) {
+      console.error(`Неизвестный тип текстуры: ${baseTexturePath}`);
+      return null;
+    }
+    
+    // Получаем ID текстуры из пути
+    const regexResult = baseTexturePath.match(/(\w+)_(\d+)_(\w+)_(\w+)/);
+    if (!regexResult) {
+      console.error(`Не удалось извлечь ID текстуры из пути: ${baseTexturePath}`);
+      return null;
+    }
+    
+    const texturePrefix = `${textureType}_${regexResult[2]}`;
+    
+    // Формируем пути к файлам текстур
+    const colorMapPath = `${baseTexturePath}/${texturePrefix}_color_1k.jpg`;
+    const normalMapPath = `${baseTexturePath}/${texturePrefix}_normal_directx_1k.png`;
+    const roughnessMapPath = `${baseTexturePath}/${texturePrefix}_roughness_1k.jpg`;
+    const aoMapPath = `${baseTexturePath}/${texturePrefix}_ao_1k.jpg`;
+    
+    // Дополнительно проверяем, есть ли карта металличности (только для металла)
+    const metalnessMapPath = textureType === 'metal' 
+      ? `${baseTexturePath}/${texturePrefix}_metallic_1k.jpg`
+      : null;
+    
+    // Создаем загрузчик текстур
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Загружаем все карты
+    const colorMap = textureLoader.load(colorMapPath, 
+      texture => {
+        console.log(`Базовая текстура загружена: ${colorMapPath}`);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2);
+      },
+      undefined,
+      error => console.error(`Ошибка загрузки базовой текстуры: ${colorMapPath}`, error)
+    );
+    
+    const normalMap = textureLoader.load(normalMapPath,
+      texture => {
+        console.log(`Карта нормалей загружена: ${normalMapPath}`);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2);
+      },
+      undefined,
+      error => console.error(`Ошибка загрузки карты нормалей: ${normalMapPath}`, error)
+    );
+    
+    const roughnessMap = textureLoader.load(roughnessMapPath,
+      texture => {
+        console.log(`Карта шероховатости загружена: ${roughnessMapPath}`);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2);
+      },
+      undefined,
+      error => console.error(`Ошибка загрузки карты шероховатости: ${roughnessMapPath}`, error)
+    );
+    
+    const aoMap = textureLoader.load(aoMapPath,
+      texture => {
+        console.log(`Карта окклюзии загружена: ${aoMapPath}`);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2, 2);
+      },
+      undefined,
+      error => console.error(`Ошибка загрузки карты окклюзии: ${aoMapPath}`, error)
+    );
+    
+    // Загружаем карту металличности, если она существует
+    let metalnessMap = null;
+    if (metalnessMapPath) {
+      metalnessMap = textureLoader.load(metalnessMapPath,
+        texture => {
+          console.log(`Карта металличности загружена: ${metalnessMapPath}`);
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(2, 2);
+        },
+        undefined,
+        error => console.error(`Ошибка загрузки карты металличности: ${metalnessMapPath}`, error)
+      );
+    }
+    
+    // Настраиваем свойства материала в зависимости от типа текстуры
+    const materialProps: {
+      map: THREE.Texture;
+      normalMap: THREE.Texture;
+      roughnessMap: THREE.Texture;
+      aoMap: THREE.Texture;
+      envMapIntensity: number;
+      roughness: number;
+      metalness?: number;
+      metalnessMap?: THREE.Texture | null;
+    } = {
+      map: colorMap,
+      normalMap: normalMap,
+      roughnessMap: roughnessMap,
+      aoMap: aoMap,
+      envMapIntensity: 1.0,
+      roughness: 1.0, // Будет модифицировано картой шероховатости
+    };
+    
+    // Для металла добавляем карту металличности
+    if (textureType === 'metal' && metalnessMap) {
+      materialProps.metalnessMap = metalnessMap;
+      materialProps.metalness = 1.0; // Будет модифицировано картой металличности
+    } else {
+      // Для не-металлических материалов устанавливаем фиксированное значение металличности
+      materialProps.metalness = textureType === 'metal' ? 0.8 : 0.0;
+    }
+    
+    // Создаем PBR-материал
+    const material = new THREE.MeshStandardMaterial(materialProps);
+    
+    return material;
   };
   
   // Загружаем текстуры
@@ -69,15 +231,29 @@ const BasicElevator: React.FC = () => {
   const floorTexture = createTexture(materials.texture?.floor);
   const ceilingTexture = createTexture(materials.texture?.ceiling);
   
-  if (wallTexture) {
+  // Создаем PBR-материалы, если указаны директории с PBR-текстурами
+  const wallPBRMaterial = createPBRMaterial(materials.texture?.walls);
+  const floorPBRMaterial = createPBRMaterial(materials.texture?.floor);
+  const ceilingPBRMaterial = createPBRMaterial(materials.texture?.ceiling);
+  
+  // Определяем, какой материал использовать: PBR или обычный
+  const actualWallMaterial = wallPBRMaterial || wallMaterial;
+  const actualFloorMaterial = floorPBRMaterial || floorMaterial;
+  const actualCeilingMaterial = ceilingPBRMaterial || ceilingMaterial;
+  
+  // Применяем обычные текстуры, если не используем PBR
+  if (wallTexture && !wallPBRMaterial) {
+    console.log('Применяю обычную текстуру стен:', materials.texture?.walls);
     wallMaterial.map = wallTexture;
   }
   
-  if (floorTexture) {
+  if (floorTexture && !floorPBRMaterial) {
+    console.log('Применяю обычную текстуру пола:', materials.texture?.floor);
     floorMaterial.map = floorTexture;
   }
   
-  if (ceilingTexture) {
+  if (ceilingTexture && !ceilingPBRMaterial) {
+    console.log('Применяю обычную текстуру потолка:', materials.texture?.ceiling);
     ceilingMaterial.map = ceilingTexture;
   }
   
@@ -89,7 +265,7 @@ const BasicElevator: React.FC = () => {
         args={[dimensions.width, 0.1, dimensions.depth]}
         receiveShadow
       >
-        <primitive object={floorMaterial} attach="material" />
+        <primitive object={actualFloorMaterial} attach="material" />
       </Box>
       
       {/* Потолок - всегда обычный материал */}
@@ -98,7 +274,7 @@ const BasicElevator: React.FC = () => {
         args={[dimensions.width, 0.1, dimensions.depth]}
         receiveShadow
       >
-        <primitive object={ceilingMaterial} attach="material" />
+        <primitive object={actualCeilingMaterial} attach="material" />
       </Box>
       
       {/* Задняя стена - единственная зеркальная стена */}
@@ -120,7 +296,7 @@ const BasicElevator: React.FC = () => {
             mirror={1.0}      // Максимальное отражение (100%)
           />
         ) : (
-          <primitive object={wallMaterial} attach="material" />
+          <primitive object={actualWallMaterial} attach="material" />
         )}
       </Box>
       
@@ -131,7 +307,7 @@ const BasicElevator: React.FC = () => {
         castShadow
         receiveShadow
       >
-        <primitive object={wallMaterial} attach="material" />
+        <primitive object={actualWallMaterial} attach="material" />
       </Box>
       
       {/* Правая стена - всегда обычный материал */}
@@ -141,7 +317,7 @@ const BasicElevator: React.FC = () => {
         castShadow
         receiveShadow
       >
-        <primitive object={wallMaterial} attach="material" />
+        <primitive object={actualWallMaterial} attach="material" />
       </Box>
       
       {/* Верхняя перемычка над дверью */}
@@ -150,7 +326,7 @@ const BasicElevator: React.FC = () => {
         args={[dimensions.width, 0.3, 0.07]}
         castShadow
       >
-        <primitive object={wallMaterial} attach="material" />
+        <primitive object={actualWallMaterial} attach="material" />
       </Box>
       
       {/* Левая боковая часть дверной рамки */}
@@ -159,7 +335,7 @@ const BasicElevator: React.FC = () => {
         args={[dimensions.width - doorWidth, doorHeight, 0.07]}
         castShadow
       >
-        <primitive object={wallMaterial} attach="material" />
+        <primitive object={actualWallMaterial} attach="material" />
       </Box>
       
       {/* Правая боковая часть дверной рамки */}
@@ -168,7 +344,7 @@ const BasicElevator: React.FC = () => {
         args={[dimensions.width - doorWidth, doorHeight, 0.07]}
         castShadow
       >
-        <primitive object={wallMaterial} attach="material" />
+        <primitive object={actualWallMaterial} attach="material" />
       </Box>
       
       {/* Левая дверь - всегда обычный материал */}
