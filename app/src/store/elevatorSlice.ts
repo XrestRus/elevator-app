@@ -19,8 +19,6 @@ export interface Materials {
   doors: string;
   isMirror: {
     walls: boolean;
-    ceiling: boolean;
-    doors: boolean;
   };
   texture: {
     walls: string | null;
@@ -66,9 +64,7 @@ const initialState: ElevatorState = {
     walls: '#E8E8E8',
     doors: '#A9A9A9',
     isMirror: {
-      walls: false,
-      ceiling: false,
-      doors: false
+      walls: false
     },
     texture: {
       walls: null,

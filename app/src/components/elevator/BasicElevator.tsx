@@ -92,29 +92,16 @@ const BasicElevator: React.FC = () => {
         <primitive object={floorMaterial} attach="material" />
       </Box>
       
-      {/* Потолок - с зеркальным материалом если нужно */}
+      {/* Потолок - всегда обычный материал */}
       <Box 
         position={[0, dimensions.height/2, 0]} 
         args={[dimensions.width, 0.1, dimensions.depth]}
         receiveShadow
       >
-        {materials.isMirror.ceiling ? (
-          <MeshReflectorMaterial
-            color={materials.ceiling}
-            blur={[300, 100]}
-            resolution={512}
-            mixBlur={0.1}
-            mixStrength={1.0}
-            metalness={0.9}
-            roughness={0.1}
-            mirror={0.8}
-          />
-        ) : (
-          <primitive object={ceilingMaterial} attach="material" />
-        )}
+        <primitive object={ceilingMaterial} attach="material" />
       </Box>
       
-      {/* Задняя стена - с зеркальным материалом если нужно */}
+      {/* Задняя стена - единственная зеркальная стена */}
       <Box 
         position={[0, 0, -dimensions.depth/2]} 
         args={[dimensions.width, dimensions.height, 0.05]}
@@ -124,63 +111,37 @@ const BasicElevator: React.FC = () => {
         {materials.isMirror.walls ? (
           <MeshReflectorMaterial
             color={materials.walls}
-            blur={[300, 100]}
-            resolution={512}
-            mixBlur={0.1}
-            mixStrength={1.0}
+            blur={[100, 50]}  // Уменьшил размытие для четкости
+            resolution={1024} // Увеличил разрешение
+            mixBlur={0.05}    // Меньше размытия
+            mixStrength={1.5} // Усилил интенсивность отражения
             metalness={0.9}
-            roughness={0.1}
-            mirror={0.8}
+            roughness={0.05}  // Уменьшил шероховатость для более четкого отражения
+            mirror={1.0}      // Максимальное отражение (100%)
           />
         ) : (
           <primitive object={wallMaterial} attach="material" />
         )}
       </Box>
       
-      {/* Левая стена - с зеркальным материалом если нужно */}
+      {/* Левая стена - всегда обычный материал */}
       <Box 
         position={[-dimensions.width/2, 0, 0]} 
         args={[0.05, dimensions.height, dimensions.depth]}
         castShadow
         receiveShadow
       >
-        {materials.isMirror.walls ? (
-          <MeshReflectorMaterial
-            color={materials.walls}
-            blur={[300, 100]}
-            resolution={512}
-            mixBlur={0.1}
-            mixStrength={1.0}
-            metalness={0.9}
-            roughness={0.1}
-            mirror={0.8}
-          />
-        ) : (
-          <primitive object={wallMaterial} attach="material" />
-        )}
+        <primitive object={wallMaterial} attach="material" />
       </Box>
       
-      {/* Правая стена - с зеркальным материалом если нужно */}
+      {/* Правая стена - всегда обычный материал */}
       <Box 
         position={[dimensions.width/2, 0, 0]} 
         args={[0.05, dimensions.height, dimensions.depth]}
         castShadow
         receiveShadow
       >
-        {materials.isMirror.walls ? (
-          <MeshReflectorMaterial
-            color={materials.walls}
-            blur={[300, 100]}
-            resolution={512}
-            mixBlur={0.1}
-            mixStrength={1.0}
-            metalness={0.9}
-            roughness={0.1}
-            mirror={0.8}
-          />
-        ) : (
-          <primitive object={wallMaterial} attach="material" />
-        )}
+        <primitive object={wallMaterial} attach="material" />
       </Box>
       
       {/* Верхняя перемычка над дверью */}
@@ -210,42 +171,16 @@ const BasicElevator: React.FC = () => {
         <primitive object={wallMaterial} attach="material" />
       </Box>
       
-      {/* Левая дверь (анимированная) - с зеркальным материалом если нужно */}
+      {/* Левая дверь - всегда обычный материал */}
       <animated.mesh {...leftDoorSpring} castShadow>
         <boxGeometry args={[dimensions.width/2 - 0.05 + 0.025, doorHeight, 0.05]} />
-        {materials.isMirror.doors ? (
-          <MeshReflectorMaterial
-            color={materials.doors}
-            blur={[300, 100]}
-            resolution={512}
-            mixBlur={0.1}
-            mixStrength={1.0}
-            metalness={0.9}
-            roughness={0.1}
-            mirror={0.8}
-          />
-        ) : (
-          <primitive object={doorMaterial} attach="material" />
-        )}
+        <primitive object={doorMaterial} attach="material" />
       </animated.mesh>
       
-      {/* Правая дверь (анимированная) - с зеркальным материалом если нужно */}
+      {/* Правая дверь - всегда обычный материал */}
       <animated.mesh {...rightDoorSpring} castShadow>
         <boxGeometry args={[dimensions.width/2 - 0.05 + 0.025, doorHeight, 0.05]} />
-        {materials.isMirror.doors ? (
-          <MeshReflectorMaterial
-            color={materials.doors}
-            blur={[300, 100]}
-            resolution={512}
-            mixBlur={0.1}
-            mixStrength={1.0}
-            metalness={0.9}
-            roughness={0.1}
-            mirror={0.8}
-          />
-        ) : (
-          <primitive object={doorMaterial} attach="material" />
-        )}
+        <primitive object={doorMaterial} attach="material" />
       </animated.mesh>
     </group>
   );

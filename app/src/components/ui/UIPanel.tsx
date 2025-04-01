@@ -270,31 +270,7 @@ const UIPanel = () => {
                     onChange={(e) => dispatch(setMirrorSurface({ part: 'walls', value: e.target.checked }))}
                     style={{ marginRight: '8px' }}
                   />
-                  Зеркальные стены
-                </label>
-              </div>
-              
-              <div style={{ marginBottom: '8px' }}>
-                <label>
-                  <input 
-                    type="checkbox" 
-                    checked={elevator.materials.isMirror.ceiling}
-                    onChange={(e) => dispatch(setMirrorSurface({ part: 'ceiling', value: e.target.checked }))}
-                    style={{ marginRight: '8px' }}
-                  />
-                  Зеркальный потолок
-                </label>
-              </div>
-              
-              <div style={{ marginBottom: '8px' }}>
-                <label>
-                  <input 
-                    type="checkbox" 
-                    checked={elevator.materials.isMirror.doors}
-                    onChange={(e) => dispatch(setMirrorSurface({ part: 'doors', value: e.target.checked }))}
-                    style={{ marginRight: '8px' }}
-                  />
-                  Зеркальные двери
+                  Зеркальная задняя стена
                 </label>
               </div>
             </div>
