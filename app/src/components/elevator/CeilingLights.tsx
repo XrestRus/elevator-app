@@ -12,7 +12,7 @@ const CeilingLights: React.FC<{
   color?: string;
   intensity?: number;
 }> = ({ 
-  count = 4, 
+  count = 5, 
   color = '#ffffff', 
   intensity = 5
 }) => {
@@ -24,7 +24,20 @@ const CeilingLights: React.FC<{
   const positions: [number, number, number][] = [];
   
   // Создание массива позиций светильников (равномерно распределенных)
-  if (count === 4) {
+  if (count === 5) {
+    // Центральный светильник
+    positions.push([0, 0, 0]); 
+    
+    // Четыре светильника по углам
+    const offsetX = dimensions.width * 0.35;
+    const offsetZ = dimensions.depth * 0.35;
+    positions.push(
+      [-offsetX, 0, -offsetZ],
+      [offsetX, 0, -offsetZ],
+      [-offsetX, 0, offsetZ],
+      [offsetX, 0, offsetZ]
+    );
+  } else if (count === 4) {
     const offsetX = dimensions.width * 0.3;
     const offsetZ = dimensions.depth * 0.3;
     positions.push(
@@ -40,9 +53,30 @@ const CeilingLights: React.FC<{
     positions.push([0, 0, 0]);
   }
   
-  // Рассчитываем размер светового пятна в зависимости от высоты лифта
-  const spotSize = dimensions.height * 0.6; // Чем выше лифт, тем больше пятно
-  const spotIntensity = lightsOn ? (intensity / 10) * 0.9 : 0;
+  // Рассчитываем размер и интенсивность светового пятна
+  const getSpotSize = (index: number) => {
+    // Центральный светильник (индекс 0) делаем немного больше и ярче
+    if (count === 5 && index === 0) {
+      return dimensions.height * 0.8;
+    }
+    return dimensions.height * 0.5;
+  };
+  
+  const getSpotIntensity = (index: number) => {
+    // Центральный светильник ярче
+    if (count === 5 && index === 0) {
+      return lightsOn ? (intensity / 10) * 1.2 : 0;
+    }
+    return lightsOn ? (intensity / 10) * 0.8 : 0;
+  };
+  
+  const getLightIntensity = (index: number) => {
+    // Центральный светильник ярче
+    if (count === 5 && index === 0) {
+      return lightsOn ? intensity * 1.2 : 0;
+    }
+    return lightsOn ? intensity * 0.8 : 0;
+  };
   
   // Создаем текстуру для светового пятна
   const spotTexture = React.useMemo(() => {
@@ -69,8 +103,9 @@ const CeilingLights: React.FC<{
       
       const rgb = hexToRgb(color);
       
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`);
-      gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.9)`);
+      gradient.addColorStop(0.4, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
+      gradient.addColorStop(0.7, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
       gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
       
       context.fillStyle = gradient;
@@ -88,17 +123,17 @@ const CeilingLights: React.FC<{
         <group key={index} position={pos}>
           {/* Корпус светильника */}
           <mesh>
-            <cylinderGeometry args={[0.1, 0.1, 0.02, 32]} />
-            <meshStandardMaterial color="#444444" />
+            <cylinderGeometry args={[0.14, 0.14, 0.02, 32]} />
+            <meshStandardMaterial color="#666666" />
           </mesh>
           
           {/* Стеклянный плафон */}
           <mesh position={[0, -0.015, 0]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.01, 32]} />
+            <cylinderGeometry args={[0.12, 0.12, 0.01, 32]} />
             <meshStandardMaterial 
-              color={lightsOn ? color : '#aaaaaa'} 
+              color={lightsOn ? color : '#e0e0e0'} 
               transparent
-              opacity={0.8}
+              opacity={0.9}
               emissive={lightsOn ? color : '#333333'}
               emissiveIntensity={lightsOn ? 1 : 0}
             />
@@ -108,24 +143,25 @@ const CeilingLights: React.FC<{
           <spotLight 
             position={[0, -0.05, 0]} 
             angle={Math.PI / 3}
-            penumbra={0.2}
-            intensity={lightsOn ? intensity : 0}
+            penumbra={0.3}
+            intensity={getLightIntensity(index)}
             color={color}
             castShadow
-            decay={2}
+            decay={1.5}
+            distance={dimensions.height * 2}
           />
           
           {/* Световое пятно на полу */}
           <group position={[0, -dimensions.height + 0.05, 0]} visible={lightsOn}>
             <Plane 
-              args={[spotSize, spotSize]} 
+              args={[getSpotSize(index), getSpotSize(index)]} 
               rotation={[-Math.PI / 2, 0, 0]}
               position={[0, 0.01, 0]} // Слегка поднимаем над полом
             >
               <meshBasicMaterial 
                 color={color}
                 transparent={true}
-                opacity={spotIntensity}
+                opacity={getSpotIntensity(index)}
                 map={spotTexture}
                 blending={THREE.AdditiveBlending}
                 depthWrite={false}
@@ -138,4 +174,4 @@ const CeilingLights: React.FC<{
   );
 };
 
-export default CeilingLights; 
+export default CeilingLights;
