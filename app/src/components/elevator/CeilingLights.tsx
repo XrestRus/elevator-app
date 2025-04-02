@@ -57,25 +57,25 @@ const CeilingLights: React.FC<{
   const getSpotSize = (index: number) => {
     // Центральный светильник (индекс 0) делаем немного больше и ярче
     if (count === 5 && index === 0) {
-      return dimensions.height * 0.8;
+      return dimensions.height * 0.7;
     }
-    return dimensions.height * 0.5;
+    return dimensions.height * 0.4;
   };
   
   const getSpotIntensity = (index: number) => {
     // Центральный светильник ярче
     if (count === 5 && index === 0) {
-      return lightsOn ? (intensity / 10) * 1.2 : 0;
+      return lightsOn ? (intensity / 10) * 1.1 : 0;
     }
-    return lightsOn ? (intensity / 10) * 0.8 : 0;
+    return lightsOn ? (intensity / 10) * 0.7 : 0;
   };
   
   const getLightIntensity = (index: number) => {
     // Центральный светильник ярче
     if (count === 5 && index === 0) {
-      return lightsOn ? intensity * 1.2 : 0;
+      return lightsOn ? intensity * 1.1 : 0;
     }
-    return lightsOn ? intensity * 0.8 : 0;
+    return lightsOn ? intensity * 0.7 : 0;
   };
   
   // Создаем текстуру для светового пятна
@@ -103,10 +103,10 @@ const CeilingLights: React.FC<{
       
       const rgb = hexToRgb(color);
       
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.9)`);
-      gradient.addColorStop(0.4, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
-      gradient.addColorStop(0.7, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`);
+      gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`);
+      gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+      gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
       
       context.fillStyle = gradient;
       context.fillRect(0, 0, 256, 256);
@@ -123,13 +123,13 @@ const CeilingLights: React.FC<{
         <group key={index} position={pos}>
           {/* Корпус светильника */}
           <mesh>
-            <cylinderGeometry args={[0.14, 0.14, 0.02, 32]} />
+            <cylinderGeometry args={[0.0, 0.076, 0.01, 32]} />
             <meshStandardMaterial color="#666666" />
           </mesh>
           
           {/* Стеклянный плафон */}
-          <mesh position={[0, -0.015, 0]}>
-            <cylinderGeometry args={[0.12, 0.12, 0.01, 32]} />
+          <mesh position={[0, -0.01, 0]}>
+            <cylinderGeometry args={[0.07, 0.07, 0.005, 32]} />
             <meshStandardMaterial 
               color={lightsOn ? color : '#e0e0e0'} 
               transparent
@@ -141,7 +141,7 @@ const CeilingLights: React.FC<{
           
           {/* Сам источник света */}
           <spotLight 
-            position={[0, -0.05, 0]} 
+            position={[0, -0.02, 0]} 
             angle={Math.PI / 3}
             penumbra={0.3}
             intensity={getLightIntensity(index)}

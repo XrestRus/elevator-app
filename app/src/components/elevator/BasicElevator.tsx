@@ -443,22 +443,30 @@ const BasicElevator: React.FC = () => {
   const decorationStripesMaterial = useMemo(() => {
     if (!elevator.decorationStripes?.enabled) return null;
     
-    const material = new THREE.MeshStandardMaterial({
-      color: elevator.decorationStripes.color || '#C0C0C0',
+    // Наследуем цвет стен, возможно с небольшим оттенком
+    const baseColor = new THREE.Color(materials.walls);
+    // Если указан цвет в настройках, учитываем его как оттенок
+    if (elevator.decorationStripes.color && elevator.decorationStripes.color !== '#C0C0C0') {
+      // Смешиваем цвет стен с указанным цветом для создания оттенка
+      const accentColor = new THREE.Color(elevator.decorationStripes.color);
+      baseColor.lerp(accentColor, 0.3); // 30% влияния акцентного цвета
+    }
+    
+    return new THREE.MeshStandardMaterial({
+      color: baseColor,
       metalness: elevator.decorationStripes.material === 'metal' ? 0.9 : 
                 (elevator.decorationStripes.material === 'glossy' ? 0.7 : 0.1),
       roughness: elevator.decorationStripes.material === 'metal' ? 0.1 : 
                 (elevator.decorationStripes.material === 'glossy' ? 0.05 : 0.8),
       emissive: elevator.decorationStripes.material === 'glossy' ? 
-                elevator.decorationStripes.color : '#000000',
+                baseColor : '#000000',
       emissiveIntensity: elevator.decorationStripes.material === 'glossy' ? 0.05 : 0
     });
-
-    return material;
   }, [
     elevator.decorationStripes?.enabled,
     elevator.decorationStripes?.color,
-    elevator.decorationStripes?.material
+    elevator.decorationStripes?.material,
+    materials.walls
   ]);
 
   return (
@@ -861,8 +869,8 @@ const BasicElevator: React.FC = () => {
             return doorStripePositions.map((pos, index) => (
               <Box
                 key={`door-left-stripe-h-${index}`}
-                position={[offsetMeters, pos, 0.04]}
-                args={[dimensions.width / 2, stripeWidth, 0.01]}
+                position={[offsetMeters, pos, 0.025]}
+                args={[dimensions.width / 2, stripeWidth, 0.005]}
                 castShadow
               >
                 {decorationStripesMaterial && (
@@ -881,8 +889,8 @@ const BasicElevator: React.FC = () => {
             return doorStripePositions.map((pos, index) => (
               <Box
                 key={`door-left-stripe-v-${index}`}
-                position={[pos + offsetMeters, 0, 0.04]}
-                args={[stripeWidth, doorHeight, 0.01]}
+                position={[pos + offsetMeters, 0, 0.025]}
+                args={[stripeWidth, doorHeight, 0.005]}
                 castShadow
               >
                 {decorationStripesMaterial && (
@@ -895,28 +903,28 @@ const BasicElevator: React.FC = () => {
 
         {/* Центральная вертикальная линия на левой створке */}
         <mesh
-          position={[dimensions.width / 4 - 0.03, 0, 0.04]}
+          position={[dimensions.width / 4 - 0.03, 0, 0.025]}
           castShadow
         >
-          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <boxGeometry args={[0.01, doorHeight, 0.05]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
 
         {/* Внешняя полоска на левой створке (со стороны зрителя) */}
         <mesh
-          position={[-dimensions.width / 4 + 0.03, 0, 0.04]}
+          position={[-dimensions.width / 4 + 0.03, 0, 0.025]}
           castShadow
         >
-          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <boxGeometry args={[0.01, doorHeight, 0.05]} />
           <primitive object={doorOuterSeamMaterial} attach="material" />
         </mesh>
         
         {/* Горизонтальная линия в центре левой двери */}
         <mesh
-          position={[0, 0, 0.04]}
+          position={[0, 0, 0.025]}
           castShadow
         >
-          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.02, 0.1]} />
+          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.01, 0.05]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
       </animated.group>
@@ -948,8 +956,8 @@ const BasicElevator: React.FC = () => {
             return doorStripePositions.map((pos, index) => (
               <Box
                 key={`door-right-stripe-h-${index}`}
-                position={[offsetMeters, pos, 0.04]}
-                args={[dimensions.width / 2, stripeWidth, 0.01]}
+                position={[offsetMeters, pos, 0.025]}
+                args={[dimensions.width / 2, stripeWidth, 0.005]}
                 castShadow
               >
                 {decorationStripesMaterial && (
@@ -968,8 +976,8 @@ const BasicElevator: React.FC = () => {
             return doorStripePositions.map((pos, index) => (
               <Box
                 key={`door-right-stripe-v-${index}`}
-                position={[pos + offsetMeters, 0, 0.04]}
-                args={[stripeWidth, doorHeight, 0.01]}
+                position={[pos + offsetMeters, 0, 0.025]}
+                args={[stripeWidth, doorHeight, 0.005]}
                 castShadow
               >
                 {decorationStripesMaterial && (
@@ -982,28 +990,28 @@ const BasicElevator: React.FC = () => {
 
         {/* Центральная вертикальная линия на правой створке */}
         <mesh
-          position={[-dimensions.width / 4 + 0.03, 0, 0.04]}
+          position={[-dimensions.width / 4 + 0.03, 0, 0.025]}
           castShadow
         >
-          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <boxGeometry args={[0.01, doorHeight, 0.05]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
 
         {/* Внешняя полоска на правой створке (со стороны зрителя) */}
         <mesh
-          position={[dimensions.width / 4 - 0.03, 0, 0.04]}
+          position={[dimensions.width / 4 - 0.03, 0, 0.025]}
           castShadow
         >
-          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <boxGeometry args={[0.01, doorHeight, 0.05]} />
           <primitive object={doorOuterSeamMaterial} attach="material" />
         </mesh>
         
         {/* Горизонтальная линия в центре правой двери */}
         <mesh
-          position={[0, 0, 0.04]}
+          position={[0, 0, 0.025]}
           castShadow
         >
-          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.02, 0.1]} />
+          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.01, 0.05]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
       </animated.group>
@@ -1123,8 +1131,8 @@ const BasicElevator: React.FC = () => {
                     positions.map((pos, index) => (
                       <Box
                         key={`back-wall-stripe-${index}`}
-                        position={[offsetMeters, pos, -dimensions.depth / 2 + 0.03]}
-                        args={[dimensions.width - 0.06, stripeWidth, 0.01]}
+                        position={[offsetMeters, pos, -dimensions.depth / 2 + 0.025]}
+                        args={[dimensions.width - 0.06, stripeWidth, 0.005]}
                         castShadow
                       >
                         {decorationStripesMaterial && (
@@ -1137,8 +1145,8 @@ const BasicElevator: React.FC = () => {
                     positions.map((pos, index) => (
                       <Box
                         key={`back-wall-stripe-${index}`}
-                        position={[pos + offsetMeters, 0, -dimensions.depth / 2 + 0.03]}
-                        args={[stripeWidth, dimensions.height - 0.06, 0.01]}
+                        position={[pos + offsetMeters, 0, -dimensions.depth / 2 + 0.025]}
+                        args={[stripeWidth, dimensions.height - 0.06, 0.005]}
                         castShadow
                       >
                         {decorationStripesMaterial && (
@@ -1155,8 +1163,8 @@ const BasicElevator: React.FC = () => {
                   positions.map((pos, index) => (
                     <Box
                       key={`left-wall-stripe-${index}`}
-                      position={[-dimensions.width / 2 + 0.03, pos, offsetMeters]}
-                      args={[0.01, stripeWidth, dimensions.depth - 0.06]}
+                      position={[-dimensions.width / 2 + 0.025, pos, offsetMeters]}
+                      args={[0.005, stripeWidth, dimensions.depth - 0.06]}
                       castShadow
                     >
                       {decorationStripesMaterial && (
@@ -1169,8 +1177,8 @@ const BasicElevator: React.FC = () => {
                   sideWallPositions.map((zPos, index) => (
                     <Box
                       key={`left-wall-stripe-${index}`}
-                      position={[-dimensions.width / 2 + 0.03, offsetMeters, zPos + offsetMeters]}
-                      args={[0.01, dimensions.height - 0.06, stripeWidth]}
+                      position={[-dimensions.width / 2 + 0.025, offsetMeters, zPos + offsetMeters]}
+                      args={[0.005, dimensions.height - 0.06, stripeWidth]}
                       castShadow
                     >
                       {decorationStripesMaterial && (
@@ -1186,8 +1194,8 @@ const BasicElevator: React.FC = () => {
                   positions.map((pos, index) => (
                     <Box
                       key={`right-wall-stripe-${index}`}
-                      position={[dimensions.width / 2 - 0.03, pos, offsetMeters]}
-                      args={[0.01, stripeWidth, dimensions.depth - 0.06]}
+                      position={[dimensions.width / 2 - 0.025, pos, offsetMeters]}
+                      args={[0.005, stripeWidth, dimensions.depth - 0.06]}
                       castShadow
                     >
                       {decorationStripesMaterial && (
@@ -1200,8 +1208,8 @@ const BasicElevator: React.FC = () => {
                   sideWallPositions.map((zPos, index) => (
                     <Box
                       key={`right-wall-stripe-${index}`}
-                      position={[dimensions.width / 2 - 0.03, offsetMeters, zPos + offsetMeters]}
-                      args={[0.01, dimensions.height - 0.06, stripeWidth]}
+                      position={[dimensions.width / 2 - 0.025, offsetMeters, zPos + offsetMeters]}
+                      args={[0.005, dimensions.height - 0.06, stripeWidth]}
                       castShadow
                     >
                       {decorationStripesMaterial && (
