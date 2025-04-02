@@ -72,10 +72,29 @@ const BasicElevator: React.FC = () => {
   });
   
   // Базовые материалы (без текстур)
-  const basicWallMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: materials.walls }), [materials.walls]);
-  const basicFloorMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: materials.floor }), [materials.floor]);
-  const basicCeilingMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: materials.ceiling }), [materials.ceiling]);
-  const doorMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: materials.doors }), [materials.doors]);
+  const basicWallMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: materials.walls,
+    metalness: materials.metalness.walls,
+    roughness: materials.roughness.walls 
+  }), [materials.walls, materials.metalness.walls, materials.roughness.walls]);
+  
+  const basicFloorMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: materials.floor,
+    metalness: materials.metalness.floor,
+    roughness: materials.roughness.floor 
+  }), [materials.floor, materials.metalness.floor, materials.roughness.floor]);
+  
+  const basicCeilingMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: materials.ceiling,
+    metalness: materials.metalness.ceiling,
+    roughness: materials.roughness.ceiling 
+  }), [materials.ceiling, materials.metalness.ceiling, materials.roughness.ceiling]);
+  
+  const doorMaterial = useMemo(() => new THREE.MeshStandardMaterial({ 
+    color: materials.doors,
+    metalness: materials.metalness.doors,
+    roughness: materials.roughness.doors 
+  }), [materials.doors, materials.metalness.doors, materials.roughness.doors]);
 
   // Кэширование путей к текстурам
   const wallTexturePath = materials.texture?.walls || '';

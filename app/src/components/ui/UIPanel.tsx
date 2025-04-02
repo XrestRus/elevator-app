@@ -11,6 +11,7 @@ import {
   ElevatorState,
   setVisibility,
   setCamera,
+  setMetalness,
 } from "../../store/elevatorSlice";
 import type { RootState } from "../../store/store";
 
@@ -280,6 +281,125 @@ const UIPanel = () => {
               </div>
             </div>
             
+            {/* Пресеты металлических цветов */}
+            <div style={{ marginBottom: '16px' }}>
+              <h4>Пресеты для лифта</h4>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                <button 
+                  style={{
+                    padding: '8px',
+                    backgroundColor: '#FFD700',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    color: '#000',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                  }}
+                  onClick={() => {
+                    // Золотой пресет
+                    dispatch(setMaterial({ part: 'walls', color: '#D4AF37' }));
+                    dispatch(setMaterial({ part: 'ceiling', color: '#D4AF37' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'doors', color: '#D4AF37' }));
+                    dispatch(setMetalness({ part: 'walls', value: 0.9 }));
+                    dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
+                    dispatch(setMetalness({ part: 'doors', value: 0.9 }));
+                    dispatch(setRoughness({ part: 'walls', value: 0.1 }));
+                    dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
+                    dispatch(setRoughness({ part: 'doors', value: 0.1 }));
+                  }}
+                >
+                  Золотой
+                </button>
+                
+                <button 
+                  style={{
+                    padding: '8px',
+                    backgroundColor: '#CD7F32',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    color: '#000',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                  }}
+                  onClick={() => {
+                    // Бронзовый пресет
+                    dispatch(setMaterial({ part: 'walls', color: '#CD7F32' }));
+                    dispatch(setMaterial({ part: 'ceiling', color: '#CD7F32' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'doors', color: '#CD7F32' }));
+                    dispatch(setMetalness({ part: 'walls', value: 0.8 }));
+                    dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
+                    dispatch(setMetalness({ part: 'doors', value: 0.8 }));
+                    dispatch(setRoughness({ part: 'walls', value: 0.2 }));
+                    dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
+                    dispatch(setRoughness({ part: 'doors', value: 0.2 }));
+                  }}
+                >
+                  Бронзовый
+                </button>
+                
+                <button 
+                  style={{
+                    padding: '8px',
+                    backgroundColor: '#C0C0C0',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    color: '#000',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                  }}
+                  onClick={() => {
+                    // Серебряный пресет
+                    dispatch(setMaterial({ part: 'walls', color: '#C0C0C0' }));
+                    dispatch(setMaterial({ part: 'ceiling', color: '#C0C0C0' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'doors', color: '#C0C0C0' }));
+                    dispatch(setMetalness({ part: 'walls', value: 0.9 }));
+                    dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
+                    dispatch(setMetalness({ part: 'doors', value: 0.9 }));
+                    dispatch(setRoughness({ part: 'walls', value: 0.1 }));
+                    dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
+                    dispatch(setRoughness({ part: 'doors', value: 0.1 }));
+                  }}
+                >
+                  Серебряный
+                </button>
+                
+                <button 
+                  style={{
+                    padding: '8px',
+                    backgroundColor: '#B87333',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    color: '#000',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                  }}
+                  onClick={() => {
+                    // Медный пресет
+                    dispatch(setMaterial({ part: 'walls', color: '#B87333' }));
+                    dispatch(setMaterial({ part: 'ceiling', color: '#B87333' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'doors', color: '#B87333' }));
+                    dispatch(setMetalness({ part: 'walls', value: 0.8 }));
+                    dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
+                    dispatch(setMetalness({ part: 'doors', value: 0.8 }));
+                    dispatch(setRoughness({ part: 'walls', value: 0.2 }));
+                    dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
+                    dispatch(setRoughness({ part: 'doors', value: 0.2 }));
+                  }}
+                >
+                  Медный
+                </button>
+              </div>
+            </div>
+            
             {/* Настройка зеркальных поверхностей */}
             <div style={{ marginBottom: '16px' }}>
               <h4>Зеркальные поверхности</h4>
@@ -351,6 +471,83 @@ const UIPanel = () => {
                   onChange={(e) => dispatch(setRoughness({ part: 'doors', value: parseFloat(e.target.value) }))}
                   style={{ width: '100%' }}
                 />
+              </div>
+            </div>
+            
+            {/* Настройка металличности */}
+            <div style={{ marginBottom: '16px' }}>
+              <h4>Металличность поверхностей</h4>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Стены:</label>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.01" 
+                  value={elevator.materials.metalness.walls}
+                  onChange={(e) => dispatch(setMetalness({ part: 'walls', value: parseFloat(e.target.value) }))}
+                  style={{ width: '100%' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Матовый</span>
+                  <span>{elevator.materials.metalness.walls.toFixed(2)}</span>
+                  <span>Металлик</span>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Пол:</label>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.01" 
+                  value={elevator.materials.metalness.floor}
+                  onChange={(e) => dispatch(setMetalness({ part: 'floor', value: parseFloat(e.target.value) }))}
+                  style={{ width: '100%' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Матовый</span>
+                  <span>{elevator.materials.metalness.floor.toFixed(2)}</span>
+                  <span>Металлик</span>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Потолок:</label>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.01" 
+                  value={elevator.materials.metalness.ceiling}
+                  onChange={(e) => dispatch(setMetalness({ part: 'ceiling', value: parseFloat(e.target.value) }))}
+                  style={{ width: '100%' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Матовый</span>
+                  <span>{elevator.materials.metalness.ceiling.toFixed(2)}</span>
+                  <span>Металлик</span>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Двери:</label>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.01" 
+                  value={elevator.materials.metalness.doors}
+                  onChange={(e) => dispatch(setMetalness({ part: 'doors', value: parseFloat(e.target.value) }))}
+                  style={{ width: '100%' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Матовый</span>
+                  <span>{elevator.materials.metalness.doors.toFixed(2)}</span>
+                  <span>Металлик</span>
+                </div>
               </div>
             </div>
             
