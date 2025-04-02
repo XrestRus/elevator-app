@@ -3,7 +3,6 @@ import {
   Box,
   MeshReflectorMaterial,
   useTexture,
-  Cylinder,
 } from "@react-three/drei";
 import { useSpring, animated } from "@react-spring/three";
 import * as THREE from "three";
@@ -387,16 +386,20 @@ const BasicElevator: React.FC = () => {
     [materials.walls]
   );
 
-  // Материал для поручней (хромированный металл)
+  // Материал для поручней (наследует цвет стен)
   const handrailMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#cccccc",
-        metalness: 0.9,
-        roughness: 0.1,
+    () => {
+      const color = new THREE.Color(materials.walls);
+      // Делаем цвет немного темнее
+      color.multiplyScalar(0.9);
+      return new THREE.MeshStandardMaterial({
+        color: color,
+        metalness: 0.6,
+        roughness: 0.3,
         envMapIntensity: 1.0,
-      }),
-    []
+      });
+    },
+    [materials.walls]
   );
 
   // Материал для стыка дверей
@@ -671,14 +674,31 @@ const BasicElevator: React.FC = () => {
 
       {/* Поручень на левой стене - показываем в зависимости от настроек */}
       {elevator.visibility.handrails && (
-        <Cylinder
-          position={[-dimensions.width / 2 + 0.03, -0.1, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
-          castShadow
-        >
-          <primitive object={handrailMaterial} attach="material" />
-        </Cylinder>
+        <group position={[-dimensions.width / 2 + 0.03, -0.1, 0]}>
+          {/* Основная часть поручня */}
+          <Box
+            position={[0, 0, 0]}
+            args={[0.03, 0.08, dimensions.depth * 0.6]}
+            castShadow
+          >
+            <primitive object={handrailMaterial} attach="material" />
+          </Box>
+          {/* Крепления к стене (верхнее и нижнее) */}
+          <Box
+            position={[-0.015, 0, dimensions.depth * 0.25]}
+            args={[0.03, 0.03, 0.03]}
+            castShadow
+          >
+            <primitive object={handrailMaterial} attach="material" />
+          </Box>
+          <Box
+            position={[-0.015, 0, -dimensions.depth * 0.25]}
+            args={[0.03, 0.03, 0.03]}
+            castShadow
+          >
+            <primitive object={handrailMaterial} attach="material" />
+          </Box>
+        </group>
       )}
 
       {/* Правая стена - всегда обычный материал */}
@@ -693,14 +713,31 @@ const BasicElevator: React.FC = () => {
 
       {/* Поручень на правой стене - показываем в зависимости от настроек */}
       {elevator.visibility.handrails && (
-        <Cylinder
-          position={[dimensions.width / 2 - 0.03, -0.1, 0]}
-          rotation={[Math.PI / 2, 0, 0]} // Повернуто на 90 градусов по часовой
-          args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
-          castShadow
-        >
-          <primitive object={handrailMaterial} attach="material" />
-        </Cylinder>
+        <group position={[dimensions.width / 2 - 0.03, -0.1, 0]}>
+          {/* Основная часть поручня */}
+          <Box
+            position={[0, 0, 0]}
+            args={[0.03, 0.08, dimensions.depth * 0.6]}
+            castShadow
+          >
+            <primitive object={handrailMaterial} attach="material" />
+          </Box>
+          {/* Крепления к стене (верхнее и нижнее) */}
+          <Box
+            position={[0.015, 0, dimensions.depth * 0.25]}
+            args={[0.03, 0.03, 0.03]}
+            castShadow
+          >
+            <primitive object={handrailMaterial} attach="material" />
+          </Box>
+          <Box
+            position={[0.015, 0, -dimensions.depth * 0.25]}
+            args={[0.03, 0.03, 0.03]}
+            castShadow
+          >
+            <primitive object={handrailMaterial} attach="material" />
+          </Box>
+        </group>
       )}
 
       {/* Верхняя перемычка над дверью */}
