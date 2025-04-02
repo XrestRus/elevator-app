@@ -37,6 +37,12 @@ export interface Materials {
   isMirror: {
     walls: boolean;
   };
+  mirror: {
+    width: number;
+    height: number;
+    type: 'full' | 'double' | 'triple';
+    position: number;
+  };
   texture: {
     walls: string | null;
     floor: string | null;
@@ -99,6 +105,12 @@ const initialState: ElevatorState = {
     doors: '#A9A9A9',
     isMirror: {
       walls: false
+    },
+    mirror: {
+      width: 1.2,
+      height: 1.5,
+      type: 'full',
+      position: 0
     },
     texture: {
       walls: null,
@@ -201,6 +213,11 @@ const elevatorSlice = createSlice({
     // Обновление настроек камеры
     setCamera: (state, action: PayloadAction<Partial<CameraOptions>>) => {
       state.camera = { ...state.camera, ...action.payload };
+    },
+    
+    // Обновление настроек зеркала
+    setMirrorOptions: (state, action: PayloadAction<Partial<Materials['mirror']>>) => {
+      state.materials.mirror = { ...state.materials.mirror, ...action.payload };
     }
   }
 });
@@ -216,7 +233,8 @@ export const {
   setMetalness,
   setLighting,
   setVisibility,
-  setCamera
+  setCamera,
+  setMirrorOptions
 } = elevatorSlice.actions;
 
 // Экспорт reducer

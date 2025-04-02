@@ -12,6 +12,7 @@ import {
   setVisibility,
   setCamera,
   setMetalness,
+  setMirrorOptions,
 } from "../../store/elevatorSlice";
 import type { RootState } from "../../store/store";
 
@@ -415,6 +416,149 @@ const UIPanel = () => {
                   Зеркальная задняя стена
                 </label>
               </div>
+              
+              {/* Настройки зеркала доступны только если включено зеркало на задней стене */}
+              {elevator.materials.isMirror.walls && (
+                <>
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Ширина зеркала (м):</label>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max={Math.min(elevator.dimensions.width * 0.9, 2.5)}
+                      step="0.1"
+                      value={elevator.materials.mirror.width}
+                      onChange={(e) => dispatch(setMirrorOptions({ width: parseFloat(e.target.value) }))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>0.5</span>
+                      <span>{elevator.materials.mirror.width.toFixed(1)} м</span>
+                      <span>{Math.min(elevator.dimensions.width * 0.9, 2.5).toFixed(1)}</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Высота зеркала (м):</label>
+                    <input 
+                      type="range" 
+                      min="0.5" 
+                      max={elevator.dimensions.height * 0.8} 
+                      step="0.1" 
+                      value={elevator.materials.mirror.height}
+                      onChange={(e) => dispatch(setMirrorOptions({ height: parseFloat(e.target.value) }))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>0.5</span>
+                      <span>{elevator.materials.mirror.height.toFixed(1)} м</span>
+                      <span>{(elevator.dimensions.height * 0.8).toFixed(1)}</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Положение по высоте:</label>
+                    <input 
+                      type="range" 
+                      min={-elevator.dimensions.height/4} 
+                      max={elevator.dimensions.height/4} 
+                      step="0.05" 
+                      value={elevator.materials.mirror.position}
+                      onChange={(e) => dispatch(setMirrorOptions({ position: parseFloat(e.target.value) }))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Ниже</span>
+                      <span>{elevator.materials.mirror.position.toFixed(2)}</span>
+                      <span>Выше</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Тип зеркала:</label>
+                    <select
+                      value={elevator.materials.mirror.type}
+                      onChange={(e) => dispatch(setMirrorOptions({ 
+                        type: e.target.value as 'full' | 'double' | 'triple' 
+                      }))}
+                      style={{ width: '100%', padding: '4px' }}
+                    >
+                      <option value="full">Сплошное зеркало</option>
+                      <option value="double">Два зеркала в ряд</option>
+                      <option value="triple">Три зеркала в ряд</option>
+                    </select>
+                  </div>
+                  
+                  {/* Пресеты для зеркал */}
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Пресеты зеркал:</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      <button 
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: '#f0f0f0',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                        }}
+                        onClick={() => {
+                          // Большое зеркало во всю стену
+                          dispatch(setMirrorOptions({ 
+                            width: Math.min(elevator.dimensions.width * 0.9, 2.5),
+                            height: elevator.dimensions.height * 0.8,
+                            type: 'full' 
+                          }));
+                        }}
+                      >
+                        Большое зеркало
+                      </button>
+                      
+                      <button 
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: '#f0f0f0',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                        }}
+                        onClick={() => {
+                          // Два вертикальных зеркала
+                          dispatch(setMirrorOptions({ 
+                            width: Math.min(elevator.dimensions.width * 0.8, 2.2),
+                            height: elevator.dimensions.height * 0.7,
+                            type: 'double' 
+                          }));
+                        }}
+                      >
+                        Два зеркала
+                      </button>
+                      
+                      <button 
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: '#f0f0f0',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                        }}
+                        onClick={() => {
+                          // Три маленьких зеркала
+                          dispatch(setMirrorOptions({ 
+                            width: Math.min(elevator.dimensions.width * 0.85, 2.4),
+                            height: elevator.dimensions.height * 0.5,
+                            type: 'triple' 
+                          }));
+                        }}
+                      >
+                        Три зеркала
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             
             {/* Настройка шероховатости */}
