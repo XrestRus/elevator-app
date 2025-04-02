@@ -9,6 +9,7 @@ import { useSpring, animated } from "@react-spring/three";
 import * as THREE from "three";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
+import ElevatorPanel from "./ElevatorPanel";
 
 /**
  * Компонент, представляющий базовую геометрию лифта с анимированными дверьми
@@ -398,28 +399,6 @@ const BasicElevator: React.FC = () => {
     []
   );
 
-  // Материал для панели с кнопками
-  const controlPanelMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#444444",
-        metalness: 0.6,
-        roughness: 0.2,
-      }),
-    []
-  );
-
-  // Материал для кнопок на панели
-  const buttonMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#222222",
-        metalness: 0.5,
-        roughness: 0.3,
-      }),
-    []
-  );
-
   // Материал для стыка дверей
   const doorSeamMaterial = useMemo(
     () =>
@@ -429,6 +408,19 @@ const BasicElevator: React.FC = () => {
         roughness: 0.7,
         emissive: "#000000",
         emissiveIntensity: 0.2,
+      }),
+    [lightsOn]
+  );
+
+  // Материал для внешних полосок дверей (более заметный)
+  const doorOuterSeamMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: "#111111", // Темный цвет, но немного светлее основного стыка
+        metalness: 0.4,
+        roughness: 0.6,
+        emissive: "#111111",
+        emissiveIntensity: 0.3, // Чуть больше свечения для лучшей видимости
       }),
     [lightsOn]
   );
@@ -681,47 +673,12 @@ const BasicElevator: React.FC = () => {
       {elevator.visibility.handrails && (
         <Cylinder
           position={[-dimensions.width / 2 + 0.03, -0.1, 0]}
-          rotation={[Math.PI / 2, 0, 0]} // Повернуто на 90 градусов по часовой
+          rotation={[Math.PI / 2, 0, 0]}
           args={[0.02, 0.02, dimensions.depth * 0.6, 16]}
           castShadow
         >
           <primitive object={handrailMaterial} attach="material" />
         </Cylinder>
-      )}
-
-      {/* Панель управления с кнопками на левой стене - показываем в зависимости от настроек */}
-      {elevator.visibility.controlPanel && (
-        <group
-          position={[-dimensions.width / 2 + 0.08, -0.1, dimensions.depth / 3]}
-        >
-          {/* Основа панели */}
-          <Box args={[0.05, 0.4, 0.25]} castShadow>
-            <primitive object={controlPanelMaterial} attach="material" />
-          </Box>
-
-          {/* Кнопки лифта (сетка 3x5) */}
-          {Array.from({ length: 3 }).map((_, row) =>
-            Array.from({ length: 5 }).map((_, col) => (
-              <Box
-                key={`button-${row}-${col}`}
-                position={[0.03, 0.15 - row * 0.06, -0.08 + col * 0.04]}
-                args={[0.01, 0.025, 0.025]}
-                castShadow
-              >
-                <primitive object={buttonMaterial} attach="material" />
-              </Box>
-            ))
-          )}
-
-          {/* Дисплей этажа */}
-          <Box position={[0.03, 0.16, 0]} args={[0.01, 0.04, 0.15]} castShadow>
-            <meshStandardMaterial 
-              color="#000000" 
-              emissive="#003300" 
-              emissiveIntensity={lightsOn ? 1.0 : 0.0}
-            />
-          </Box>
-        </group>
       )}
 
       {/* Правая стена - всегда обычный материал */}
@@ -800,6 +757,15 @@ const BasicElevator: React.FC = () => {
         <primitive object={frontWallMaterial} attach="material" />
       </Box>
 
+      {/* Панель управления на передней стене слева от дверей */}
+      {elevator.visibility.controlPanel && (
+        <ElevatorPanel 
+          position={[-dimensions.width / 2.6, -0.2, dimensions.depth / 2.1]} 
+          lightsOn={lightsOn}
+          wallColor={materials.walls}
+        />
+      )}
+
       {/* Правая боковая панель передней стены */}
       <Box
         position={[dimensions.width / 2 - 0.2, 0, dimensions.depth / 2]}
@@ -816,12 +782,30 @@ const BasicElevator: React.FC = () => {
           <primitive object={doorMaterial} attach="material" />
         </mesh>
 
-        {/* Единственная вертикальная линия на левой створке */}
+        {/* Центральная вертикальная линия на левой створке */}
+        <mesh
+          position={[dimensions.width / 4 - 0.03, 0, 0.04]}
+          castShadow
+        >
+          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <primitive object={doorSeamMaterial} attach="material" />
+        </mesh>
+
+        {/* Внешняя полоска на левой створке (со стороны зрителя) */}
+        <mesh
+          position={[-dimensions.width / 4 + 0.03, 0, 0.04]}
+          castShadow
+        >
+          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <primitive object={doorOuterSeamMaterial} attach="material" />
+        </mesh>
+        
+        {/* Горизонтальная линия в центре левой двери */}
         <mesh
           position={[0, 0, 0.04]}
           castShadow
         >
-          <boxGeometry args={[0.03, doorHeight, 0.1]} />
+          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.02, 0.1]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
       </animated.group>
@@ -833,12 +817,30 @@ const BasicElevator: React.FC = () => {
           <primitive object={doorMaterial} attach="material" />
         </mesh>
 
-        {/* Единственная вертикальная линия на правой створке */}
+        {/* Центральная вертикальная линия на правой створке */}
+        <mesh
+          position={[-dimensions.width / 4 + 0.03, 0, 0.04]}
+          castShadow
+        >
+          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <primitive object={doorSeamMaterial} attach="material" />
+        </mesh>
+
+        {/* Внешняя полоска на правой створке (со стороны зрителя) */}
+        <mesh
+          position={[dimensions.width / 4 - 0.03, 0, 0.04]}
+          castShadow
+        >
+          <boxGeometry args={[0.015, doorHeight, 0.1]} />
+          <primitive object={doorOuterSeamMaterial} attach="material" />
+        </mesh>
+        
+        {/* Горизонтальная линия в центре правой двери */}
         <mesh
           position={[0, 0, 0.04]}
           castShadow
         >
-          <boxGeometry args={[0.03, doorHeight, 0.1]} />
+          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.02, 0.1]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
       </animated.group>
