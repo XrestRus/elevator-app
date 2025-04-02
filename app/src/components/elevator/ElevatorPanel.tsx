@@ -35,7 +35,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const displayMaterial = useMemo(
     () => 
       new THREE.MeshStandardMaterial({
-        color: "#000000",
+        color: "gray",
         emissive: "#004488",
         emissiveIntensity: lightsOn ? 0.5 : 0.0,
       }),
@@ -46,8 +46,8 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const buttonMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#333333",
-        metalness: 0.5,
+        color: "silver",
+        metalness: 1.5,
         roughness: 0.3,
         emissive: "#222222",
         emissiveIntensity: 0.2,
@@ -59,9 +59,9 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const buttonRimMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#555555",
-        metalness: 0.7,
-        roughness: 0.2,
+        color: "silver",
+        metalness: 0.9,
+        roughness: 0.1,
       }),
     []
   );
@@ -73,12 +73,12 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     
     // Первый столбец (12, 11, 10, 9, ..., 1)
     for (let i = 0; i < 12; i++) {
-      positions.push([-0.05, 0.25 - i * 0.04]);
+      positions.push([-0.05, 0.25 - i * 0.05]);
     }
     
     // Второй столбец (24, 23, 22, ..., 13)
     for (let i = 0; i < 12; i++) {
-      positions.push([0.05, 0.25 - i * 0.04]);
+      positions.push([0.05, 0.25 - i * 0.05]);
     }
     
     return positions;
