@@ -53,11 +53,11 @@ function App() {
         <CameraController />
         
         {/* Усиливаем освещение */}
-        <ambientLight intensity={1.5} />
-        <pointLight position={[0, 1, 0]} intensity={3} />
-        <pointLight position={[-1, 0, 0]} intensity={1} />
-        <pointLight position={[1, 0, 0]} intensity={1} />
-        <pointLight position={[0, 0, -1]} intensity={1} />
+        <ambientLight intensity={lighting.enabled ? 1.5 : 0.2} />
+        <pointLight position={[0, 1, 0]} intensity={lighting.enabled ? 3 : 0} />
+        <pointLight position={[-1, 0, 0]} intensity={lighting.enabled ? 1 : 0} />
+        <pointLight position={[1, 0, 0]} intensity={lighting.enabled ? 1 : 0} />
+        <pointLight position={[0, 0, -1]} intensity={lighting.enabled ? 1 : 0} />
         
         <Suspense fallback={null}>
           <BasicElevator />

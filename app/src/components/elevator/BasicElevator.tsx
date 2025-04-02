@@ -16,6 +16,7 @@ import type { RootState } from "../../store/store";
 const BasicElevator: React.FC = () => {
   const elevator = useSelector((state: RootState) => state.elevator);
   const { materials, dimensions, doorsOpen } = elevator;
+  const lightsOn = elevator.lighting.enabled;
 
   // Новый подход: двери занимают почти всю ширину лифта
   // Оставляем только небольшие боковые части для рамки
@@ -427,8 +428,9 @@ const BasicElevator: React.FC = () => {
         metalness: 0.9,
         roughness: 0.1,
         emissive: "#111111",
+        emissiveIntensity: lightsOn ? 1.0 : 0.0,
       }),
-    []
+    [lightsOn]
   );
 
   // Материал для прорези в дверях
@@ -439,8 +441,9 @@ const BasicElevator: React.FC = () => {
         metalness: 0.9,
         roughness: 0.2,
         emissive: "#080808",
+        emissiveIntensity: lightsOn ? 1.0 : 0.0,
       }),
-    []
+    [lightsOn]
   );
 
   return (
@@ -496,7 +499,7 @@ const BasicElevator: React.FC = () => {
                 metalness={0.5} // Максимальная металличность
                 roughness={0.05} // Минимальная шероховатость для зеркального отражения
                 mirror={1.0} // Максимальное отражение
-                emissiveIntensity={0.2} // Интенсивность свечения
+                emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
               />
             </Box>
           )}
@@ -526,7 +529,7 @@ const BasicElevator: React.FC = () => {
                   metalness={0.5} // Максимальная металличность
                   roughness={0.05} // Минимальная шероховатость для зеркального отражения
                   mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={0.2} // Интенсивность свечения
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
                 />
               </Box>
 
@@ -552,7 +555,7 @@ const BasicElevator: React.FC = () => {
                   metalness={0.5} // Максимальная металличность
                   roughness={0.05} // Минимальная шероховатость для зеркального отражения
                   mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={0.2} // Интенсивность свечения
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
                 />
               </Box>
             </>
@@ -583,7 +586,7 @@ const BasicElevator: React.FC = () => {
                   metalness={0.5} // Максимальная металличность
                   roughness={0.05} // Минимальная шероховатость для зеркального отражения
                   mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={0.2} // Интенсивность свечения
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
                 />
               </Box>
 
@@ -609,7 +612,7 @@ const BasicElevator: React.FC = () => {
                   metalness={0.5} // Максимальная металличность
                   roughness={0.05} // Минимальная шероховатость для зеркального отражения
                   mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={0.2} // Интенсивность свечения
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
                 />
               </Box>
 
@@ -635,7 +638,7 @@ const BasicElevator: React.FC = () => {
                   metalness={0.5} // Максимальная металличность
                   roughness={0.05} // Минимальная шероховатость для зеркального отражения
                   mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={0.2} // Интенсивность свечения
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
                 />
               </Box>
             </>
@@ -660,7 +663,7 @@ const BasicElevator: React.FC = () => {
               metalness={0.9}
               roughness={0.1}
               emissive={materials.walls}
-              emissiveIntensity={0.1}
+              emissiveIntensity={lightsOn ? 0.1 : 0.0}
             />
           </Box>
         </>
@@ -714,7 +717,11 @@ const BasicElevator: React.FC = () => {
 
           {/* Дисплей этажа */}
           <Box position={[0.03, 0.16, 0]} args={[0.01, 0.04, 0.15]} castShadow>
-            <meshStandardMaterial color="#000000" emissive="#003300" />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#003300" 
+              emissiveIntensity={lightsOn ? 1.0 : 0.0}
+            />
           </Box>
         </group>
       )}
