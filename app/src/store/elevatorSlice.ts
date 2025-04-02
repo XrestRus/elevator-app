@@ -93,9 +93,9 @@ export interface ElevatorState {
  */
 const initialState: ElevatorState = {
   dimensions: {
-    width: 2,
-    height: 2.4,
-    depth: 2
+    width: 2.0,
+    height: 2.3,
+    depth: 2.0
   },
   doorsOpen: false,
   materials: {

@@ -451,16 +451,16 @@ const BasicElevator: React.FC = () => {
       {/* Пол */}
       <Box
         position={[0, -dimensions.height / 2, 0]}
-        args={[dimensions.width, 0.1, dimensions.depth]}
+        args={[dimensions.width, 0.05, dimensions.depth]}
         receiveShadow
       >
         <primitive object={actualFloorMaterial} attach="material" />
       </Box>
 
-      {/* Потолок - всегда обычный материал */}
+      {/* Потолок */}
       <Box
         position={[0, dimensions.height / 2, 0]}
-        args={[dimensions.width, 0.1, dimensions.depth]}
+        args={[dimensions.width, 0.05, dimensions.depth]}
         receiveShadow
       >
         <primitive object={actualCeilingMaterial} attach="material" />

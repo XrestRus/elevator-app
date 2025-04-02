@@ -824,7 +824,7 @@ const UIPanel = () => {
                   <span>{elevator.lighting.color}</span>
                 </div>
               </div>
-              
+
               <div style={{ marginBottom: '8px' }}>
                 <label style={{ display: 'block', marginBottom: '4px' }}>Интенсивность:</label>
                 <input 
