@@ -8,7 +8,7 @@ import { useSpring, animated } from "@react-spring/three";
 import * as THREE from "three";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
-import ElevatorPanel from "./ElevatorPanel";
+import ElevatorPanel from "./ElevatorPanel.tsx";
 
 /**
  * Компонент, представляющий базовую геометрию лифта с анимированными дверьми
@@ -439,6 +439,28 @@ const BasicElevator: React.FC = () => {
     []
   );
 
+  // Материал для декоративных полос
+  const decorationStripesMaterial = useMemo(() => {
+    if (!elevator.decorationStripes?.enabled) return null;
+    
+    const material = new THREE.MeshStandardMaterial({
+      color: elevator.decorationStripes.color || '#C0C0C0',
+      metalness: elevator.decorationStripes.material === 'metal' ? 0.9 : 
+                (elevator.decorationStripes.material === 'glossy' ? 0.7 : 0.1),
+      roughness: elevator.decorationStripes.material === 'metal' ? 0.1 : 
+                (elevator.decorationStripes.material === 'glossy' ? 0.05 : 0.8),
+      emissive: elevator.decorationStripes.material === 'glossy' ? 
+                elevator.decorationStripes.color : '#000000',
+      emissiveIntensity: elevator.decorationStripes.material === 'glossy' ? 0.05 : 0
+    });
+
+    return material;
+  }, [
+    elevator.decorationStripes?.enabled,
+    elevator.decorationStripes?.color,
+    elevator.decorationStripes?.material
+  ]);
+
   return (
     <group>
       {/* Пол */}
@@ -478,7 +500,7 @@ const BasicElevator: React.FC = () => {
               position={[
                 0,
                 materials.mirror.position,
-                -dimensions.depth / 2 + 0.03,
+                -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
               ]}
               args={[materials.mirror.width, materials.mirror.height, 0.01]}
               castShadow
@@ -504,7 +526,7 @@ const BasicElevator: React.FC = () => {
                 position={[
                   -materials.mirror.width / 4,
                   materials.mirror.position,
-                  -dimensions.depth / 2 + 0.03,
+                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
                 ]}
                 args={[
                   materials.mirror.width / 2 - 0.05,
@@ -515,14 +537,14 @@ const BasicElevator: React.FC = () => {
               >
                 <MeshReflectorMaterial
                   color={"#ffffff"}
-                  blur={[50, 25]} // Меньшее размытие для более четкого отражения
-                  resolution={2048} // Увеличил разрешение для качества
-                  mixBlur={0.0} // Минимальное смешивание размытия
-                  mixStrength={1.0} // Усилил интенсивность отражения
-                  metalness={0.5} // Максимальная металличность
-                  roughness={0.05} // Минимальная шероховатость для зеркального отражения
-                  mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
+                  blur={[50, 25]} 
+                  resolution={2048}
+                  mixBlur={0.0}
+                  mixStrength={1.0}
+                  metalness={0.5}
+                  roughness={0.05}
+                  mirror={1.0}
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
                 />
               </Box>
 
@@ -530,7 +552,7 @@ const BasicElevator: React.FC = () => {
                 position={[
                   materials.mirror.width / 4,
                   materials.mirror.position,
-                  -dimensions.depth / 2 + 0.03,
+                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
                 ]}
                 args={[
                   materials.mirror.width / 2 - 0.05,
@@ -541,14 +563,14 @@ const BasicElevator: React.FC = () => {
               >
                 <MeshReflectorMaterial
                   color={"#ffffff"}
-                  blur={[50, 25]} // Меньшее размытие для более четкого отражения
-                  resolution={2048} // Увеличил разрешение для качества
-                  mixBlur={0.0} // Минимальное смешивание размытия
-                  mixStrength={1.0} // Усилил интенсивность отражения
-                  metalness={0.5} // Максимальная металличность
-                  roughness={0.05} // Минимальная шероховатость для зеркального отражения
-                  mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
+                  blur={[50, 25]}
+                  resolution={2048}
+                  mixBlur={0.0}
+                  mixStrength={1.0}
+                  metalness={0.5}
+                  roughness={0.05}
+                  mirror={1.0}
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
                 />
               </Box>
             </>
@@ -561,7 +583,7 @@ const BasicElevator: React.FC = () => {
                 position={[
                   -materials.mirror.width / 3,
                   materials.mirror.position,
-                  -dimensions.depth / 2 + 0.03,
+                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
                 ]}
                 args={[
                   materials.mirror.width / 3 - 0.05,
@@ -572,14 +594,14 @@ const BasicElevator: React.FC = () => {
               >
                 <MeshReflectorMaterial
                   color={"#ffffff"}
-                  blur={[50, 25]} // Меньшее размытие для более четкого отражения
-                  resolution={2048} // Увеличил разрешение для качества
-                  mixBlur={0.0} // Минимальное смешивание размытия
-                  mixStrength={1.0} // Усилил интенсивность отражения
-                  metalness={0.5} // Максимальная металличность
-                  roughness={0.05} // Минимальная шероховатость для зеркального отражения
-                  mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
+                  blur={[50, 25]}
+                  resolution={2048}
+                  mixBlur={0.0}
+                  mixStrength={1.0}
+                  metalness={0.5}
+                  roughness={0.05}
+                  mirror={1.0}
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
                 />
               </Box>
 
@@ -587,7 +609,7 @@ const BasicElevator: React.FC = () => {
                 position={[
                   0,
                   materials.mirror.position,
-                  -dimensions.depth / 2 + 0.03,
+                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
                 ]}
                 args={[
                   materials.mirror.width / 3 - 0.05,
@@ -598,14 +620,14 @@ const BasicElevator: React.FC = () => {
               >
                 <MeshReflectorMaterial
                   color={"#ffffff"}
-                  blur={[50, 25]} // Меньшее размытие для более четкого отражения
-                  resolution={2048} // Увеличил разрешение для качества
-                  mixBlur={0.0} // Минимальное смешивание размытия
-                  mixStrength={1.0} // Усилил интенсивность отражения
-                  metalness={0.5} // Максимальная металличность
-                  roughness={0.05} // Минимальная шероховатость для зеркального отражения
-                  mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
+                  blur={[50, 25]}
+                  resolution={2048}
+                  mixBlur={0.0}
+                  mixStrength={1.0}
+                  metalness={0.5}
+                  roughness={0.05}
+                  mirror={1.0}
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
                 />
               </Box>
 
@@ -613,7 +635,7 @@ const BasicElevator: React.FC = () => {
                 position={[
                   materials.mirror.width / 3,
                   materials.mirror.position,
-                  -dimensions.depth / 2 + 0.03,
+                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
                 ]}
                 args={[
                   materials.mirror.width / 3 - 0.05,
@@ -624,14 +646,14 @@ const BasicElevator: React.FC = () => {
               >
                 <MeshReflectorMaterial
                   color={"#ffffff"}
-                  blur={[50, 25]} // Меньшее размытие для более четкого отражения
-                  resolution={2048} // Увеличил разрешение для качества
-                  mixBlur={0.0} // Минимальное смешивание размытия
-                  mixStrength={1.0} // Усилил интенсивность отражения
-                  metalness={0.5} // Максимальная металличность
-                  roughness={0.05} // Минимальная шероховатость для зеркального отражения
-                  mirror={1.0} // Максимальное отражение
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
+                  blur={[50, 25]}
+                  resolution={2048}
+                  mixBlur={0.0}
+                  mixStrength={1.0}
+                  metalness={0.5}
+                  roughness={0.05}
+                  mirror={1.0}
+                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
                 />
               </Box>
             </>
@@ -642,7 +664,7 @@ const BasicElevator: React.FC = () => {
             position={[
               0,
               materials.mirror.position,
-              -dimensions.depth / 2 + 0.02,
+              -dimensions.depth / 2 + 0.04, // Увеличил отступ рамки от стены
             ]}
             args={[
               materials.mirror.width + 0.05,
@@ -819,6 +841,58 @@ const BasicElevator: React.FC = () => {
           <primitive object={doorMaterial} attach="material" />
         </mesh>
 
+        {/* Декоративные полосы на левой двери */}
+        {elevator.decorationStripes?.enabled && elevator.decorationStripes?.showOnDoors && decorationStripesMaterial && (() => {
+          const stripeWidth = (elevator.decorationStripes.width || 5) / 100;
+          const stripeCount = elevator.decorationStripes.count || 1;
+          const isHorizontal = (elevator.decorationStripes.orientation || 'horizontal') === 'horizontal';
+          const offsetMeters = (elevator.decorationStripes.offset || 0) / 100;
+          
+          // Позиции для полос
+          const doorStripePositions: number[] = [];
+          
+          if (isHorizontal) {
+            // Для горизонтальных полос на двери
+            const step = doorHeight / (stripeCount + 1);
+            for (let i = 0; i < stripeCount; i++) {
+              doorStripePositions.push(-doorHeight / 2 + (i + 1) * step);
+            }
+            
+            return doorStripePositions.map((pos, index) => (
+              <Box
+                key={`door-left-stripe-h-${index}`}
+                position={[offsetMeters, pos, 0.04]}
+                args={[dimensions.width / 2, stripeWidth, 0.01]}
+                castShadow
+              >
+                {decorationStripesMaterial && (
+                  <primitive object={decorationStripesMaterial} attach="material" />
+                )}
+              </Box>
+            ));
+          } else {
+            // Для вертикальных полос на двери
+            const doorWidth = dimensions.width / 2 + 0.1;
+            const step = doorWidth / (stripeCount + 1);
+            for (let i = 0; i < stripeCount; i++) {
+              doorStripePositions.push(-doorWidth / 2 + (i + 1) * step);
+            }
+            
+            return doorStripePositions.map((pos, index) => (
+              <Box
+                key={`door-left-stripe-v-${index}`}
+                position={[pos + offsetMeters, 0, 0.04]}
+                args={[stripeWidth, doorHeight, 0.01]}
+                castShadow
+              >
+                {decorationStripesMaterial && (
+                  <primitive object={decorationStripesMaterial} attach="material" />
+                )}
+              </Box>
+            ));
+          }
+        })()}
+
         {/* Центральная вертикальная линия на левой створке */}
         <mesh
           position={[dimensions.width / 4 - 0.03, 0, 0.04]}
@@ -854,6 +928,58 @@ const BasicElevator: React.FC = () => {
           <primitive object={doorMaterial} attach="material" />
         </mesh>
 
+        {/* Декоративные полосы на правой двери */}
+        {elevator.decorationStripes?.enabled && elevator.decorationStripes?.showOnDoors && decorationStripesMaterial && (() => {
+          const stripeWidth = (elevator.decorationStripes.width || 5) / 100;
+          const stripeCount = elevator.decorationStripes.count || 1;
+          const isHorizontal = (elevator.decorationStripes.orientation || 'horizontal') === 'horizontal';
+          const offsetMeters = (elevator.decorationStripes.offset || 0) / 100;
+          
+          // Позиции для полос
+          const doorStripePositions: number[] = [];
+          
+          if (isHorizontal) {
+            // Для горизонтальных полос на двери
+            const step = doorHeight / (stripeCount + 1);
+            for (let i = 0; i < stripeCount; i++) {
+              doorStripePositions.push(-doorHeight / 2 + (i + 1) * step);
+            }
+            
+            return doorStripePositions.map((pos, index) => (
+              <Box
+                key={`door-right-stripe-h-${index}`}
+                position={[offsetMeters, pos, 0.04]}
+                args={[dimensions.width / 2, stripeWidth, 0.01]}
+                castShadow
+              >
+                {decorationStripesMaterial && (
+                  <primitive object={decorationStripesMaterial} attach="material" />
+                )}
+              </Box>
+            ));
+          } else {
+            // Для вертикальных полос на двери
+            const doorWidth = dimensions.width / 2 + 0.1;
+            const step = doorWidth / (stripeCount + 1);
+            for (let i = 0; i < stripeCount; i++) {
+              doorStripePositions.push(-doorWidth / 2 + (i + 1) * step);
+            }
+            
+            return doorStripePositions.map((pos, index) => (
+              <Box
+                key={`door-right-stripe-v-${index}`}
+                position={[pos + offsetMeters, 0, 0.04]}
+                args={[stripeWidth, doorHeight, 0.01]}
+                castShadow
+              >
+                {decorationStripesMaterial && (
+                  <primitive object={decorationStripesMaterial} attach="material" />
+                )}
+              </Box>
+            ));
+          }
+        })()}
+
         {/* Центральная вертикальная линия на правой створке */}
         <mesh
           position={[-dimensions.width / 4 + 0.03, 0, 0.04]}
@@ -881,6 +1007,214 @@ const BasicElevator: React.FC = () => {
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
       </animated.group>
+
+      {/* Декоративные полосы на стенах */}
+      {elevator.decorationStripes?.enabled && decorationStripesMaterial && (
+        <>
+          {/* Функция для определения позиций полос в зависимости от их расположения */}
+          {(() => {
+            // Ширина полосы в метрах
+            const stripeWidth = (elevator.decorationStripes.width || 5) / 100;
+            // Количество полос
+            const stripeCount = elevator.decorationStripes.count || 1;
+            // Расстояние между полосами в метрах - используется в расчетах позиций
+            const spacingMeters = (elevator.decorationStripes.spacing || 3) / 100;
+            // Ориентация полос
+            const isHorizontal = (elevator.decorationStripes.orientation || 'horizontal') === 'horizontal';
+            // Пропускать ли заднюю стену с зеркалом
+            const skipMirrorWall = elevator.decorationStripes.skipMirrorWall ?? true;
+            // Смещение от центра в метрах
+            const offsetMeters = (elevator.decorationStripes.offset || 0) / 100;
+            
+            // Получаем позиции полос в зависимости от настройки position
+            const positions: number[] = [];
+            
+            switch (elevator.decorationStripes.position) {
+              case 'top': {
+                // Верхние полосы
+                if (isHorizontal) {
+                  // Для горизонтальных полос - позиции по высоте
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(dimensions.height / 3 + i * (stripeWidth + spacingMeters));
+                  }
+                } else {
+                  // Для вертикальных полос - позиции от верхней точки
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(i * (stripeWidth + spacingMeters) - (stripeCount - 1) * (stripeWidth + spacingMeters) / 2);
+                  }
+                }
+                break;
+              }
+              case 'bottom': {
+                // Нижние полосы
+                if (isHorizontal) {
+                  // Для горизонтальных полос - позиции по высоте
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(-dimensions.height / 3 - i * (stripeWidth + spacingMeters));
+                  }
+                } else {
+                  // Для вертикальных полос - позиции от нижней точки
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(i * (stripeWidth + spacingMeters) - (stripeCount - 1) * (stripeWidth + spacingMeters) / 2);
+                  }
+                }
+                break;
+              }
+              case 'all': {
+                // Полосы во всю высоту/ширину, равномерно распределенные
+                if (isHorizontal) {
+                  // Для горизонтальных полос - позиции по высоте
+                  const step = dimensions.height / (stripeCount + 1);
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(-dimensions.height / 2 + (i + 1) * step);
+                  }
+                } else {
+                  // Для вертикальных полос - равномерно распределяем по ширине/глубине
+                  const step = (dimensions.width - 0.1) / (stripeCount + 1);
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(-dimensions.width / 2 + 0.05 + (i + 1) * step);
+                  }
+                }
+                break;
+              }
+              default: { // 'middle'
+                // По умолчанию полосы в центре
+                if (isHorizontal) {
+                  // Для горизонтальных полос - позиции по высоте
+                  const middleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(- middleOffset + i * (stripeWidth + spacingMeters));
+                  }
+                } else {
+                  // Для вертикальных полос - позиции по ширине от центра
+                  const middleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
+                  for (let i = 0; i < stripeCount; i++) {
+                    positions.push(- middleOffset + i * (stripeWidth + spacingMeters));
+                  }
+                }
+                break;
+              }
+            }
+            
+            // Создаем дополнительные позиции для боковых стен при вертикальной ориентации
+            const sideWallPositions: number[] = [];
+            if (!isHorizontal) {
+              if (elevator.decorationStripes.position === 'all') {
+                // Распределяем полосы равномерно по глубине боковых стен
+                const step = dimensions.depth / (stripeCount + 1);
+                for (let i = 0; i < stripeCount; i++) {
+                  sideWallPositions.push(-dimensions.depth / 2 + (i + 1) * step);
+                }
+              } else {
+                // Используем то же расстояние между полосами, что и для задней стены
+                const sideWallMiddleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
+                for (let i = 0; i < stripeCount; i++) {
+                  sideWallPositions.push(- sideWallMiddleOffset + i * (stripeWidth + spacingMeters));
+                }
+              }
+            }
+                        
+            return (
+              <>
+                {/* Задняя стена - показываем полосы только если нет зеркала или не выбран пропуск стены с зеркалом */}
+                {(!materials.isMirror.walls || !skipMirrorWall) && (
+                  isHorizontal ? (
+                    // Горизонтальные полосы на задней стене
+                    positions.map((pos, index) => (
+                      <Box
+                        key={`back-wall-stripe-${index}`}
+                        position={[offsetMeters, pos, -dimensions.depth / 2 + 0.03]}
+                        args={[dimensions.width - 0.06, stripeWidth, 0.01]}
+                        castShadow
+                      >
+                        {decorationStripesMaterial && (
+                          <primitive object={decorationStripesMaterial} attach="material" />
+                        )}
+                      </Box>
+                    ))
+                  ) : (
+                    // Вертикальные полосы на задней стене
+                    positions.map((pos, index) => (
+                      <Box
+                        key={`back-wall-stripe-${index}`}
+                        position={[pos + offsetMeters, 0, -dimensions.depth / 2 + 0.03]}
+                        args={[stripeWidth, dimensions.height - 0.06, 0.01]}
+                        castShadow
+                      >
+                        {decorationStripesMaterial && (
+                          <primitive object={decorationStripesMaterial} attach="material" />
+                        )}
+                      </Box>
+                    ))
+                  )
+                )}
+                
+                {/* Левая стена */}
+                {isHorizontal ? (
+                  // Горизонтальные полосы на левой стене
+                  positions.map((pos, index) => (
+                    <Box
+                      key={`left-wall-stripe-${index}`}
+                      position={[-dimensions.width / 2 + 0.03, pos, offsetMeters]}
+                      args={[0.01, stripeWidth, dimensions.depth - 0.06]}
+                      castShadow
+                    >
+                      {decorationStripesMaterial && (
+                        <primitive object={decorationStripesMaterial} attach="material" />
+                      )}
+                    </Box>
+                  ))
+                ) : (
+                  // Вертикальные полосы на левой стене
+                  sideWallPositions.map((zPos, index) => (
+                    <Box
+                      key={`left-wall-stripe-${index}`}
+                      position={[-dimensions.width / 2 + 0.03, offsetMeters, zPos + offsetMeters]}
+                      args={[0.01, dimensions.height - 0.06, stripeWidth]}
+                      castShadow
+                    >
+                      {decorationStripesMaterial && (
+                        <primitive object={decorationStripesMaterial} attach="material" />
+                      )}
+                    </Box>
+                  ))
+                )}
+                
+                {/* Правая стена */}
+                {isHorizontal ? (
+                  // Горизонтальные полосы на правой стене
+                  positions.map((pos, index) => (
+                    <Box
+                      key={`right-wall-stripe-${index}`}
+                      position={[dimensions.width / 2 - 0.03, pos, offsetMeters]}
+                      args={[0.01, stripeWidth, dimensions.depth - 0.06]}
+                      castShadow
+                    >
+                      {decorationStripesMaterial && (
+                        <primitive object={decorationStripesMaterial} attach="material" />
+                      )}
+                    </Box>
+                  ))
+                ) : (
+                  // Вертикальные полосы на правой стене
+                  sideWallPositions.map((zPos, index) => (
+                    <Box
+                      key={`right-wall-stripe-${index}`}
+                      position={[dimensions.width / 2 - 0.03, offsetMeters, zPos + offsetMeters]}
+                      args={[0.01, dimensions.height - 0.06, stripeWidth]}
+                      castShadow
+                    >
+                      {decorationStripesMaterial && (
+                        <primitive object={decorationStripesMaterial} attach="material" />
+                      )}
+                    </Box>
+                  ))
+                )}
+              </>
+            );
+          })()}
+        </>
+      )}
     </group>
   );
 };

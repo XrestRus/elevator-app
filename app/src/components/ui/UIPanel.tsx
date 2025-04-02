@@ -13,6 +13,7 @@ import {
   setCamera,
   setMetalness,
   setMirrorOptions,
+  setDecorationStripes,
 } from "../../store/elevatorSlice";
 import type { RootState } from "../../store/store";
 
@@ -302,14 +303,16 @@ const UIPanel = () => {
                     // Золотой пресет
                     dispatch(setMaterial({ part: 'walls', color: '#D4AF37' }));
                     dispatch(setMaterial({ part: 'ceiling', color: '#D4AF37' }));
-                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#332211' })); // Тёмный пол, контрастирующий с золотом
                     dispatch(setMaterial({ part: 'doors', color: '#D4AF37' }));
                     dispatch(setMetalness({ part: 'walls', value: 0.9 }));
                     dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
                     dispatch(setMetalness({ part: 'doors', value: 0.9 }));
+                    dispatch(setMetalness({ part: 'floor', value: 0.5 })); // Средняя металличность для пола
                     dispatch(setRoughness({ part: 'walls', value: 0.1 }));
                     dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
                     dispatch(setRoughness({ part: 'doors', value: 0.1 }));
+                    dispatch(setRoughness({ part: 'floor', value: 0.3 })); // Невысокая шероховатость для пола
                   }}
                 >
                   Золотой
@@ -330,14 +333,16 @@ const UIPanel = () => {
                     // Бронзовый пресет
                     dispatch(setMaterial({ part: 'walls', color: '#CD7F32' }));
                     dispatch(setMaterial({ part: 'ceiling', color: '#CD7F32' }));
-                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#3D2B1F' })); // Тёмно-коричневый пол
                     dispatch(setMaterial({ part: 'doors', color: '#CD7F32' }));
                     dispatch(setMetalness({ part: 'walls', value: 0.8 }));
                     dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
                     dispatch(setMetalness({ part: 'doors', value: 0.8 }));
+                    dispatch(setMetalness({ part: 'floor', value: 0.4 })); // Средняя металличность для пола
                     dispatch(setRoughness({ part: 'walls', value: 0.2 }));
                     dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
                     dispatch(setRoughness({ part: 'doors', value: 0.2 }));
+                    dispatch(setRoughness({ part: 'floor', value: 0.5 })); // Средняя шероховатость для пола
                   }}
                 >
                   Бронзовый
@@ -358,14 +363,16 @@ const UIPanel = () => {
                     // Серебряный пресет
                     dispatch(setMaterial({ part: 'walls', color: '#C0C0C0' }));
                     dispatch(setMaterial({ part: 'ceiling', color: '#C0C0C0' }));
-                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#303030' })); // Тёмно-серый пол
                     dispatch(setMaterial({ part: 'doors', color: '#C0C0C0' }));
                     dispatch(setMetalness({ part: 'walls', value: 0.9 }));
                     dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
                     dispatch(setMetalness({ part: 'doors', value: 0.9 }));
+                    dispatch(setMetalness({ part: 'floor', value: 0.7 })); // Высокая металличность для пола
                     dispatch(setRoughness({ part: 'walls', value: 0.1 }));
                     dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
                     dispatch(setRoughness({ part: 'doors', value: 0.1 }));
+                    dispatch(setRoughness({ part: 'floor', value: 0.2 })); // Низкая шероховатость для пола
                   }}
                 >
                   Серебряный
@@ -386,14 +393,16 @@ const UIPanel = () => {
                     // Медный пресет
                     dispatch(setMaterial({ part: 'walls', color: '#B87333' }));
                     dispatch(setMaterial({ part: 'ceiling', color: '#B87333' }));
-                    dispatch(setMaterial({ part: 'floor', color: '#8B4513' }));
+                    dispatch(setMaterial({ part: 'floor', color: '#2D2D2D' })); // Почти чёрный пол
                     dispatch(setMaterial({ part: 'doors', color: '#B87333' }));
                     dispatch(setMetalness({ part: 'walls', value: 0.8 }));
                     dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
                     dispatch(setMetalness({ part: 'doors', value: 0.8 }));
+                    dispatch(setMetalness({ part: 'floor', value: 0.6 })); // Металличность для пола
                     dispatch(setRoughness({ part: 'walls', value: 0.2 }));
                     dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
                     dispatch(setRoughness({ part: 'doors', value: 0.2 }));
+                    dispatch(setRoughness({ part: 'floor', value: 0.3 })); // Низкая шероховатость для пола
                   }}
                 >
                   Медный
@@ -513,7 +522,6 @@ const UIPanel = () => {
                       >
                         Большое зеркало
                       </button>
-                      
                       <button 
                         style={{
                           padding: '4px 8px',
@@ -524,17 +532,16 @@ const UIPanel = () => {
                           fontSize: '12px',
                         }}
                         onClick={() => {
-                          // Два вертикальных зеркала
+                          // Два зеркала в ряд
                           dispatch(setMirrorOptions({ 
-                            width: Math.min(elevator.dimensions.width * 0.8, 2.2),
-                            height: elevator.dimensions.height * 0.7,
+                            width: Math.min(elevator.dimensions.width * 0.4, 1.0),
+                            height: elevator.dimensions.height * 0.6,
                             type: 'double' 
                           }));
                         }}
                       >
                         Два зеркала
                       </button>
-                      
                       <button 
                         style={{
                           padding: '4px 8px',
@@ -545,9 +552,9 @@ const UIPanel = () => {
                           fontSize: '12px',
                         }}
                         onClick={() => {
-                          // Три маленьких зеркала
+                          // Три зеркала в ряд
                           dispatch(setMirrorOptions({ 
-                            width: Math.min(elevator.dimensions.width * 0.85, 2.4),
+                            width: Math.min(elevator.dimensions.width * 0.25, 0.7),
                             height: elevator.dimensions.height * 0.5,
                             type: 'triple' 
                           }));
@@ -791,6 +798,383 @@ const UIPanel = () => {
                 />
                 <label htmlFor="showControlPanel">Панель управления</label>
               </div>
+            </div>
+            
+            {/* Декоративные полосы */}
+            <div style={{ marginBottom: '16px' }}>
+              <h4>Декоративные полосы</h4>
+              
+              <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type="checkbox" 
+                  id="showStripes"
+                  checked={elevator.decorationStripes?.enabled ?? false}
+                  onChange={() => dispatch(setDecorationStripes({ 
+                    enabled: !(elevator.decorationStripes?.enabled ?? false)
+                  }))}
+                  style={{ marginRight: '8px' }}
+                />
+                <label htmlFor="showStripes">Показать декоративные полосы</label>
+              </div>
+              
+              {(elevator.decorationStripes?.enabled ?? false) && (
+                <>
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Расположение полос:</label>
+                    <select
+                      value={elevator.decorationStripes?.position ?? 'middle'}
+                      onChange={(e) => {
+                        const position = e.target.value;
+                        if (position === 'top' || position === 'middle' || position === 'bottom' || position === 'all') {
+                          dispatch(setDecorationStripes({ position }));
+                        }
+                      }}
+                      style={{ width: '100%', padding: '4px' }}
+                    >
+                      <option value="top">Верхняя часть стен</option>
+                      <option value="middle">Середина стен</option>
+                      <option value="bottom">Нижняя часть стен</option>
+                      <option value="all">Все стены</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Ориентация полос:</label>
+                    <select
+                      value={elevator.decorationStripes?.orientation ?? 'horizontal'}
+                      onChange={(e) => {
+                        const orientation = e.target.value;
+                        if (orientation === 'horizontal' || orientation === 'vertical') {
+                          dispatch(setDecorationStripes({ orientation }));
+                        }
+                      }}
+                      style={{ width: '100%', padding: '4px' }}
+                    >
+                      <option value="horizontal">Горизонтальные</option>
+                      <option value="vertical">Вертикальные</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Количество полос:</label>
+                    <select
+                      value={elevator.decorationStripes?.count ?? 1}
+                      onChange={(e) => dispatch(setDecorationStripes({ 
+                        count: parseInt(e.target.value) 
+                      }))}
+                      style={{ width: '100%', padding: '4px' }}
+                    >
+                      <option value="1">1 полоса</option>
+                      <option value="2">2 полосы</option>
+                      <option value="3">3 полосы</option>
+                      <option value="4">4 полосы</option>
+                      <option value="5">5 полос</option>
+                      <option value="6">6 полос</option>
+                      <option value="7">7 полос</option>
+                      <option value="8">8 полос</option>
+                      <option value="9">9 полос</option>
+                      <option value="10">10 полос</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={elevator.decorationStripes?.showOnDoors ?? false}
+                        onChange={(e) => dispatch(setDecorationStripes({ 
+                          showOnDoors: e.target.checked 
+                        }))}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Полосы на дверях
+                    </label>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Ширина полосы (см):</label>
+                    <input 
+                      type="range" 
+                      min="0.1" 
+                      max="15" 
+                      step="0.1" 
+                      value={elevator.decorationStripes?.width ?? 5}
+                      onChange={(e) => dispatch(setDecorationStripes({ 
+                        width: parseFloat(e.target.value) 
+                      }))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>0.1 см</span>
+                      <span>{(elevator.decorationStripes?.width ?? 5).toFixed(1)} см</span>
+                      <span>15 см</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Расстояние между полосами (см):</label>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="20" 
+                      step="0.5" 
+                      value={elevator.decorationStripes?.spacing ?? 3}
+                      onChange={(e) => dispatch(setDecorationStripes({ 
+                        spacing: parseFloat(e.target.value) 
+                      }))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>1 см</span>
+                      <span>{(elevator.decorationStripes?.spacing ?? 3).toFixed(1)} см</span>
+                      <span>20 см</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Смещение от центра (см):</label>
+                    <input 
+                      type="range" 
+                      min="-20" 
+                      max="20" 
+                      step="0.5" 
+                      value={elevator.decorationStripes?.offset ?? 0}
+                      onChange={(e) => dispatch(setDecorationStripes({ 
+                        offset: parseFloat(e.target.value) 
+                      }))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Левее</span>
+                      <span>{(elevator.decorationStripes?.offset ?? 0).toFixed(1)} см</span>
+                      <span>Правее</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={elevator.decorationStripes?.skipMirrorWall ?? true}
+                        onChange={(e) => dispatch(setDecorationStripes({ 
+                          skipMirrorWall: e.target.checked 
+                        }))}
+                        style={{ marginRight: '8px' }}
+                      />
+                      Не отображать на стене с зеркалом
+                    </label>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Материал полос:</label>
+                    <select
+                      value={elevator.decorationStripes?.material ?? 'metal'}
+                      onChange={(e) => {
+                        const material = e.target.value;
+                        if (material === 'metal' || material === 'glossy' || material === 'wood') {
+                          dispatch(setDecorationStripes({ material }));
+                        }
+                      }}
+                      style={{ width: '100%', padding: '4px' }}
+                    >
+                      <option value="metal">Металл</option>
+                      <option value="glossy">Глянцевый</option>
+                      <option value="wood">Дерево</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px' }}>Цвет полос:</label>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <input 
+                        type="color" 
+                        value={elevator.decorationStripes?.color ?? '#C0C0C0'}
+                        onChange={(e) => dispatch(setDecorationStripes({ 
+                          color: e.target.value 
+                        }))}
+                        style={{ marginRight: '8px' }}
+                      />
+                      <span>{elevator.decorationStripes?.color ?? '#C0C0C0'}</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '8px' }}>
+                    <button 
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        marginBottom: '8px'
+                      }}
+                      onClick={() => {
+                        dispatch(setDecorationStripes({
+                          enabled: true,
+                          position: 'middle',
+                          count: 1,
+                          width: 5,
+                          material: 'metal',
+                          color: '#FFD700', // Золотой цвет
+                          orientation: 'horizontal',
+                          spacing: 3,
+                          skipMirrorWall: true,
+                          offset: 0,
+                          showOnDoors: false
+                        }));
+                      }}
+                    >
+                      Золотая полоса
+                    </button>
+                    
+                    <button 
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        marginBottom: '8px'
+                      }}
+                      onClick={() => {
+                        dispatch(setDecorationStripes({
+                          enabled: true,
+                          position: 'middle',
+                          count: 1,
+                          width: 3,
+                          material: 'metal',
+                          color: '#C0C0C0', // Серебряный цвет
+                          orientation: 'horizontal',
+                          spacing: 3,
+                          skipMirrorWall: true,
+                          offset: 0,
+                          showOnDoors: false
+                        }));
+                      }}
+                    >
+                      Серебряная полоса
+                    </button>
+                    
+                    <button 
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        marginBottom: '8px'
+                      }}
+                      onClick={() => {
+                        dispatch(setDecorationStripes({
+                          enabled: true,
+                          position: 'all',
+                          count: 3,
+                          width: 8,
+                          material: 'wood',
+                          color: '#8B4513', // Деревянный цвет
+                          orientation: 'horizontal',
+                          spacing: 3,
+                          skipMirrorWall: true,
+                          offset: 0,
+                          showOnDoors: false
+                        }));
+                      }}
+                    >
+                      Деревянные полосы
+                    </button>
+                    
+                    <button 
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        marginBottom: '8px'
+                      }}
+                      onClick={() => {
+                        dispatch(setDecorationStripes({
+                          enabled: true,
+                          position: 'all',
+                          count: 5,
+                          width: 2,
+                          material: 'metal',
+                          color: '#C0C0C0', // Серебряный цвет
+                          orientation: 'vertical',
+                          spacing: 3,
+                          skipMirrorWall: true,
+                          offset: 0,
+                          showOnDoors: false
+                        }));
+                      }}
+                    >
+                      Вертикальные полосы
+                    </button>
+                    
+                    <button 
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        marginBottom: '8px'
+                      }}
+                      onClick={() => {
+                        dispatch(setDecorationStripes({
+                          enabled: true,
+                          position: 'middle',
+                          count: 1,
+                          width: 5,
+                          material: 'metal',
+                          color: '#FFD700', // Золотой цвет
+                          orientation: 'horizontal',
+                          spacing: 3,
+                          skipMirrorWall: true,
+                          offset: 0,
+                          showOnDoors: true
+                        }));
+                      }}
+                    >
+                      Золотая полоса с дверями
+                    </button>
+                    
+                    <button 
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        marginBottom: '8px'
+                      }}
+                      onClick={() => {
+                        dispatch(setDecorationStripes({
+                          enabled: true,
+                          position: 'all',
+                          count: 3,
+                          width: 2,
+                          material: 'metal',
+                          color: '#C0C0C0', // Серебряный цвет
+                          orientation: 'vertical',
+                          spacing: 3,
+                          skipMirrorWall: true,
+                          offset: 0,
+                          showOnDoors: true
+                        }));
+                      }}
+                    >
+                      Вертикальные полосы с дверями
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
             
             {/* Настройки освещения */}

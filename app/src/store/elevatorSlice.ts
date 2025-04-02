@@ -77,6 +77,23 @@ export interface VisibilityOptions {
 }
 
 /**
+ * Интерфейс для настроек декоративных полос
+ */
+export interface DecorationStripesOptions {
+  enabled: boolean;
+  position: 'top' | 'middle' | 'bottom' | 'all';
+  count: number;
+  width: number;
+  material: 'metal' | 'glossy' | 'wood';
+  color: string;
+  orientation: 'horizontal' | 'vertical';
+  spacing: number;
+  skipMirrorWall: boolean;
+  offset: number;
+  showOnDoors: boolean;
+}
+
+/**
  * Интерфейс состояния лифта
  */
 export interface ElevatorState {
@@ -86,6 +103,7 @@ export interface ElevatorState {
   lighting: LightingOptions;
   visibility: VisibilityOptions;
   camera: CameraOptions;
+  decorationStripes?: DecorationStripesOptions;
 }
 
 /**
@@ -148,6 +166,19 @@ const initialState: ElevatorState = {
   },
   camera: {
     fov: 75
+  },
+  decorationStripes: {
+    enabled: false,
+    position: 'middle',
+    count: 1,
+    width: 5,
+    material: 'metal',
+    color: '#C0C0C0',
+    orientation: 'horizontal',
+    spacing: 3,
+    skipMirrorWall: true,
+    offset: 0,
+    showOnDoors: false
   }
 };
 
@@ -218,6 +249,26 @@ const elevatorSlice = createSlice({
     // Обновление настроек зеркала
     setMirrorOptions: (state, action: PayloadAction<Partial<Materials['mirror']>>) => {
       state.materials.mirror = { ...state.materials.mirror, ...action.payload };
+    },
+    
+    // Обновление настроек декоративных полос
+    setDecorationStripes: (state, action: PayloadAction<Partial<DecorationStripesOptions>>) => {
+      if (!state.decorationStripes) {
+        state.decorationStripes = {
+          enabled: false,
+          position: 'middle',
+          count: 1,
+          width: 5,
+          material: 'metal',
+          color: '#C0C0C0',
+          orientation: 'horizontal',
+          spacing: 3,
+          skipMirrorWall: true,
+          offset: 0,
+          showOnDoors: false
+        };
+      }
+      state.decorationStripes = { ...state.decorationStripes, ...action.payload };
     }
   }
 });
@@ -234,7 +285,8 @@ export const {
   setLighting,
   setVisibility,
   setCamera,
-  setMirrorOptions
+  setMirrorOptions,
+  setDecorationStripes
 } = elevatorSlice.actions;
 
 // Экспорт reducer
