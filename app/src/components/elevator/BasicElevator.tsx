@@ -68,16 +68,16 @@ const BasicElevator: React.FC = () => {
   // Анимация для левой двери
   const leftDoorSpring = useSpring({
     position: doorsOpen
-      ? [-dimensions.width / 2 - 0.3, -0.15, dimensions.depth / 2] // Позиция открытия
-      : [-dimensions.width / 4, -0.15, dimensions.depth / 2], // Смещена влево от центра
+      ? [-dimensions.width / 2 - 0.3, -0.15, dimensions.depth / 2] 
+      : [-dimensions.width / 4 + 0.05, -0.15, dimensions.depth / 2],
     config: { mass: 1, tension: 120, friction: 14 },
   });
 
   // Анимация для правой двери
   const rightDoorSpring = useSpring({
     position: doorsOpen
-      ? [dimensions.width / 2 + 0.3, -0.15, dimensions.depth / 2] // Позиция открытия
-      : [dimensions.width / 4, -0.15, dimensions.depth / 2], // Смещена вправо от центра
+      ? [dimensions.width / 2 + 0.3, -0.15, dimensions.depth / 2]
+      : [dimensions.width / 4 - 0.05, -0.15, dimensions.depth / 2],
     config: { mass: 1, tension: 120, friction: 14 },
   });
 
@@ -424,26 +424,24 @@ const BasicElevator: React.FC = () => {
   const doorSeamMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#000000",
-        metalness: 0.9,
-        roughness: 0.1,
-        emissive: "#111111",
-        emissiveIntensity: lightsOn ? 1.0 : 0.0,
+        color: "#000000", // Черный цвет для максимального контраста
+        metalness: 0.3,
+        roughness: 0.7,
+        emissive: "#000000",
+        emissiveIntensity: 0.2,
       }),
     [lightsOn]
   );
 
-  // Материал для прорези в дверях
-  const doorSlotMaterial = useMemo(
+  // Материал для рамки вокруг дверей (металлический)
+  const doorFrameMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#111111",
-        metalness: 0.9,
+        color: "#555555",
+        metalness: 0.8,
         roughness: 0.2,
-        emissive: "#080808",
-        emissiveIntensity: lightsOn ? 1.0 : 0.0,
       }),
-    [lightsOn]
+    []
   );
 
   return (
@@ -751,54 +749,98 @@ const BasicElevator: React.FC = () => {
       {/* Верхняя перемычка над дверью */}
       <Box
         position={[0, dimensions.height / 2 - 0.15, dimensions.depth / 2]}
-        args={[dimensions.width, 0.3, 0.07]}
+        args={[dimensions.width - 0.2, 0.3, 0.07]}
         castShadow
       >
         <primitive object={frontWallMaterial} attach="material" />
       </Box>
 
-      {/* Левая дверь - с небольшим запасом по ширине */}
+      {/* Рамка для дверей (верхняя часть) */}
+      <Box
+        position={[0, dimensions.height / 2 - 0.3, dimensions.depth / 2 + 0.04]}
+        args={[dimensions.width - 0.3, 0.04, 0.02]}
+        castShadow
+      >
+        <primitive object={doorFrameMaterial} attach="material" />
+      </Box>
+
+      {/* Рамка для дверей (нижняя часть) */}
+      <Box
+        position={[0, -dimensions.height / 2 + 0.1, dimensions.depth / 2 + 0.04]}
+        args={[dimensions.width - 0.3, 0.02, 0.02]}
+        castShadow
+      >
+        <primitive object={doorFrameMaterial} attach="material" />
+      </Box>
+
+      {/* Рамка для дверей (левая часть) */}
+      <Box
+        position={[-dimensions.width / 2 + 0.25, 0, dimensions.depth / 2 + 0.04]}
+        args={[0.02, dimensions.height - 0.4, 0.02]}
+        castShadow
+      >
+        <primitive object={doorFrameMaterial} attach="material" />
+      </Box>
+
+      {/* Рамка для дверей (правая часть) */}
+      <Box
+        position={[dimensions.width / 2 - 0.25, 0, dimensions.depth / 2 + 0.04]}
+        args={[0.02, dimensions.height - 0.4, 0.02]}
+        castShadow
+      >
+        <primitive object={doorFrameMaterial} attach="material" />
+      </Box>
+
+      {/* Левая боковая панель передней стены */}
+      <Box
+        position={[-dimensions.width / 2 + 0.2, 0, dimensions.depth / 2]}
+        args={[0.4, dimensions.height, 0.07]}
+        castShadow
+      >
+        <primitive object={frontWallMaterial} attach="material" />
+      </Box>
+
+      {/* Правая боковая панель передней стены */}
+      <Box
+        position={[dimensions.width / 2 - 0.2, 0, dimensions.depth / 2]}
+        args={[0.4, dimensions.height, 0.07]}
+        castShadow
+      >
+        <primitive object={frontWallMaterial} attach="material" />
+      </Box>
+
+      {/* Левая дверь - с скорректированной шириной */}
       <animated.group {...leftDoorSpring}>
         <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2 + 0.05, doorHeight, 0.05]} />
+          <boxGeometry args={[dimensions.width / 2 + 0.1, doorHeight, 0.05]} />
           <primitive object={doorMaterial} attach="material" />
         </mesh>
 
-        {/* Прорезь в левой двери */}
-        <Box
-          position={[dimensions.width / 4 + 0.025, 0, 0.03]}
-          args={[0.01, doorHeight * 0.8, 0.06]}
-          castShadow
-        >
-          <primitive object={doorSlotMaterial} attach="material" />
-        </Box>
-      </animated.group>
-
-      {/* Правая дверь - с небольшим запасом по ширине */}
-      <animated.group {...rightDoorSpring}>
-        <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2 + 0.05, doorHeight, 0.05]} />
-          <primitive object={doorMaterial} attach="material" />
-        </mesh>
-
-        {/* Стык между дверьми (черная полоса) на левом крае правой двери */}
+        {/* Единственная вертикальная линия на левой створке */}
         <mesh
-          position={[-dimensions.width / 4 - 0.025, 0, 0.05]}
-          visible={!doorsOpen}
+          position={[0, 0, 0.04]}
           castShadow
         >
-          <boxGeometry args={[0.05, doorHeight, 0.1]} />
+          <boxGeometry args={[0.03, doorHeight, 0.1]} />
           <primitive object={doorSeamMaterial} attach="material" />
         </mesh>
+      </animated.group>
 
-        {/* Прорезь в правой двери */}
-        <Box
-          position={[-dimensions.width / 4 - 0.025, 0, 0.03]}
-          args={[0.01, doorHeight * 0.8, 0.06]}
+      {/* Правая дверь - с скорректированной шириной */}
+      <animated.group {...rightDoorSpring}>
+        <mesh castShadow>
+          <boxGeometry args={[dimensions.width / 2 + 0.1, doorHeight, 0.05]} />
+          <primitive object={doorMaterial} attach="material" />
+        </mesh>
+
+        {/* Единственная вертикальная линия на правой створке */}
+        <mesh
+          position={[0, 0, 0.04]}
           castShadow
         >
-          <primitive object={doorSlotMaterial} attach="material" />
-        </Box>
+          <boxGeometry args={[0.03, doorHeight, 0.1]} />
+          <primitive object={doorSeamMaterial} attach="material" />
+        </mesh>
       </animated.group>
     </group>
   );
