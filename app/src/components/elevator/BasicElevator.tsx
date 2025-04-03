@@ -12,6 +12,7 @@ import ElevatorMirror from "./ElevatorMirror.tsx";
 import ElevatorHandrails from "./ElevatorHandrails.tsx";
 import DecorationStripes from "./DecorationStripes.tsx";
 import JointStripes from "./JointStripes";
+import PerformanceOptimizer from "../../utils/PerformanceOptimizer";
 import {
   createWallMaterialWithCustomRepeat,
   loadPBRTextures,
@@ -20,12 +21,14 @@ import {
 } from "./ElevatorMaterialsUtils.tsx";
 
 /**
- * Компонент, представляющий базовую геометрию лифта с анимированными дверьми
+ * Компонент, представляющий базовую геометрию лифта с анимированными дверьми и оптимизированным рендерингом
  */
 const BasicElevator: React.FC = () => {
   const elevator = useSelector((state: RootState) => state.elevator);
   const { materials, dimensions, doorsOpen } = elevator;
   const lightsOn = elevator.lighting.enabled;
+  // Проверяем производительность устройства для адаптивной оптимизации
+  const isHighPerformance = useMemo(() => PerformanceOptimizer.isHighPerformanceDevice(), []);
 
   // Новый подход: двери занимают почти всю ширину лифта
   // Оставляем только небольшие боковые части для рамки
@@ -120,6 +123,40 @@ const BasicElevator: React.FC = () => {
   const wallTextures = useTexture(wallPaths);
   const floorTextures = useTexture(floorPaths);
   const ceilingTextures = useTexture(ceilingPaths);
+  
+  // Оптимизация текстур в зависимости от производительности устройства
+  useEffect(() => {
+    // Применяем оптимизацию к загруженным текстурам
+    const optimizeTexture = (texture: THREE.Texture | undefined) => {
+      if (!texture) return;
+      
+      // Если устройство не мощное, используем менее качественные настройки текстур
+      if (!isHighPerformance) {
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
+        texture.anisotropy = 1; // Минимальная анизотропная фильтрация
+      } else {
+        // Для мощных устройств используем более качественные настройки
+        texture.anisotropy = 4; // Повышаем качество текстур на мощных устройствах
+      }
+      
+      // Освобождаем память GPU, если текстура больше не используется
+      texture.dispose = function() {
+        if (this.image instanceof HTMLImageElement) {
+          this.image.onload = null;
+        }
+        // Вызываем стандартный dispose
+        THREE.Texture.prototype.dispose.call(this);
+      };
+    };
+    
+    // Оптимизируем все текстуры
+    Object.values(wallTextures).forEach(optimizeTexture);
+    Object.values(floorTextures).forEach(optimizeTexture);
+    Object.values(ceilingTextures).forEach(optimizeTexture);
+    
+  }, [wallTextures, floorTextures, ceilingTextures, isHighPerformance]);
 
   // Обработка ошибок при загрузке текстур
   useEffect(() => {
@@ -297,22 +334,22 @@ const BasicElevator: React.FC = () => {
     decorationStripesMaterial,
     materials.walls
   ]);
-
+  
   return (
     <group>
-      {/* Пол */}
+      {/* Пол - с оптимизацией */}
       <ElevatorFloor 
         dimensions={dimensions} 
-        floorMaterial={actualFloorMaterial} 
+        floorMaterial={actualFloorMaterial}
       />
-
-      {/* Потолок */}
+      
+      {/* Потолок - с оптимизацией */}
       <ElevatorCeiling 
         dimensions={dimensions} 
-        ceilingMaterial={actualCeilingMaterial} 
+        ceilingMaterial={actualCeilingMaterial}
       />
-
-      {/* Стены и дверные рамки */}
+      
+      {/* Стены и дверные рамки - с оптимизацией */}
       <ElevatorWalls 
         dimensions={dimensions}
         backWallMaterial={backWallMaterial}
@@ -320,9 +357,9 @@ const BasicElevator: React.FC = () => {
         frontWallMaterial={frontWallMaterial}
         doorFrameMaterial={doorFrameMaterial}
       />
-
-      {/* Зеркало */}
-      <ElevatorMirror
+      
+      {/* Зеркало - с оптимизацией */}
+      <ElevatorMirror 
         dimensions={dimensions}
         materials={materials}
         mirrorConfig={{
@@ -332,7 +369,7 @@ const BasicElevator: React.FC = () => {
         lightsOn={lightsOn}
       />
 
-      {/* Панель управления на передней стене слева от дверей */}
+      {/* Панель управления на передней стене слева от дверей - с оптимизацией */}
       {elevator.visibility.controlPanel && (
         <ElevatorPanel 
           position={[-dimensions.width / 2.6, -0.2, dimensions.depth / 2.1]} 
@@ -341,24 +378,22 @@ const BasicElevator: React.FC = () => {
         />
       )}
 
-      {/* Двери */}
+      {/* Двери - с оптимизацией */}
       <ElevatorDoors
         doorsOpen={doorsOpen}
         doorHeight={doorHeight}
         dimensions={dimensions}
         doorMaterial={doorMaterial}
-        decorationStripes={elevator.decorationStripes}
-        decorationStripesMaterial={decorationStripesMaterial}
       />
 
-      {/* Поручни */}
+      {/* Поручни - с оптимизацией */}
       <ElevatorHandrails
         dimensions={dimensions}
         handrailMaterial={handrailMaterial}
         isVisible={elevator.visibility.handrails}
       />
 
-      {/* Декоративные полосы на стенах */}
+      {/* Декоративные полосы на стенах - с оптимизацией */}
       <DecorationStripes
         dimensions={dimensions}
         decorationStripes={elevator.decorationStripes || {}}
@@ -366,7 +401,7 @@ const BasicElevator: React.FC = () => {
         hasMirror={materials.isMirror.walls}
       />
 
-      {/* Стыки между стенами */}
+      {/* Стыки между стенами - с оптимизацией */}
       <JointStripes
         dimensions={dimensions}
         jointStripeMaterial={jointStripeMaterial}

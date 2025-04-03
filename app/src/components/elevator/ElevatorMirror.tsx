@@ -46,16 +46,13 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
   const jointsQualityFactor = useSelector((state: RootState) => state.elevator.joints?.qualityFactor ?? 1.0);
   const isHighQuality = jointsQualityFactor > 0.5;
   
-  // Параметр blur для зеркала в зависимости от качества
-  const blurValue = isHighQuality ? [300, 100] as [number, number] : [400, 200] as [number, number];
-  
   // Общие настройки MeshReflectorMaterial для всех зеркал (мемоизированные)
   const mirrorMaterialProps = useMemo(() => ({
     color: "#ffffff",
-    blur: blurValue,
-    resolution: isHighQuality ? 512 : 256,
+    blur: isHighQuality ? [300, 100]: [400, 200],
+    resolution: isHighQuality ? 2048 : 1024,
     mixBlur: isHighQuality ? 0.2 : 0.3,
-    mixStrength: isHighQuality ? 0.8 : 0.7,
+    mixStrength: isHighQuality ? 2.8 : 1.7,
     depthScale: isHighQuality ? 1.0 : 0.6,
     minDepthThreshold: 0.4,
     maxDepthThreshold: isHighQuality ? 1.5 : 0.8,
@@ -65,7 +62,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
     distortion: 0,
     reflectorOffset: 0,
     emissiveIntensity: lightsOn ? 0.2 : 0.0
-  }), [lightsOn, isHighQuality, blurValue]);
+  }), [lightsOn, isHighQuality]);
   
   // Настройки для рамки зеркала (мемоизированные)
   const mirrorFrameProps = useMemo(() => ({

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useSpring, animated } from "@react-spring/three";
 import * as THREE from "three";
 
@@ -14,16 +14,6 @@ interface ElevatorDoorsProps {
     depth: number;
   };
   doorMaterial: THREE.Material;
-  decorationStripes?: {
-    enabled?: boolean;
-    showOnDoors?: boolean;
-    width?: number;
-    count?: number;
-    orientation?: string;
-    offset?: number;
-    material?: string;
-  };
-  decorationStripesMaterial: THREE.Material | null;
 }
 
 /**
@@ -35,36 +25,55 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
   dimensions,
   doorMaterial,
 }) => {
-  // Анимация для левой двери
+  // Оптимизированные настройки анимации для более плавного открытия/закрытия
+  const animConfig = {
+    mass: 1, // Увеличиваем массу для более естественного движения
+    tension: 120, // Увеличиваем натяжение для более быстрого начала движения
+    friction: 16, // Увеличиваем трение для более плавной остановки
+    clamp: false, // Разрешаем небольшое перебегание
+    immediate: false, // Никогда не пропускаем анимацию
+  };
+
+  // Референс для отслеживания предыдущего состояния
+  const prevOpenState = useRef(doorsOpen);
+  
+  // Анимация для левой двери с оптимизированными параметрами
   const leftDoorSpring = useSpring({
     position: doorsOpen
       ? [-dimensions.width / 2, -0.15, dimensions.depth / 2]
       : [-dimensions.width / 4.45, -0.15, dimensions.depth / 2],
-    config: { mass: 0.1, tension: 100, friction: 14 },
+    config: animConfig,
+    // Обратный вызов для обновления рендера до окончания анимации
+    onRest: () => {
+      prevOpenState.current = doorsOpen;
+    }
   });
 
-  // Анимация для правой двери
+  // Анимация для правой двери с оптимизированными параметрами
   const rightDoorSpring = useSpring({
     position: doorsOpen
       ? [dimensions.width / 2, -0.15, dimensions.depth / 2]
       : [dimensions.width / 4.45, -0.15, dimensions.depth / 2],
-    config: { mass: 0.1, tension: 100, friction: 14 },
+    config: animConfig,
   });
-
+  
+  // Ширина дверей
+  const doorWidth = dimensions.width / 2.23;
+  
   return (
     <>
-      {/* Левая дверь - с скорректированной шириной */}
+      {/* Левая дверь */}
       <animated.group {...leftDoorSpring}>
-        <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2.23, doorHeight, 0.05]} />
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[doorWidth, doorHeight, 0.05]} />
           <primitive object={doorMaterial} attach="material" />
         </mesh>
       </animated.group>
 
-      {/* Правая дверь - с скорректированной шириной */}
+      {/* Правая дверь */}
       <animated.group {...rightDoorSpring}>
-        <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2.23, doorHeight, 0.05]} />
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[doorWidth, doorHeight, 0.05]} />
           <primitive object={doorMaterial} attach="material" />
         </mesh>
       </animated.group>

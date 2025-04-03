@@ -140,6 +140,26 @@ const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
         }))}
       />
       
+      {/* Подсказка по управлению в режиме свободного полета */}
+      {elevator.camera.freeCamera && (
+        <div style={{ 
+          marginTop: '8px', 
+          padding: '8px', 
+          backgroundColor: '#fffce0', 
+          borderRadius: '4px',
+          border: '1px solid #eee8a9'
+        }}>
+          <p style={{ fontWeight: 'bold', margin: '0 0 4px' }}>Управление:</p>
+          <div style={{ fontSize: '13px' }}>
+            <b>W</b> - вперед, <b>S</b> - назад<br />
+            <b>A</b> - влево, <b>D</b> - вправо<br />
+            <b>Q</b> - вверх, <b>E</b> - вниз<br />
+            <b>Shift</b> - ускорение движения<br />
+            <b>Мышь</b> - поворот камеры
+          </div>
+        </div>
+      )}
+      
       {/* Отображение координат камеры */}
       <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
         <p style={{ fontWeight: 'bold', margin: '0 0 4px' }}>Текущее положение камеры:</p>

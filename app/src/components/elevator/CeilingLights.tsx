@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
-import { Plane } from '@react-three/drei';
+import { Plane, Instance, Instances } from '@react-three/drei';
 import * as THREE from 'three';
+import PerformanceOptimizer from '../../utils/PerformanceOptimizer';
 
 /**
- * Компонент для отображения точечных светильников на потолке лифта
+ * Компонент для отображения точечных светильников на потолке лифта с оптимизацией
  */
 const CeilingLights: React.FC<{
   count?: number;
@@ -20,46 +21,51 @@ const CeilingLights: React.FC<{
   const { dimensions } = useSelector((state: RootState) => state.elevator);
   const lightsOn = useSelector((state: RootState) => state.elevator.lighting.enabled ?? true);
   const wallColor = useSelector((state: RootState) => state.elevator.materials.walls);
+  const highPerformance = useMemo(() => PerformanceOptimizer.isHighPerformanceDevice(), []);
   
   // Создаем цвет корпуса светильника на основе цвета стен
-  const frameLightColor = React.useMemo(() => {
+  const frameLightColor = useMemo(() => {
     const color = new THREE.Color(wallColor);
     color.multiplyScalar(0.8); // Делаем цвет немного темнее стен
     return color;
   }, [wallColor]);
   
-  // Расположение светильников на потолке
-  const positions: [number, number, number][] = [];
-  
-  // Создание массива позиций светильников (равномерно распределенных)
-  if (count === 5) {
-    // Центральный светильник
-    positions.push([0, 0, 0]); 
+  // Расположение светильников на потолке - мемоизируем для предотвращения повторных вычислений
+  const positions = useMemo(() => {
+    const posArray: [number, number, number][] = [];
     
-    // Четыре светильника по углам
-    const offsetX = dimensions.width * 0.35;
-    const offsetZ = dimensions.depth * 0.35;
-    positions.push(
-      [-offsetX, 0, -offsetZ],
-      [offsetX, 0, -offsetZ],
-      [-offsetX, 0, offsetZ],
-      [offsetX, 0, offsetZ]
-    );
-  } else if (count === 4) {
-    const offsetX = dimensions.width * 0.3;
-    const offsetZ = dimensions.depth * 0.3;
-    positions.push(
-      [-offsetX, 0, -offsetZ],
-      [offsetX, 0, -offsetZ],
-      [-offsetX, 0, offsetZ],
-      [offsetX, 0, offsetZ]
-    );
-  } else if (count === 2) {
-    const offsetZ = dimensions.depth * 0.3;
-    positions.push([0, 0, -offsetZ], [0, 0, offsetZ]);
-  } else {
-    positions.push([0, 0, 0]);
-  }
+    // Создание массива позиций светильников (равномерно распределенных)
+    if (count === 5) {
+      // Центральный светильник
+      posArray.push([0, 0, 0]); 
+      
+      // Четыре светильника по углам
+      const offsetX = dimensions.width * 0.35;
+      const offsetZ = dimensions.depth * 0.35;
+      posArray.push(
+        [-offsetX, 0, -offsetZ],
+        [offsetX, 0, -offsetZ],
+        [-offsetX, 0, offsetZ],
+        [offsetX, 0, offsetZ]
+      );
+    } else if (count === 4) {
+      const offsetX = dimensions.width * 0.3;
+      const offsetZ = dimensions.depth * 0.3;
+      posArray.push(
+        [-offsetX, 0, -offsetZ],
+        [offsetX, 0, -offsetZ],
+        [-offsetX, 0, offsetZ],
+        [offsetX, 0, offsetZ]
+      );
+    } else if (count === 2) {
+      const offsetZ = dimensions.depth * 0.3;
+      posArray.push([0, 0, -offsetZ], [0, 0, offsetZ]);
+    } else {
+      posArray.push([0, 0, 0]);
+    }
+    
+    return posArray;
+  }, [count, dimensions.width, dimensions.depth]);
   
   // Рассчитываем размер и интенсивность светового пятна
   const getSpotSize = (index: number) => {
@@ -70,14 +76,6 @@ const CeilingLights: React.FC<{
     return dimensions.height * 0.4;
   };
   
-  const getSpotIntensity = (index: number) => {
-    // Центральный светильник ярче
-    if (count === 5 && index === 0) {
-      return lightsOn ? (intensity / 10) * 1.1 : 0;
-    }
-    return lightsOn ? (intensity / 10) * 0.7 : 0;
-  };
-  
   const getLightIntensity = (index: number) => {
     // Центральный светильник ярче
     if (count === 5 && index === 0) {
@@ -86,17 +84,21 @@ const CeilingLights: React.FC<{
     return lightsOn ? intensity * 0.7 : 0;
   };
   
-  // Создаем текстуру для светового пятна
-  const spotTexture = React.useMemo(() => {
+  // Создаем текстуру для светового пятна с оптимизацией
+  const spotTexture = useMemo(() => {
+    // Определяем размер текстуры в зависимости от производительности устройства
+    const textureSize = highPerformance ? 256 : 128;
+    
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = textureSize;
+    canvas.height = textureSize;
     const context = canvas.getContext('2d');
     if (context) {
       // Создаем градиент от центра к краям
+      const center = textureSize / 2;
       const gradient = context.createRadialGradient(
-        128, 128, 0, 
-        128, 128, 128
+        center, center, 0, 
+        center, center, center
       );
       
       // Преобразуем hex-цвет в RGB формат для использования в градиенте
@@ -117,65 +119,90 @@ const CeilingLights: React.FC<{
       gradient.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
       
       context.fillStyle = gradient;
-      context.fillRect(0, 0, 256, 256);
+      context.fillRect(0, 0, textureSize, textureSize);
     }
     
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
+    
+    // Оптимизация фильтрации текстур
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
+    
     return texture;
-  }, [color]); // Зависимость от цвета светильника
+  }, [color, highPerformance]); // Зависимость от цвета светильника и производительности устройства
+  
+  // Геометрия для плафона светильника - создаем один раз
+  const glassGeometry = useMemo(() => new THREE.CylinderGeometry(0.07, 0.07, 0.005, highPerformance ? 16 : 8), [highPerformance]);
+  
+  // Материалы для плафона и световых пятен - оптимизируем с помощью мемоизации
+  const glassMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({ 
+      color: lightsOn ? color : '#e0e0e0', 
+      transparent: true,
+      opacity: 0.9,
+      emissive: lightsOn ? color : '#333333',
+      emissiveIntensity: lightsOn ? 1 : 0
+    });
+  }, [lightsOn, color]);
+  
+  const spotPlaneMaterial = useMemo(() => {
+    return new THREE.MeshBasicMaterial({ 
+      color: color,
+      transparent: true,
+      opacity: 0.7,
+      map: spotTexture,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+  }, [color, spotTexture]);
   
   return (
     <group position={[0, dimensions.height/2 - 0.05, 0]}>
+      {/* Используем инстансинг для оптимизации рендеринга однотипных мешей */}
+      <Instances range={positions.length} limit={10}>
+        <cylinderGeometry args={[0.0, 0.076, 0.01, highPerformance ? 16 : 8]} />
+        <meshStandardMaterial color={frameLightColor} />
+        
+        {positions.map((pos, index) => (
+          <group key={index}>
+            <Instance position={pos} />
+          </group>
+        ))}
+      </Instances>
+      
+      {/* Оптимизированная отрисовка плафонов и света */}
       {positions.map((pos, index) => (
-        <group key={index} position={pos}>
-          {/* Корпус светильника */}
-          <mesh>
-            <cylinderGeometry args={[0.0, 0.076, 0.01, 16]} />
-            <meshStandardMaterial color={frameLightColor} />
-          </mesh>
-          
+        <group key={`light-${index}`} position={pos}>
           {/* Стеклянный плафон */}
-          <mesh position={[0, -0.01, 0]}>
-            <cylinderGeometry args={[0.07, 0.07, 0.005, 16]} />
-            <meshStandardMaterial 
-              color={lightsOn ? color : '#e0e0e0'} 
-              transparent
-              opacity={0.9}
-              emissive={lightsOn ? color : '#333333'}
-              emissiveIntensity={lightsOn ? 1 : 0}
-            />
-          </mesh>
+          <mesh position={[0, -0.01, 0]} geometry={glassGeometry} material={glassMaterial} />
           
-          {/* Сам источник света */}
+          {/* Сам источник света - с оптимизированными параметрами */}
           <spotLight 
             position={[0, -0.02, 0]} 
             angle={Math.PI / 3}
             penumbra={0.3}
             intensity={getLightIntensity(index)}
             color={color}
-            castShadow={false}
-            decay={1.5}
-            distance={dimensions.height * 1.5}
+            castShadow={highPerformance}
+            decay={2}
+            distance={dimensions.height * 1.2} // Оптимизированная дистанция
+            shadow-mapSize-width={highPerformance ? 512 : 256}
+            shadow-mapSize-height={highPerformance ? 512 : 256}
+            shadow-bias={-0.001}
+            shadow-focus={1}
           />
           
-          {/* Световое пятно на полу */}
+          {/* Световое пятно на полу - только если свет включен */}
           {lightsOn && (
             <group position={[0, -dimensions.height + 0.05, 0]}>
               <Plane 
                 args={[getSpotSize(index), getSpotSize(index)]} 
                 rotation={[-Math.PI / 2, 0, 0]}
                 position={[0, 0.01, 0]} // Слегка поднимаем над полом
-              >
-                <meshBasicMaterial 
-                  color={color}
-                  transparent={true}
-                  opacity={getSpotIntensity(index)}
-                  map={spotTexture}
-                  blending={THREE.AdditiveBlending}
-                  depthWrite={false}
-                />
-              </Plane>
+                material={spotPlaneMaterial}
+              />
             </group>
           )}
         </group>
