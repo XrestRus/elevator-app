@@ -12,12 +12,13 @@ import DoorAnimationUpdater from './components/elevator/DoorAnimationUpdater';
 import CameraController from './components/camera/CameraController';
 import { 
   ShadowOptimizer, 
-  PerformanceMonitor,
   SceneOptimizerComponent 
 } from './components/optimization';
 import { PerformanceOptimizer } from './utils/optimization';
 import SoftShadowEnhancer from './components/camera/SoftShadowEnhancer';
 import type { RootState } from './store/store';
+import ObjectHoverHandler from './components/ui/ObjectHoverHandler';
+import ObjectTooltip from './components/ui/ObjectTooltip';
 
 /**
  * Главный компонент приложения для конструктора лифта
@@ -60,6 +61,44 @@ function App() {
   
   return (
     <div className="app-container">
+      {/* Стили для тултипа */}
+      <style>
+        {`
+          .object-tooltip {
+            position: fixed;
+            z-index: 9999;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            max-width: 300px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+          }
+          
+          .object-tooltip-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+          }
+          
+          .object-tooltip-row {
+            margin-bottom: 4px;
+          }
+          
+          .object-tooltip-label {
+            opacity: 0.7;
+          }
+          
+          .object-tooltip-additional {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 4px;
+            margin-top: 4px;
+          }
+        `}
+      </style>
+      
       <Canvas
         shadows={isHighPerformance}
         camera={{ 
@@ -77,10 +116,7 @@ function App() {
         tabIndex={0} // Делаем Canvas фокусируемым для обработки клавиатурных событий
       >
         <CameraController />
-        
-        {/* Добавляем монитор производительности */}
-        <PerformanceMonitor />
-        
+      
         {/* Добавляем компонент для анимации дверей */}
         <DoorAnimationUpdater />
         
@@ -127,8 +163,14 @@ function App() {
             showAxes={debugSettings.showAxes}
             showGizmo={debugSettings.showGizmo}
           />
+          
+          {/* Компонент для обработки наведения на объекты должен быть внутри Canvas */}
+          <ObjectHoverHandler />
         </Suspense>
       </Canvas>
+      
+      {/* Тултип теперь отображается вне Canvas, но использует данные из Canvas */}
+      <ObjectTooltip />
       
       {/* Панель управления для UI */}
       <UIPanel />
