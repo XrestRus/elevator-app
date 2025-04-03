@@ -30,7 +30,7 @@ const ShadowOptimizer: React.FC = () => {
             const isMobileOrLowPerf = window.navigator.userAgent.includes('Mobile') || 
                                       !PerformanceOptimizer.isHighPerformanceDevice();
             
-            const shadowMapSize = isMobileOrLowPerf ? 512 : 1024;
+            const shadowMapSize = isMobileOrLowPerf ? 512 : 2048; // Увеличиваем размер карты теней
             
             if (object.shadow) {
               object.shadow.mapSize.width = shadowMapSize;
@@ -40,16 +40,22 @@ const ShadowOptimizer: React.FC = () => {
               object.shadow.camera.near = 0.1;
               object.shadow.camera.far = dimensions.height * 2;
               
+              // Добавляем радиус размытия для всех источников света
+              object.shadow.radius = isMobileOrLowPerf ? 3 : 8;
+              
               // Для SpotLight особые настройки
               if (object instanceof THREE.SpotLight) {
-                object.shadow.bias = -0.0005;
-                object.shadow.focus = 1;
+                object.shadow.bias = -0.0003; // Уменьшаем для предотвращения артефактов
+                object.shadow.focus = 0.7; // Снижаем фокус для размытия
+                object.shadow.blurSamples = isMobileOrLowPerf ? 4 : 12; // Увеличиваем количество сэмплов
+                object.penumbra = 0.7; // Увеличиваем зону полутени
               }
               
               // Для PointLight и DirectionalLight
               if (object instanceof THREE.PointLight || 
                   object instanceof THREE.DirectionalLight) {
-                object.shadow.bias = -0.001;
+                object.shadow.bias = -0.0005;
+                object.shadow.normalBias = 0.02; // Добавляем для улучшения качества теней
               }
               
               // Обновляем карту теней данного источника

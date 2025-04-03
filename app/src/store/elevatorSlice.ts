@@ -182,7 +182,7 @@ const initialState: ElevatorState = {
   lighting: {
     count: 4,
     color: '#ffffff',
-    intensity: 2,
+    intensity: 6,
     enabled: true
   },
   visibility: {

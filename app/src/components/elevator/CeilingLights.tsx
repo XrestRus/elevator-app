@@ -182,16 +182,18 @@ const CeilingLights: React.FC<{
           <spotLight 
             position={[0, -0.02, 0]} 
             angle={Math.PI / 3}
-            penumbra={0.3}
+            penumbra={0.7}
             intensity={getLightIntensity(index)}
             color={color}
             castShadow={highPerformance}
             decay={2}
-            distance={dimensions.height * 1.2} // Оптимизированная дистанция
-            shadow-mapSize-width={highPerformance ? 512 : 256}
-            shadow-mapSize-height={highPerformance ? 512 : 256}
-            shadow-bias={-0.001}
-            shadow-focus={1}
+            distance={dimensions.height * 1.5}
+            shadow-mapSize-width={highPerformance ? 1024 : 512}
+            shadow-mapSize-height={highPerformance ? 1024 : 512}
+            shadow-bias={-0.0005}
+            shadow-focus={0.8}
+            shadow-radius={5}
+            shadow-blurSamples={highPerformance ? 8 : 4}
           />
           
           {/* Световое пятно на полу - только если свет включен */}

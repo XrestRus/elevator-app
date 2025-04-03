@@ -160,16 +160,24 @@ const BasicElevator: React.FC = () => {
 
   // Обработка ошибок при загрузке текстур
   useEffect(() => {
-    // Упрощенная обработка ошибок загрузки для повышения производительности
-    const handleGlobalError = (event: Event) => {
+    // Простая обработка ошибок загрузки текстур
+    const handleGlobalError = (event: Event | ErrorEvent) => {
       const target = event.target as HTMLImageElement;
       if (target && target.src && !target.src.includes('dummy.png')) {
-        console.warn(`Не удалось загрузить текстуру: ${target.src}`);
+        console.error(`Ошибка загрузки текстуры:`, {
+          url: target.src,
+          error: event instanceof ErrorEvent ? event.message : 'Неизвестная ошибка'
+        });
+        
+        // Предотвращаем всплытие ошибки до глобального обработчика и показ в консоли браузера
+        event.stopPropagation();
+        event.preventDefault();
       }
-      event.stopPropagation();
-      event.preventDefault();
+      
+      return true; // Предотвращаем стандартную обработку ошибки
     };
     
+    // Слушаем ошибки загрузки изображений
     window.addEventListener('error', handleGlobalError, true);
     
     return () => {

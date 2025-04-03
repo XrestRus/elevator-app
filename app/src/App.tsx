@@ -14,6 +14,7 @@ import CameraController from './components/camera/CameraController';
 import ShadowOptimizer from './components/optimization/ShadowOptimizer';
 import PerformanceMonitor from './components/optimization/PerformanceMonitor';
 import PerformanceOptimizer from './utils/PerformanceOptimizer';
+import SoftShadowEnhancer from './components/camera/SoftShadowEnhancer';
 import type { RootState } from './store/store';
 
 /**
@@ -23,6 +24,7 @@ function App() {
   // Получаем настройки из Redux
   const lighting = useSelector((state: RootState) => state.elevator.lighting);
   const cameraSettings = useSelector((state: RootState) => state.elevator.camera);
+  const dimensions = useSelector((state: RootState) => state.elevator.dimensions);
   
   // Определяем производительность устройства
   const isHighPerformance = useMemo(() => PerformanceOptimizer.isHighPerformanceDevice(), []);
@@ -47,7 +49,8 @@ function App() {
     shadowMap: isHighPerformance ? { 
       enabled: true,
       type: THREE.PCFSoftShadowMap,
-      autoUpdate: false
+      autoUpdate: false,
+      softness: 8 // Добавляем параметр мягкости для теней
     } : false,
     // Ограничиваем pixelRatio для повышения FPS
     pixelRatio: Math.min(window.devicePixelRatio, 1.5)
@@ -82,11 +85,26 @@ function App() {
         {/* Добавляем оптимизатор теней */}
         {isHighPerformance && <ShadowOptimizer />}
         
+        {/* Добавляем компонент для более мягких теней */}
+        <SoftShadowEnhancer />
+        
         {/* Добавляем компонент для оптимизации сцены */}
         <SceneOptimizer />
         
         {/* Базовое освещение - оптимизированное */}
-        <ambientLight intensity={lighting.enabled ? 1.0 : 0.2} />
+        <ambientLight intensity={lighting.enabled ? 0.7 : 0.2} />
+        
+        {/* Добавляем мягкое направленное освещение сверху для более естественных теней */}
+        <directionalLight 
+          position={[0, dimensions.height * 1.5, 0]} 
+          intensity={lighting.enabled ? 0.3 : 0.1}
+          castShadow={isHighPerformance}
+          shadow-radius={8}
+          shadow-mapSize-width={isHighPerformance ? 1024 : 512}
+          shadow-mapSize-height={isHighPerformance ? 1024 : 512}
+          shadow-bias={-0.0003}
+          shadow-normalBias={0.02}
+        />
         
         <Suspense fallback={null}>
           <BasicElevator />

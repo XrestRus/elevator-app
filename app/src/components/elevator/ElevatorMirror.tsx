@@ -52,10 +52,9 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
     blur: isHighQuality ? [50, 25] as [number, number] : [400, 200] as [number, number],
     resolution: isHighQuality ? 2048 : 1024,
     mixBlur: isHighQuality ? 0.1 : 0.3,
-    mixStrength: isHighQuality ? 1 : 1.7,
-    depthScale: isHighQuality ? 1.0 : 0.6,
-    minDepthThreshold: 0.4,
-    maxDepthThreshold: isHighQuality ? 1.5 : 0.8,
+    mixStrength: isHighQuality ? 1 : 1,
+    depthScale: isHighQuality ? 1.0 : 0.5,
+    minDepthThreshold: 1,
     metalness: 0.5,
     roughness: isHighQuality ? 0.05 : 0.07,
     // Влияет на засвет отражения

@@ -471,12 +471,17 @@ const TextureControls: React.FC<TextureControlsProps> = ({ elevator }) => {
   const textureOptions = [
     { value: "", label: "Без текстуры" },
     { value: "/textures/example/wood_0066_1k_HoQeAg", label: "Дерево (PBR)" },
-    { value: "/textures/example/metal_0049_1k_1dmpSz", label: "Металл 1 (PBR)" },
-    { value: "/textures/example/metal_0071_1k_HD5XFx", label: "Металл 2 (PBR)" },
-    { value: "/textures/example/metal_0081_1k_qh6kbG", label: "Металл 3 (PBR)" },
-    { value: "/textures/example/metal_0082_1k_je0RXH", label: "Металл 4 (PBR)" },
-    { value: "/textures/example/metal_0083_1k_r9ZJJl", label: "Металл 5 (PBR)" },
-    { value: "/textures/example/metal_0084_1k_uJitA0", label: "Металл 6 (PBR)" }
+    { value: "/textures/example/metal_0016_1k_bN2ZC3", label: "Металл 1 (PBR)" },
+    { value: "/textures/example/metal_0019_1k_NrVP9t", label: "Металл 2 (PBR)" },
+    { value: "/textures/example/metal_0044_1k_QzepB1", label: "Металл 4 (PBR)" },
+    { value: "/textures/example/metal_0049_1k_1dmpSz", label: "Металл 5 (PBR)" },
+    { value: "/textures/example/metal_0050_1k_bvFzT8", label: "Металл 6 (PBR)" },
+    { value: "/textures/example/metal_0058_1k_ZmmcU2", label: "Металл 7 (PBR)" },
+    { value: "/textures/example/metal_0071_1k_HD5XFx", label: "Металл 8 (PBR)" },
+    { value: "/textures/example/metal_0081_1k_qh6kbG", label: "Металл 9 (PBR)" },
+    { value: "/textures/example/metal_0082_1k_je0RXH", label: "Металл 10 (PBR)" },
+    { value: "/textures/example/metal_0083_1k_r9ZJJl", label: "Металл 11 (PBR)" },
+    { value: "/textures/example/metal_0084_1k_uJitA0", label: "Металл 12 (PBR)" }
   ];
   
   return (
