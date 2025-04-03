@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHoverStore } from './ObjectHoverHandler';
+import { useHoverStore } from './HoverStore';
 import '../../styles/ObjectInfoPanel.css';
 
 /**

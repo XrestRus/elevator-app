@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Object3D, Group } from 'three';
 import { HoverableObject } from '../../hooks/useObjectHover';
-import { useHoverStore } from './ObjectHoverHandler';
+import { useHoverStore } from './HoverStore';
 import '../../styles/Hoverable.css';
 
 /**

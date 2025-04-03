@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useHoverStore } from './ObjectHoverHandler';
+import { useHoverStore } from './HoverStore';
 import '../../styles/Tooltip.css';
 
 /**

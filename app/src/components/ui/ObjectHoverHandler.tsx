@@ -1,28 +1,7 @@
 import React from "react";
-import { useObjectHover, HoverableObject } from "../../hooks/useObjectHover";
-import { create } from "zustand";
+import { useObjectHover } from "../../hooks/useObjectHover";
+import { useHoverStore } from "./HoverStore";
 import { useFrame, useThree } from "@react-three/fiber";
-
-/**
- * Хранилище для централизованного управления данными взаимодействия с объектами сцены
- */
-interface HoverStore {
-  hoveredObject: HoverableObject | null;
-  mousePosition: { x: number; y: number } | null;
-  selectedObject: HoverableObject | null;
-  setHoveredObject: (object: HoverableObject | null) => void;
-  setMousePosition: (position: { x: number; y: number } | null) => void;
-  setSelectedObject: (object: HoverableObject | null) => void;
-}
-
-export const useHoverStore = create<HoverStore>((set) => ({
-  hoveredObject: null,
-  mousePosition: null,
-  selectedObject: null,
-  setHoveredObject: (object) => set({ hoveredObject: object }),
-  setMousePosition: (position) => set({ mousePosition: position }),
-  setSelectedObject: (object) => set({ selectedObject: object }),
-}));
 
 /**
  * Компонент для обработки наведения мыши на объекты в сцене и их выбора кликом
