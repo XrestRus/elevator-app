@@ -5,12 +5,35 @@ import * as THREE from 'three';
  */
 export class PerformanceOptimizer {
   
+  // Кэшированное значение проверки производительности
+  private static _isHighPerformance: boolean | null = null;
+  
   /**
    * Проверяет, имеет ли устройство высокую производительность
    * @returns {boolean} true если устройство мощное
    */
   static isHighPerformanceDevice(): boolean {
-    return window.navigator.hardwareConcurrency > 4;
+    // Используем кэшированное значение, если оно уже определено
+    if (this._isHighPerformance !== null) {
+      return this._isHighPerformance;
+    }
+    
+    // Базовая проверка на количество логических ядер процессора
+    const hasMultipleCores = window.navigator.hardwareConcurrency > 4;
+    
+    // Проверка на мобильное устройство
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Проверка на поддержку WebGPU (будущий стандарт для высокопроизводительной графики)
+    const hasWebGPUSupport = 'gpu' in navigator;
+    
+    // Определяем общую оценку производительности
+    this._isHighPerformance = hasMultipleCores && (!isMobile || hasWebGPUSupport);
+    
+    console.log(`Оценка производительности: ${this._isHighPerformance ? 'Высокая' : 'Стандартная'}`);
+    console.log(`Ядра ЦП: ${window.navigator.hardwareConcurrency}, Мобильное: ${isMobile}, WebGPU: ${hasWebGPUSupport}`);
+    
+    return this._isHighPerformance;
   }
   
   /**
@@ -27,6 +50,17 @@ export class PerformanceOptimizer {
       texture.magFilter = THREE.LinearFilter;
       texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
       texture.anisotropy = 1; // Минимальная анизотропная фильтрация
+      
+      // Уменьшаем размер текстуры для слабых устройств
+      if (texture.image && texture.image instanceof HTMLImageElement) {
+        const maxSize = 512; // Максимальный размер текстуры на слабых устройствах
+        if (texture.image.width > maxSize || texture.image.height > maxSize) {
+          console.log(`Уменьшение размера текстуры с ${texture.image.width}x${texture.image.height} до макс. ${maxSize}`);
+          texture.image.width = Math.min(texture.image.width, maxSize);
+          texture.image.height = Math.min(texture.image.height, maxSize);
+          texture.needsUpdate = true;
+        }
+      }
     } else {
       // Для мощных устройств используем более качественные настройки
       texture.minFilter = THREE.LinearMipmapLinearFilter;
@@ -46,85 +80,6 @@ export class PerformanceOptimizer {
   }
   
   /**
-   * Объединяет геометрии в одну для снижения количества вызовов отрисовки
-   * @param {THREE.BufferGeometry[]} geometries - массив геометрий для объединения
-   * @param {boolean} preserveGroups - сохранять ли группы материалов
-   * @returns {THREE.BufferGeometry} объединенная геометрия
-   */
-  static mergeGeometries(
-    geometries: THREE.BufferGeometry[], 
-    preserveGroups = true
-  ): THREE.BufferGeometry {
-    const mergedGeometry = new THREE.BufferGeometry();
-    
-    // Определяем, какие атрибуты есть во всех геометриях
-    const attributes: Record<string, boolean> = {};
-    geometries.forEach(geometry => {
-      Object.keys(geometry.attributes).forEach(name => {
-        attributes[name] = true;
-      });
-    });
-    
-    // Считаем общее количество вершин
-    let vertexCount = 0;
-    geometries.forEach(geometry => {
-      vertexCount += geometry.attributes.position?.count || 0;
-    });
-    
-    // Создаем буферы для каждого атрибута
-    const attributeBuffers: Record<string, Float32Array> = {};
-    Object.keys(attributes).forEach(name => {
-      const itemSize = geometries[0].attributes[name]?.itemSize || 3;
-      attributeBuffers[name] = new Float32Array(vertexCount * itemSize);
-    });
-    
-    // Заполняем буферы
-    let offset = 0;
-    geometries.forEach(geometry => {
-      Object.keys(attributes).forEach(name => {
-        const attribute = geometry.attributes[name];
-        if (attribute) {
-          const itemSize = attribute.itemSize;
-          const array = attribute.array;
-          attributeBuffers[name].set(array, offset * itemSize);
-        }
-      });
-      offset += geometry.attributes.position?.count || 0;
-    });
-    
-    // Создаем атрибуты из буферов
-    Object.keys(attributeBuffers).forEach(name => {
-      const itemSize = geometries[0].attributes[name]?.itemSize || 3;
-      mergedGeometry.setAttribute(
-        name,
-        new THREE.BufferAttribute(attributeBuffers[name], itemSize)
-      );
-    });
-    
-    // Сохраняем группы материалов, если нужно
-    if (preserveGroups) {
-      let groupOffset = 0;
-      geometries.forEach(geometry => {
-        const count = geometry.attributes.position?.count || 0;
-        if (geometry.groups && geometry.groups.length > 0) {
-          geometry.groups.forEach(group => {
-            mergedGeometry.addGroup(
-              group.start + groupOffset,
-              group.count,
-              group.materialIndex
-            );
-          });
-        } else if (count > 0) {
-          mergedGeometry.addGroup(groupOffset, count, 0);
-        }
-        groupOffset += count;
-      });
-    }
-    
-    return mergedGeometry;
-  }
-  
-  /**
    * Оптимизирует материал в зависимости от производительности устройства
    * @param {THREE.Material} material - материал для оптимизации
    * @param {boolean} isHighPerf - флаг высокой производительности
@@ -134,10 +89,24 @@ export class PerformanceOptimizer {
     
     // Определяем тип материала для безопасных проверок свойств
     const stdMaterial = material as THREE.MeshStandardMaterial;
-    const basicMaterial = material as THREE.MeshBasicMaterial;
     
     // Общие оптимизации для всех материалов
     material.precision = isHighPerf ? 'highp' : 'mediump';
+    
+    // Оптимизация карт для всех типов материалов
+    const maps = [
+      'map', 'alphaMap', 'aoMap', 'bumpMap', 'displacementMap', 
+      'emissiveMap', 'envMap', 'lightMap', 'metalnessMap', 
+      'normalMap', 'roughnessMap', 'specularMap'
+    ];
+    
+    maps.forEach(mapName => {
+      // Используем явное приведение к any, так как нужно получить доступ к динамическим свойствам
+      const materialAny = material as any;
+      if (materialAny[mapName] && materialAny[mapName] instanceof THREE.Texture) {
+        this.optimizeTexture(materialAny[mapName], isHighPerf);
+      }
+    });
     
     // Специфичные оптимизации для стандартных материалов
     if (material instanceof THREE.MeshStandardMaterial) {
@@ -155,50 +124,127 @@ export class PerformanceOptimizer {
           stdMaterial.metalness = 0.2; // Усредненное значение
           stdMaterial.metalnessMap = null;
         }
-      }
-    }
-    
-    // Оптимизируем текстуры материала для всех типов, поддерживающих map
-    if (material instanceof THREE.MeshBasicMaterial || 
-        material instanceof THREE.MeshStandardMaterial || 
-        material instanceof THREE.MeshPhongMaterial || 
-        material instanceof THREE.MeshLambertMaterial) {
-      
-      if (basicMaterial.map) {
-        PerformanceOptimizer.optimizeTexture(basicMaterial.map, isHighPerf);
-      }
-    }
-    
-    // Специфические текстуры для PBR-материалов
-    if (material instanceof THREE.MeshStandardMaterial) {
-      if (stdMaterial.normalMap) {
-        PerformanceOptimizer.optimizeTexture(stdMaterial.normalMap, isHighPerf);
-      }
-    }
-    
-    // Добавляем оптимизированный dispose для освобождения памяти
-    const originalDispose = material.dispose;
-    material.dispose = function() {
-      // Освобождаем все текстуры материала для типов с поддержкой текстур
-      if (material instanceof THREE.MeshBasicMaterial || 
-          material instanceof THREE.MeshStandardMaterial || 
-          material instanceof THREE.MeshPhongMaterial || 
-          material instanceof THREE.MeshLambertMaterial) {
         
-        if (basicMaterial.map) basicMaterial.map.dispose();
+        // Отключаем расчет нормалей в вершинах
+        stdMaterial.flatShading = true;
+      }
+    }
+    
+    // Отключаем расчет нормалей на низкопроизводительных устройствах для всех материалов
+    if (!isHighPerf && 'normalScale' in material) {
+      const materialWithNormalScale = material as THREE.MeshStandardMaterial;
+      if (materialWithNormalScale.normalScale) {
+        materialWithNormalScale.normalScale.set(0.5, 0.5);
+      }
+    }
+    
+    // Помечаем материал как требующий обновления
+    material.needsUpdate = true;
+  }
+  
+  /**
+   * Объединяет несколько геометрий в одну для оптимизации рендеринга
+   * @param {THREE.BufferGeometry[]} geometries - массив геометрий для объединения
+   * @returns {THREE.BufferGeometry} объединенная геометрия
+   */
+  static mergeGeometries(geometries: THREE.BufferGeometry[]): THREE.BufferGeometry | null {
+    if (!geometries.length) return null;
+    
+    // Простая реализация слияния без использования внешних зависимостей
+    // Для продакшн рекомендуется использовать THREE.BufferGeometryUtils.mergeBufferGeometries
+    try {
+      const positionArrays: Float32Array[] = [];
+      const normalArrays: Float32Array[] = [];
+      const uvArrays: Float32Array[] = [];
+      
+      let positionCount = 0;
+      let hasNormals = true;
+      let hasUVs = true;
+      
+      geometries.forEach(geometry => {
+        const positionAttribute = geometry.attributes.position;
+        if (!positionAttribute) return;
+        
+        positionArrays.push(positionAttribute.array as Float32Array);
+        positionCount += positionAttribute.array.length;
+        
+        if (geometry.attributes.normal) {
+          normalArrays.push(geometry.attributes.normal.array as Float32Array);
+        } else {
+          hasNormals = false;
+        }
+        
+        if (geometry.attributes.uv) {
+          uvArrays.push(geometry.attributes.uv.array as Float32Array);
+        } else {
+          hasUVs = false;
+        }
+      });
+      
+      const mergedPositions = new Float32Array(positionCount);
+      let offset = 0;
+      
+      positionArrays.forEach(array => {
+        mergedPositions.set(array, offset);
+        offset += array.length;
+      });
+      
+      const mergedGeometry = new THREE.BufferGeometry();
+      mergedGeometry.setAttribute('position', new THREE.BufferAttribute(mergedPositions, 3));
+      
+      if (hasNormals) {
+        const mergedNormals = new Float32Array(positionCount);
+        offset = 0;
+        normalArrays.forEach(array => {
+          mergedNormals.set(array, offset);
+          offset += array.length;
+        });
+        mergedGeometry.setAttribute('normal', new THREE.BufferAttribute(mergedNormals, 3));
       }
       
-      // Дополнительные текстуры для PBR-материалов
-      if (material instanceof THREE.MeshStandardMaterial) {
-        if (stdMaterial.normalMap) stdMaterial.normalMap.dispose();
-        if (stdMaterial.roughnessMap) stdMaterial.roughnessMap.dispose();
-        if (stdMaterial.metalnessMap) stdMaterial.metalnessMap.dispose();
-        if (stdMaterial.aoMap) stdMaterial.aoMap.dispose();
+      if (hasUVs) {
+        const mergedUVs = new Float32Array(positionCount / 3 * 2);
+        offset = 0;
+        uvArrays.forEach(array => {
+          mergedUVs.set(array, offset);
+          offset += array.length;
+        });
+        mergedGeometry.setAttribute('uv', new THREE.BufferAttribute(mergedUVs, 2));
       }
       
-      // Вызываем стандартный dispose
-      originalDispose.call(this);
-    };
+      return mergedGeometry;
+    } catch (error) {
+      console.error('Ошибка при объединении геометрий:', error);
+      return geometries[0].clone();
+    }
+  }
+  
+  /**
+   * Создает инстансную версию меша для оптимизации
+   * @param {THREE.Mesh} originalMesh - оригинальный меш
+   * @param {number} count - количество экземпляров
+   * @param {Function} transformCallback - функция для трансформации каждого экземпляра
+   * @returns {THREE.InstancedMesh} инстансный меш
+   */
+  static createInstancedMesh(
+    originalMesh: THREE.Mesh, 
+    count: number, 
+    transformCallback: (index: number, matrix: THREE.Matrix4) => void
+  ): THREE.InstancedMesh {
+    const instancedMesh = new THREE.InstancedMesh(
+      originalMesh.geometry,
+      originalMesh.material,
+      count
+    );
+    
+    const matrix = new THREE.Matrix4();
+    for (let i = 0; i < count; i++) {
+      transformCallback(i, matrix);
+      instancedMesh.setMatrixAt(i, matrix);
+    }
+    
+    instancedMesh.instanceMatrix.needsUpdate = true;
+    return instancedMesh;
   }
   
   /**
@@ -265,6 +311,65 @@ export class PerformanceOptimizer {
         }
       }
     });
+    
+    // Оптимизируем LOD (Level of Detail) объекты, если они есть
+    scene.traverse((object) => {
+      if (object instanceof THREE.LOD) {
+        // Добавляем автоматическое управление LOD на основе производительности
+        const levels = object.levels;
+        if (levels.length > 1 && !isHighPerf) {
+          // На слабых устройствах используем только самый низкоуровневый LOD
+          // и удаляем остальные, используя прямое управление массивом levels
+          // Note: THREE.LOD не имеет стандартного метода removeLevelAt
+          while (levels.length > 1) {
+            levels.shift(); // Удаляем уровни высокой детализации с начала массива
+          }
+          
+          // Проверяем наличие object.levels и совпадает ли он с нашей локальной переменной
+          // для обеспечения корректной работы
+          if (object.levels !== levels) {
+            object.levels = levels;
+          }
+        }
+      }
+    });
+  }
+  
+  /**
+   * Управляет производительностью на основе мониторинга FPS
+   * @param {number} fps - текущий FPS
+   * @param {THREE.WebGLRenderer} renderer - рендерер для оптимизации
+   * @param {THREE.Scene} scene - сцена для оптимизации
+   */
+  static manageFPS(fps: number, renderer: THREE.WebGLRenderer, scene: THREE.Scene): void {
+    // Пороговые значения для регулировки производительности
+    const LOW_FPS = 30;
+    const TARGET_FPS = 50;
+    
+    const isHighPerformance = this.isHighPerformanceDevice();
+    
+    if (fps < LOW_FPS) {
+      // Агрессивно оптимизируем при низком FPS
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 0.8));
+      renderer.shadowMap.enabled = false;
+      this.optimizeScene(scene, false);
+      
+      console.log(`Низкий FPS (${fps.toFixed(1)}): применяем агрессивную оптимизацию`);
+    } else if (fps < TARGET_FPS && fps >= LOW_FPS) {
+      // Умеренно оптимизируем при среднем FPS
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
+      renderer.shadowMap.enabled = isHighPerformance;
+      this.optimizeScene(scene, false);
+      
+      console.log(`Средний FPS (${fps.toFixed(1)}): применяем умеренную оптимизацию`);
+    } else if (fps >= TARGET_FPS && isHighPerformance) {
+      // Восстанавливаем качество при высоком FPS и мощном устройстве
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      renderer.shadowMap.enabled = true;
+      this.optimizeScene(scene, true);
+      
+      console.log(`Высокий FPS (${fps.toFixed(1)}): восстанавливаем качество`);
+    }
   }
 }
 

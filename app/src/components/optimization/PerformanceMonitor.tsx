@@ -10,7 +10,7 @@ const PerformanceMonitor: React.FC = () => {
   const { gl, scene } = useThree();
   const frameRates = useRef<number[]>([]);
   const lastTime = useRef<number>(performance.now());
-  const [lowPerformance, setLowPerformance] = useState(false);
+  const [optimizationApplied, setOptimizationApplied] = useState(false);
   
   // Мониторинг FPS и адаптивное управление качеством рендеринга
   useFrame(() => {
@@ -30,26 +30,16 @@ const PerformanceMonitor: React.FC = () => {
     // Рассчитываем средний FPS
     const avgFps = frameRates.current.reduce((sum, value) => sum + value, 0) / frameRates.current.length;
     
-    // Адаптивно настраиваем качество рендеринга
-    if (avgFps < 40 && !lowPerformance) {
-      setLowPerformance(true);
-      // Снижаем качество рендеринга
-      gl.setPixelRatio(Math.min(window.devicePixelRatio, 1)); // Ограничиваем pixelRatio
+    // Используем улучшенный метод оптимизации с настройками, зависящими от FPS
+    // Оптимизации будут применяться постепенно, в зависимости от производительности
+    if (frameRates.current.length >= 10) { // Ждем накопления статистики
+      // Используем новую функцию управления производительностью
+      PerformanceOptimizer.manageFPS(avgFps, gl, scene);
       
-      // Оптимизируем сцену для повышения производительности
-      PerformanceOptimizer.optimizeScene(scene, false);
-      
-      console.log('Производительность снижена: оптимизация включена');
-    } else if (avgFps > 50 && lowPerformance) {
-      setLowPerformance(false);
-      // Повышаем качество рендеринга, но только если устройство мощное
-      if (PerformanceOptimizer.isHighPerformanceDevice()) {
-        gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Восстанавливаем pixelRatio
-        
-        // Оптимизируем сцену с высоким качеством
-        PerformanceOptimizer.optimizeScene(scene, true);
-        
-        console.log('Производительность восстановлена: высокое качество');
+      // Отмечаем, что оптимизация применена (для отладки)
+      if (!optimizationApplied) {
+        console.log(`Начальный мониторинг FPS: ${avgFps.toFixed(1)}`);
+        setOptimizationApplied(true);
       }
     }
   });

@@ -139,11 +139,15 @@ const DebugStats: React.FC<{
       
       {showGizmo && (
         <GizmoHelper
-          alignment="bottom-right"
-          margin={[80, 80]}
-          renderPriority={-2} // Низкий приоритет рендеринга
+          alignment="bottom-right" 
+          margin={[50, 50]} // Уменьшаем отступы от края для лучшей видимости
+          renderPriority={1} // Увеличиваем приоритет рендеринга
+          scale={1.75} // Увеличиваем размер для лучшей видимости
         >
-          <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor="black" />
+          <GizmoViewport 
+            axisColors={['#ff3333', '#33ff33', '#3333ff']} // Более яркие цвета осей
+            labelColor="white" // Белый цвет для лучшей видимости
+          />
         </GizmoHelper>
       )}
     </>

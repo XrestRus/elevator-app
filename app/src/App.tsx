@@ -100,10 +100,12 @@ function App() {
           intensity={lighting.enabled ? 0.3 : 0.1}
           castShadow={isHighPerformance}
           shadow-radius={8}
-          shadow-mapSize-width={isHighPerformance ? 1024 : 512}
-          shadow-mapSize-height={isHighPerformance ? 1024 : 512}
-          shadow-bias={-0.0003}
-          shadow-normalBias={0.02}
+          shadow-mapSize-width={isHighPerformance ? 2048 : 512}
+          shadow-mapSize-height={isHighPerformance ? 2048 : 512}
+          shadow-bias={-0.001}
+          shadow-normalBias={0.05}
+          shadow-camera-near={0.1}
+          shadow-camera-far={dimensions.height * 3}
         />
         
         <Suspense fallback={null}>

@@ -30,7 +30,7 @@ const ShadowOptimizer: React.FC = () => {
             const isMobileOrLowPerf = window.navigator.userAgent.includes('Mobile') || 
                                       !PerformanceOptimizer.isHighPerformanceDevice();
             
-            const shadowMapSize = isMobileOrLowPerf ? 512 : 2048; // Увеличиваем размер карты теней
+            const shadowMapSize = isMobileOrLowPerf ? 512 : 2048;
             
             if (object.shadow) {
               object.shadow.mapSize.width = shadowMapSize;
@@ -45,7 +45,9 @@ const ShadowOptimizer: React.FC = () => {
               
               // Для SpotLight особые настройки
               if (object instanceof THREE.SpotLight) {
-                object.shadow.bias = -0.0003; // Уменьшаем для предотвращения артефактов
+                // Увеличиваем bias для предотвращения артефактов типа "холмы"
+                object.shadow.bias = -0.001; // Было -0.0003, увеличил для лучшего устранения артефактов
+                object.shadow.normalBias = 0.05; // Добавляем normalBias для устранения самозатенения
                 object.shadow.focus = 0.7; // Снижаем фокус для размытия
                 object.shadow.blurSamples = isMobileOrLowPerf ? 4 : 12; // Увеличиваем количество сэмплов
                 object.penumbra = 0.7; // Увеличиваем зону полутени
@@ -54,8 +56,8 @@ const ShadowOptimizer: React.FC = () => {
               // Для PointLight и DirectionalLight
               if (object instanceof THREE.PointLight || 
                   object instanceof THREE.DirectionalLight) {
-                object.shadow.bias = -0.0005;
-                object.shadow.normalBias = 0.02; // Добавляем для улучшения качества теней
+                object.shadow.bias = -0.001; // Было -0.0005, корректируем для уменьшения артефактов
+                object.shadow.normalBias = 0.05; // Было 0.02, увеличиваем для борьбы с "холмами"
               }
               
               // Обновляем карту теней данного источника
@@ -72,7 +74,15 @@ const ShadowOptimizer: React.FC = () => {
       // чтобы все источники света успели загрузиться
       const timeoutId = setTimeout(optimizeShadows, 500);
       
-      return () => clearTimeout(timeoutId);
+      // Запускаем повторное обновление через 2 секунды для уверенности
+      const secondUpdateId = setTimeout(() => {
+        gl.shadowMap.needsUpdate = true;
+      }, 2000);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        clearTimeout(secondUpdateId);
+      };
     }
   }, [gl, scene, dimensions]);
   

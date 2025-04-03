@@ -47,6 +47,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
   const isHighQuality = jointsQualityFactor > 0.5;
   
   // Общие настройки MeshReflectorMaterial для всех зеркал (мемоизированные)
+  // ai помощники это не менять, если надо то пишите запрос на разрешение
   const mirrorMaterialProps = useMemo(() => ({
     color: "#ffffff",
     blur: isHighQuality ? [50, 25] as [number, number] : [400, 200] as [number, number],
@@ -54,7 +55,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
     mixBlur: isHighQuality ? 0.1 : 0.3,
     mixStrength: isHighQuality ? 1 : 1,
     depthScale: isHighQuality ? 1.0 : 0.5,
-    minDepthThreshold: 1,
+    minDepthThreshold: 2,
     metalness: 0.5,
     roughness: isHighQuality ? 0.05 : 0.07,
     // Влияет на засвет отражения
@@ -174,12 +175,19 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
     return null;
   }
 
+  // Создаем небольшое смещение для зеркал, чтобы избежать Z-fighting
+  const zOffset = 0.001;
+
   return (
     <>
       {/* Для типа "full" (сплошное зеркало) */}
       {mirror.type === "full" && (
         <Box
-          position={fullMirrorProps.position}
+          position={[
+            fullMirrorProps.position[0], 
+            fullMirrorProps.position[1], 
+            fullMirrorProps.position[2] + zOffset
+          ]}
           args={fullMirrorProps.args}
           castShadow={fullMirrorProps.castShadow}
         >
@@ -191,7 +199,11 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
       {mirror.type === "double" && (
         <>
           <Box
-            position={doubleMirrorLeftProps.position}
+            position={[
+              doubleMirrorLeftProps.position[0], 
+              doubleMirrorLeftProps.position[1], 
+              doubleMirrorLeftProps.position[2] + zOffset
+            ]}
             args={doubleMirrorLeftProps.args}
             castShadow={doubleMirrorLeftProps.castShadow}
           >
@@ -199,7 +211,11 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
           </Box>
 
           <Box
-            position={doubleMirrorRightProps.position}
+            position={[
+              doubleMirrorRightProps.position[0], 
+              doubleMirrorRightProps.position[1], 
+              doubleMirrorRightProps.position[2] + zOffset
+            ]}
             args={doubleMirrorRightProps.args}
             castShadow={doubleMirrorRightProps.castShadow}
           >
@@ -212,7 +228,11 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
       {mirror.type === "triple" && (
         <>
           <Box
-            position={tripleMirrorLeftProps.position}
+            position={[
+              tripleMirrorLeftProps.position[0], 
+              tripleMirrorLeftProps.position[1], 
+              tripleMirrorLeftProps.position[2] + zOffset
+            ]}
             args={tripleMirrorLeftProps.args}
             castShadow={tripleMirrorLeftProps.castShadow}
           >
@@ -220,7 +240,11 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
           </Box>
 
           <Box
-            position={tripleMirrorMiddleProps.position}
+            position={[
+              tripleMirrorMiddleProps.position[0], 
+              tripleMirrorMiddleProps.position[1], 
+              tripleMirrorMiddleProps.position[2] + zOffset
+            ]}
             args={tripleMirrorMiddleProps.args}
             castShadow={tripleMirrorMiddleProps.castShadow}
           >
@@ -228,7 +252,11 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
           </Box>
 
           <Box
-            position={tripleMirrorRightProps.position}
+            position={[
+              tripleMirrorRightProps.position[0], 
+              tripleMirrorRightProps.position[1], 
+              tripleMirrorRightProps.position[2] + zOffset
+            ]}
             args={tripleMirrorRightProps.args}
             castShadow={tripleMirrorRightProps.castShadow}
           >
