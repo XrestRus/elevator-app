@@ -49,16 +49,17 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
   // Общие настройки MeshReflectorMaterial для всех зеркал (мемоизированные)
   const mirrorMaterialProps = useMemo(() => ({
     color: "#ffffff",
-    blur: isHighQuality ? [300, 100]: [400, 200],
+    blur: isHighQuality ? [50, 25] as [number, number] : [400, 200] as [number, number],
     resolution: isHighQuality ? 2048 : 1024,
-    mixBlur: isHighQuality ? 0.2 : 0.3,
-    mixStrength: isHighQuality ? 2.8 : 1.7,
+    mixBlur: isHighQuality ? 0.1 : 0.3,
+    mixStrength: isHighQuality ? 1 : 1.7,
     depthScale: isHighQuality ? 1.0 : 0.6,
     minDepthThreshold: 0.4,
     maxDepthThreshold: isHighQuality ? 1.5 : 0.8,
     metalness: 0.5,
     roughness: isHighQuality ? 0.05 : 0.07,
-    mirror: isHighQuality ? 0.9 : 0.7,
+    // Влияет на засвет отражения
+    mirror: isHighQuality ? 1 : 0.7,
     distortion: 0,
     reflectorOffset: 0,
     emissiveIntensity: lightsOn ? 0.2 : 0.0
