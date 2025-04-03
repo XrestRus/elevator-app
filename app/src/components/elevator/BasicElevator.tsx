@@ -34,7 +34,7 @@ const BasicElevator: React.FC = () => {
   // Оставляем только небольшие боковые части для рамки
   const doorHeight = dimensions.height - 0.3; // Высота дверного проема
 
-  // Базовые материалы (без текстур)
+  // Статичные материалы с мемоизацией для стен, пола, потолка и дверей
   const basicWallMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -62,11 +62,7 @@ const BasicElevator: React.FC = () => {
         metalness: materials.metalness.ceiling,
         roughness: materials.roughness.ceiling,
       }),
-    [
-      materials.ceiling,
-      materials.metalness.ceiling,
-      materials.roughness.ceiling,
-    ]
+    [materials.ceiling, materials.metalness.ceiling, materials.roughness.ceiling]
   );
 
   const doorMaterial = useMemo(
@@ -211,32 +207,62 @@ const BasicElevator: React.FC = () => {
 
   // Создаем PBR материалы только если есть реальные текстуры (не заглушки)
   const wallPBRMaterial = useMemo(
-    () => createPBRMaterial(wallTextures, wallPBRPaths.textureType, materials.walls),
-    [wallTextures, wallPBRPaths, materials.walls]
+    () => createPBRMaterial(
+      wallTextures, 
+      wallPBRPaths.textureType, 
+      materials.walls, 
+      materials.roughness.walls, 
+      materials.metalness.walls
+    ),
+    [wallTextures, wallPBRPaths, materials.walls, materials.roughness.walls, materials.metalness.walls]
   );
 
   // Создаем PBR материал для пола с мемоизацией
   const floorPBRMaterial = useMemo(
-    () => createPBRMaterial(floorTextures, floorPBRPaths.textureType, materials.floor),
-    [floorTextures, floorPBRPaths, materials.floor]
+    () => createPBRMaterial(
+      floorTextures, 
+      floorPBRPaths.textureType, 
+      materials.floor, 
+      materials.roughness.floor, 
+      materials.metalness.floor
+    ),
+    [floorTextures, floorPBRPaths, materials.floor, materials.roughness.floor, materials.metalness.floor]
   );
 
   // Создаем PBR материал для потолка с мемоизацией
   const ceilingPBRMaterial = useMemo(
-    () => createPBRMaterial(ceilingTextures, ceilingPBRPaths.textureType, materials.ceiling),
-    [ceilingTextures, ceilingPBRPaths, materials.ceiling]
+    () => createPBRMaterial(
+      ceilingTextures, 
+      ceilingPBRPaths.textureType, 
+      materials.ceiling, 
+      materials.roughness.ceiling, 
+      materials.metalness.ceiling
+    ),
+    [ceilingTextures, ceilingPBRPaths, materials.ceiling, materials.roughness.ceiling, materials.metalness.ceiling]
   );
 
   // Создаем PBR материал для дверей с мемоизацией
   const doorsPBRMaterial = useMemo(
-    () => createPBRMaterial(doorsTextures, doorsPBRPaths.textureType, materials.doors),
-    [doorsTextures, doorsPBRPaths, materials.doors]
+    () => createPBRMaterial(
+      doorsTextures, 
+      doorsPBRPaths.textureType, 
+      materials.doors, 
+      materials.roughness.doors, 
+      materials.metalness.doors
+    ),
+    [doorsTextures, doorsPBRPaths, materials.doors, materials.roughness.doors, materials.metalness.doors]
   );
 
   // Создаем PBR материал для передней стены с мемоизацией
   const frontWallPBRMaterial = useMemo(
-    () => createPBRMaterial(frontWallTextures, frontWallPBRPaths.textureType, materials.walls),
-    [frontWallTextures, frontWallPBRPaths, materials.walls]
+    () => createPBRMaterial(
+      frontWallTextures, 
+      frontWallPBRPaths.textureType, 
+      materials.walls, 
+      materials.roughness.walls, 
+      materials.metalness.walls
+    ),
+    [frontWallTextures, frontWallPBRPaths, materials.walls, materials.roughness.walls, materials.metalness.walls]
   );
 
   // Создаем материал для стены с дверью без текстуры (мемоизация)
@@ -244,10 +270,10 @@ const BasicElevator: React.FC = () => {
     () =>
       new THREE.MeshStandardMaterial({
         color: materials.walls,
-        metalness: 0.2,
-        roughness: 0.3,
+        metalness: materials.metalness.walls,
+        roughness: materials.roughness.walls,
       }),
-    [materials.walls]
+    [materials.walls, materials.metalness.walls, materials.roughness.walls]
   );
 
   // Определяем, какой материал использовать: PBR или обычный

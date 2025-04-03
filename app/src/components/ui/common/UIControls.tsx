@@ -40,7 +40,10 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
         max={max.toFixed(2).toString()}
         step={step.toString()}
         value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
+        onChange={(e) => {
+          const newValue = parseFloat(e.target.value);
+          onChange(newValue);
+        }}
         style={{ width: "100%" }}
         disabled={disabled}
       />

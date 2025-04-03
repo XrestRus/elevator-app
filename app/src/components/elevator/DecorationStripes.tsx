@@ -17,13 +17,25 @@ interface DecorationStripesProps {
     width?: number;
     count?: number;
     orientation?: string;
-    position?: string;
     spacing?: number;
     offset?: number;
     qualityFactor?: number; // Фактор качества для оптимизации
   };
   decorationStripesMaterial: THREE.Material | null;
   hasMirror: boolean;
+}
+
+/**
+ * Тип для описания стены лифта
+ */
+interface WallConfig {
+  name: string;                // Название стены для формирования ключей
+  position: [number, number, number]; // Базовая позиция для полосы [x, y, z]
+  args: [number, number, number];     // Размеры полосы при горизонтальной ориентации
+  argsVertical: [number, number, number]; // Размеры при вертикальной ориентации
+  positions: number[];         // Массив позиций полос для данной стены
+  skip?: boolean;              // Флаг для пропуска рендеринга
+  axis: 'x' | 'y' | 'z';       // Ось, вдоль которой размещаются полосы
 }
 
 /**
@@ -55,101 +67,134 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({
   // При очень низком качестве показываем только основные полосы и убираем с боковых стен
   const shouldRenderSideWalls = qualityFactor >= 0.3;
 
-  // Мемоизируем позиции полос
-  const positions = useMemo(() => {
-    const pos: number[] = [];
-
-    switch (decorationStripes.position) {
-      case "top": {
-        // Верхние полосы
-        if (isHorizontal) {
-          // Для горизонтальных полос - позиции по высоте
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(dimensions.height / 3 + i * (stripeWidth + spacingMeters));
-          }
-        } else {
-          // Для вертикальных полос - позиции от верхней точки
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(i * (stripeWidth + spacingMeters) - (stripeCount - 1) * (stripeWidth + spacingMeters) / 2);
-          }
-        }
-        break;
-      }
-      case "bottom": {
-        // Нижние полосы
-        if (isHorizontal) {
-          // Для горизонтальных полос - позиции по высоте
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(-dimensions.height / 3 - i * (stripeWidth + spacingMeters));
-          }
-        } else {
-          // Для вертикальных полос - позиции от нижней точки
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(i * (stripeWidth + spacingMeters) - (stripeCount - 1) * (stripeWidth + spacingMeters) / 2);
-          }
-        }
-        break;
-      }
-      case "all": {
-        // Полосы во всю высоту/ширину, равномерно распределенные
-        if (isHorizontal) {
-          // Для горизонтальных полос - позиции по высоте
-          const step = dimensions.height / (stripeCount + 1);
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(-dimensions.height / 2 + (i + 1) * step);
-          }
-        } else {
-          // Для вертикальных полос - равномерно распределяем по ширине/глубине
-          const step = (dimensions.width - 0.1) / (stripeCount + 1);
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(-dimensions.width / 2 + 0.05 + (i + 1) * step);
-          }
-        }
-        break;
-      }
-      default: { // 'middle'
-        // По умолчанию полосы в центре
-        if (isHorizontal) {
-          // Для горизонтальных полос - позиции по высоте
-          const middleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(- middleOffset + i * (stripeWidth + spacingMeters));
-          }
-        } else {
-          // Для вертикальных полос - позиции по ширине от центра
-          const middleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
-          for (let i = 0; i < stripeCount; i++) {
-            pos.push(- middleOffset + i * (stripeWidth + spacingMeters));
-          }
-        }
-        break;
-      }
-    }
-    return pos;
-  }, [decorationStripes.position, isHorizontal, stripeCount, stripeWidth, spacingMeters, dimensions]);
-
-  // Мемоизируем позиции полос для боковых стен
-  const sideWallPositions = useMemo(() => {
-    const sidePos: number[] = [];
-
-    if (!isHorizontal) {
-      if (decorationStripes.position === "all") {
-        // Распределяем полосы равномерно по глубине боковых стен
-        const step = dimensions.depth / (stripeCount + 1);
-        for (let i = 0; i < stripeCount; i++) {
-          sidePos.push(-dimensions.depth / 2 + (i + 1) * step);
-        }
+  /**
+   * Рассчитывает массив позиций полос на основе заданного положения
+   */
+  const calculatePositions = useMemo(() => {
+    // Функция для расчета позиций полос с центрированием
+    const calculatePositionsWithCentering = (): number[] => {
+      const pos: number[] = [];
+      
+      if (stripeCount === 1) {
+        // Если только одна полоса, размещаем ее по центру
+        pos.push(0);
       } else {
-        // Используем то же расстояние между полосами, что и для задней стены
-        const sideWallMiddleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
-        for (let i = 0; i < stripeCount; i++) {
-          sidePos.push(- sideWallMiddleOffset + i * (stripeWidth + spacingMeters));
+        // Для нескольких полос - центрируем блок
+        // Рассчитываем общую ширину блока полос
+        const totalWidth = stripeWidth * stripeCount + spacingMeters * (stripeCount - 1);
+        
+        // Проверяем, поместятся ли полосы в доступном пространстве
+        let availableSpace;
+        if (isHorizontal) {
+          availableSpace = dimensions.height - 0.1; // отступ от краев
+        } else {
+          availableSpace = dimensions.width - 0.1;
+        }
+        
+        if (totalWidth <= availableSpace) {
+          // Если полосы помещаются, центрируем группу
+          const startPos = -totalWidth / 2 + stripeWidth / 2;
+          for (let i = 0; i < stripeCount; i++) {
+            pos.push(startPos + i * (stripeWidth + spacingMeters));
+          }
+        } else {
+          // Если не помещаются - распределяем равномерно
+          const step = availableSpace / (stripeCount + 1);
+          const offset = isHorizontal ? dimensions.height : dimensions.width;
+          
+          for (let i = 0; i < stripeCount; i++) {
+            pos.push(-offset / 2 + 0.05 + (i + 1) * step);
+          }
         }
       }
+      
+      return pos;
+    };
+    
+    return calculatePositionsWithCentering;
+  }, [dimensions, isHorizontal, stripeCount, stripeWidth, spacingMeters]);
+
+  // Мемоизируем позиции полос для основных стен
+  const mainPositions = useMemo(() => {
+    return calculatePositions();
+  }, [calculatePositions]);
+
+  // Вычисление позиций для боковых стен
+  const sideWallPositions = useMemo(() => {
+    if (isHorizontal) {
+      // Для горизонтальных полос используем те же позиции
+      return mainPositions;
+    } else {
+      // Для вертикальных полос рассчитываем с учетом глубины
+      const pos: number[] = [];
+      
+      if (stripeCount === 1) {
+        // Одна полоса всегда по центру
+        pos.push(0);
+      } else {
+        // Рассчитываем, поместятся ли полосы с нужным расстоянием
+        const totalDepth = stripeWidth * stripeCount + spacingMeters * (stripeCount - 1);
+        const availableDepth = dimensions.depth - 0.1; // небольшой отступ от края
+        
+        if (totalDepth <= availableDepth) {
+          // Если полосы помещаются, то центрируем группу
+          const startPos = -totalDepth / 2 + stripeWidth / 2;
+          for (let i = 0; i < stripeCount; i++) {
+            pos.push(startPos + i * (stripeWidth + spacingMeters));
+          }
+        } else {
+          // Если полосы не помещаются, то распределяем равномерно
+          const step = dimensions.depth / (stripeCount + 1);
+          for (let i = 0; i < stripeCount; i++) {
+            pos.push(-dimensions.depth / 2 + 0.05 + (i + 1) * step);
+          }
+        }
+      }
+      
+      return pos;
     }
-    return sidePos;
-  }, [isHorizontal, stripeCount, stripeWidth, spacingMeters, dimensions, decorationStripes.position]);
-  
+  }, [dimensions.depth, isHorizontal, mainPositions, spacingMeters, stripeCount, stripeWidth]);
+
+  // Конфигурация всех стен лифта
+  const wallConfigs = useMemo((): WallConfig[] => {
+    const configs: WallConfig[] = [];
+    
+    // Задняя стена
+    configs.push({
+      name: "back-wall",
+      position: [offsetMeters, 0, -dimensions.depth / 2 + 0.025],
+      args: [dimensions.width - 0.06, stripeWidth, 0.005],
+      argsVertical: [stripeWidth, dimensions.height - 0.06, 0.005],
+      positions: mainPositions,
+      skip: hasMirror && skipMirrorWall,
+      axis: isHorizontal ? 'y' : 'x'
+    });
+    
+    // Левая стена (отображаем только при достаточном качестве)
+    if (shouldRenderSideWalls) {
+      configs.push({
+        name: "left-wall",
+        position: [-dimensions.width / 2 + 0.025, offsetMeters, 0],
+        args: [0.005, stripeWidth, dimensions.depth - 0.06],
+        argsVertical: [0.005, dimensions.height - 0.06, stripeWidth],
+        positions: isHorizontal ? mainPositions : sideWallPositions,
+        axis: isHorizontal ? 'y' : 'z'
+      });
+      
+      // Правая стена
+      configs.push({
+        name: "right-wall",
+        position: [dimensions.width / 2 - 0.025, offsetMeters, 0],
+        args: [0.005, stripeWidth, dimensions.depth - 0.06],
+        argsVertical: [0.005, dimensions.height - 0.06, stripeWidth],
+        positions: isHorizontal ? mainPositions : sideWallPositions,
+        axis: isHorizontal ? 'y' : 'z'
+      });
+    }
+    
+    return configs;
+  }, [dimensions, hasMirror, isHorizontal, mainPositions, offsetMeters, shouldRenderSideWalls, sideWallPositions, skipMirrorWall, stripeWidth]);
+
   // Мемоизируем все элементы для оптимизации
   const stripeElements = useMemo(() => {
     // Если материал не определен или полосы отключены, возвращаем пустой массив
@@ -159,118 +204,45 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({
     
     const elements: React.ReactElement[] = [];
     
-    // Задняя стена - показываем полосы только если нет зеркала или не выбран пропуск стены с зеркалом
-    if (!hasMirror || !skipMirrorWall) {
-      if (isHorizontal) {
-        // Горизонтальные полосы на задней стене
-        positions.forEach((pos, index) => {
-          elements.push(
-            <Box
-              key={`back-wall-stripe-${index}`}
-              position={[offsetMeters, pos, -dimensions.depth / 2 + 0.025]}
-              args={[dimensions.width - 0.06, stripeWidth, 0.005]}
-              castShadow={false}
-            >
-              <primitive object={decorationStripesMaterial} attach="material" />
-            </Box>
-          );
-        });
-      } else {
-        // Вертикальные полосы на задней стене
-        positions.forEach((pos, index) => {
-          elements.push(
-            <Box
-              key={`back-wall-stripe-${index}`}
-              position={[pos + offsetMeters, 0, -dimensions.depth / 2 + 0.025]}
-              args={[stripeWidth, dimensions.height - 0.06, 0.005]}
-              castShadow={false}
-            >
-              <primitive object={decorationStripesMaterial} attach="material" />
-            </Box>
-          );
-        });
-      }
-    }
-    
-    // Боковые стены - рендерим только при достаточном качестве
-    if (shouldRenderSideWalls) {
-      // Левая стена
-      if (isHorizontal) {
-        // Горизонтальные полосы на левой стене
-        positions.forEach((pos, index) => {
-          elements.push(
-            <Box
-              key={`left-wall-stripe-${index}`}
-              position={[-dimensions.width / 2 + 0.025, pos, offsetMeters]}
-              args={[0.005, stripeWidth, dimensions.depth - 0.06]}
-              castShadow={false}
-            >
-              <primitive object={decorationStripesMaterial} attach="material" />
-            </Box>
-          );
-        });
-      } else {
-        // Вертикальные полосы на левой стене
-        sideWallPositions.forEach((zPos, index) => {
-          elements.push(
-            <Box
-              key={`left-wall-stripe-${index}`}
-              position={[-dimensions.width / 2 + 0.025, offsetMeters, zPos + offsetMeters]}
-              args={[0.005, dimensions.height - 0.06, stripeWidth]}
-              castShadow={false}
-            >
-              <primitive object={decorationStripesMaterial} attach="material" />
-            </Box>
-          );
-        });
-      }
+    // Рендерим полосы для всех стен
+    wallConfigs.forEach(wall => {
+      if (wall.skip) return;
       
-      // Правая стена
-      if (isHorizontal) {
-        // Горизонтальные полосы на правой стене
-        positions.forEach((pos, index) => {
-          elements.push(
-            <Box
-              key={`right-wall-stripe-${index}`}
-              position={[dimensions.width / 2 - 0.025, pos, offsetMeters]}
-              args={[0.005, stripeWidth, dimensions.depth - 0.06]}
-              castShadow={false}
-            >
-              <primitive object={decorationStripesMaterial} attach="material" />
-            </Box>
-          );
-        });
-      } else {
-        // Вертикальные полосы на правой стене
-        sideWallPositions.forEach((zPos, index) => {
-          elements.push(
-            <Box
-              key={`right-wall-stripe-${index}`}
-              position={[dimensions.width / 2 - 0.025, offsetMeters, zPos + offsetMeters]}
-              args={[0.005, dimensions.height - 0.06, stripeWidth]}
-              castShadow={false}
-            >
-              <primitive object={decorationStripesMaterial} attach="material" />
-            </Box>
-          );
-        });
-      }
-    }
+      wall.positions.forEach((pos, index) => {
+        // Определяем позицию полосы в зависимости от оси
+        const position: [number, number, number] = [...wall.position];
+        
+        // Устанавливаем позицию по соответствующей оси
+        switch (wall.axis) {
+          case 'x':
+            position[0] = pos + (wall.axis === 'x' ? offsetMeters : 0);
+            break;
+          case 'y':
+            position[1] = pos;
+            break;
+          case 'z':
+            position[2] = pos + (wall.axis === 'z' ? offsetMeters : 0);
+            break;
+        }
+        
+        // Применяем соответствующие размеры в зависимости от ориентации
+        const args = isHorizontal ? wall.args : wall.argsVertical;
+        
+        elements.push(
+          <Box
+            key={`${wall.name}-stripe-${index}`}
+            position={position}
+            args={args}
+            castShadow={false}
+          >
+            <primitive object={decorationStripesMaterial} attach="material" />
+          </Box>
+        );
+      });
+    });
     
     return elements;
-  }, [
-    positions, 
-    sideWallPositions, 
-    hasMirror, 
-    skipMirrorWall, 
-    isHorizontal, 
-    dimensions, 
-    offsetMeters, 
-    stripeWidth, 
-    decorationStripesMaterial,
-    shouldRenderSideWalls,
-    decorationStripes.enabled
-  ]);
+  }, [decorationStripes.enabled, decorationStripesMaterial, isHorizontal, offsetMeters, wallConfigs]);
 
   // Если материал не определен или полосы отключены, возвращаем null
   if (!decorationStripes.enabled || !decorationStripesMaterial) {

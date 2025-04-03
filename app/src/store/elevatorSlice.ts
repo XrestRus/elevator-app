@@ -90,13 +90,12 @@ export interface VisibilityOptions {
  */
 export interface DecorationStripesOptions {
   enabled: boolean;
-  position: 'top' | 'middle' | 'bottom' | 'all';
   count: number;
   width: number;
   material: 'metal' | 'glossy' | 'wood';
   color: string;
   orientation: 'horizontal' | 'vertical';
-  spacing: number;
+  spacing: number; // Расстояние между полосами в сантиметрах
   skipMirrorWall: boolean;
   offset: number;
   showOnDoors: boolean;
@@ -113,6 +112,7 @@ export interface JointOptions {
   material: 'metal' | 'glossy' | 'wood';
   protrusion: number; // Выступ стыков в мм
   qualityFactor?: number; // Фактор качества для оптимизации (0.0-1.0), где 1.0 - высокое качество
+  selectedJoint?: string; // Название выбранного стыка для отображения информации
 }
 
 /**
@@ -206,13 +206,12 @@ const initialState: ElevatorState = {
   },
   decorationStripes: {
     enabled: true,
-    position: 'all',
     count: 4,
-    width: 0.1,
+    width: 0.2,
     material: 'metal',
     color: '#C0C0C0',
     orientation: 'vertical',
-    spacing: 3,
+    spacing: 30,
     skipMirrorWall: true,
     offset: 0,
     showOnDoors: true,
@@ -311,7 +310,6 @@ const elevatorSlice = createSlice({
       if (!state.decorationStripes) {
         state.decorationStripes = {
           enabled: false,
-          position: 'all',
           count: 4,
           width: 5,
           material: 'metal',
@@ -323,6 +321,22 @@ const elevatorSlice = createSlice({
           showOnDoors: false
         };
       }
+      
+      // Валидация spacing - убедимся, что это число и находится в допустимом диапазоне
+      if (action.payload.spacing !== undefined) {
+        const spacing = Number(action.payload.spacing);
+        if (!isNaN(spacing)) {
+          // Ограничиваем значение диапазоном от 1 до 30 см
+          action.payload.spacing = Math.max(1, Math.min(30, spacing));
+          console.log('Validated spacing value:', action.payload.spacing);
+        } else {
+          // Если не число, убираем из payload
+          console.error('Invalid spacing value:', action.payload.spacing);
+          delete action.payload.spacing;
+        }
+      }
+      
+      // Обновляем state
       state.decorationStripes = { ...state.decorationStripes, ...action.payload };
     },
     

@@ -91,14 +91,6 @@ interface DecorationStripesProps {
 const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
   const dispatch = useDispatch();
   
-  // Опции для выбора положения полос
-  const positionOptions = [
-    { value: 'top', label: 'Верхняя часть стен' },
-    { value: 'middle', label: 'Середина стен' },
-    { value: 'bottom', label: 'Нижняя часть стен' },
-    { value: 'all', label: 'Все стены' }
-  ];
-  
   // Опции для выбора ориентации полос
   const orientationOptions = [
     { value: 'horizontal', label: 'Горизонтальные' },
@@ -126,17 +118,6 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
       
       {(elevator.decorationStripes?.enabled ?? false) && (
         <>
-          <SelectInput
-            label="Расположение полос:"
-            value={elevator.decorationStripes?.position ?? 'middle'}
-            onChange={(value) => {
-              if (value === 'top' || value === 'middle' || value === 'bottom' || value === 'all') {
-                dispatch(setDecorationStripes({ position: value }));
-              }
-            }}
-            options={positionOptions}
-          />
-          
           <SelectInput
             label="Ориентация полос:"
             value={elevator.decorationStripes?.orientation ?? 'horizontal'}
@@ -177,9 +158,14 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             max={30}
             step={0.5}
             value={elevator.decorationStripes?.spacing ?? 3}
-            onChange={(value) => dispatch(setDecorationStripes({ 
-              spacing: value 
-            }))}
+            onChange={(value) => {
+              // Убедимся, что value - число и логируем для отладки
+              const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+              
+              dispatch(setDecorationStripes({ 
+                spacing: numericValue 
+              }));
+            }}
             centerLabel={(value) => `${value.toFixed(1)} см`}
             leftLabel="1 см"
             rightLabel="30 см"
@@ -239,32 +225,12 @@ const JointControls: React.FC<JointControlsProps> = ({ elevator }) => {
       
       {(elevator.joints?.enabled ?? false) && (
         <>
-          <RangeSlider
-            label="Ширина стыка (мм):"
-            min={1}
-            max={20}
-            step={0.5}
-            value={elevator.joints?.width ?? 4}
+          <ColorPicker
+            label="Цвет стыков:"
+            value={elevator.joints?.color ?? '#888888'}
             onChange={(value) => dispatch(setJoints({ 
-              width: value 
+              color: value 
             }))}
-            centerLabel={(value) => `${value.toFixed(1)} мм`}
-            leftLabel="1 мм"
-            rightLabel="20 мм"
-          />
-          
-          <RangeSlider
-            label="Выступ стыка (мм):"
-            min={0}
-            max={10}
-            step={0.5}
-            value={elevator.joints?.protrusion ?? 3}
-            onChange={(value) => dispatch(setJoints({ 
-              protrusion: value 
-            }))}
-            centerLabel={(value) => `${value.toFixed(1)} мм`}
-            leftLabel="0 мм"
-            rightLabel="10 мм"
           />
           
           <SelectInput
@@ -278,13 +244,51 @@ const JointControls: React.FC<JointControlsProps> = ({ elevator }) => {
             options={materialOptions}
           />
           
-          <ColorPicker
-            label="Цвет стыков:"
-            value={elevator.joints?.color ?? '#888888'}
+          <RangeSlider
+            label="Ширина стыка (мм):"
+            min={1}
+            max={20}
+            step={0.5}
+            value={elevator.joints?.width ?? 2.5}
             onChange={(value) => dispatch(setJoints({ 
-              color: value 
+              width: value 
             }))}
+            centerLabel={(value) => `${value.toFixed(1)} мм`}
+            leftLabel="1 мм"
+            rightLabel="20 мм"
           />
+          
+          {elevator.joints?.selectedJoint && (
+            <div style={{ 
+              margin: '10px 0',
+              padding: '8px 12px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '4px',
+              border: '1px solid #ddd' 
+            }}>
+              <h5 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
+                Выбранный стык:
+              </h5>
+              <div style={{ fontSize: '13px' }}>
+                {elevator.joints.selectedJoint}
+              </div>
+              
+              <button 
+                onClick={() => dispatch(setJoints({ selectedJoint: undefined }))}
+                style={{
+                  marginTop: '8px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  background: '#e0e0e0',
+                  border: '1px solid #ccc',
+                  borderRadius: '3px',
+                  cursor: 'pointer'
+                }}
+              >
+                Сбросить выбор
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

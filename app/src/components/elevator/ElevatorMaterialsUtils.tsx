@@ -183,12 +183,16 @@ export const createTexturePaths = (
  * @param textures Объект с текстурами
  * @param textureType Тип текстуры
  * @param color Цвет материала для окрашивания текстуры
+ * @param customRoughness Пользовательское значение шероховатости (0-1)
+ * @param customMetalness Пользовательское значение металличности (0-1)
  * @returns Новый материал с настроенными текстурами
  */
 export const createPBRMaterial = (
   textures: Record<string, THREE.Texture>,
   textureType: string | null,
-  color?: string | THREE.Color
+  color?: string | THREE.Color,
+  customRoughness?: number,
+  customMetalness?: number
 ) => {
   if (!textureType) return null;
 
@@ -216,16 +220,41 @@ export const createPBRMaterial = (
     console.log(`Внимание: цвет не предоставлен для текстуры типа ${textureType}, используется цвет по умолчанию`);
   }
   
-  // Настраиваем свойства материала в зависимости от типа текстуры
+  // Определяем базовые значения metalness и roughness в зависимости от типа материала
+  let defaultRoughness = 0.5;
+  let defaultMetalness = 0.0;
+  
   if (textureType === "metal") {
-    materialProperties.roughness = 0.5; // Базовая шероховатость для металла
-    materialProperties.metalness = 0.9; // Более высокая металличность для металла
+    defaultRoughness = 0.5;
+    defaultMetalness = 0.9;
   } else if (textureType === "wood") {
-    materialProperties.roughness = 0.7; // Повышенная шероховатость для дерева
-    materialProperties.metalness = 0.0; // Нет металличности для дерева
+    defaultRoughness = 0.7;
+    defaultMetalness = 0.0;
   } else {
-    materialProperties.roughness = 1.0;
-    materialProperties.metalness = 0.0;
+    defaultRoughness = 1.0;
+    defaultMetalness = 0.0;
+  }
+  
+  // Устанавливаем шероховатость - приоритет у пользовательских настроек
+  materialProperties.roughness = typeof customRoughness === 'number' 
+    ? customRoughness 
+    : defaultRoughness;
+    
+  // Устанавливаем металличность - приоритет у пользовательских настроек
+  materialProperties.metalness = typeof customMetalness === 'number' 
+    ? customMetalness 
+    : defaultMetalness;
+  
+  // Если заданы пользовательские значения и есть карты текстур, отключаем карты
+  // для обеспечения точного соответствия пользовательским настройкам
+  if (typeof customRoughness === 'number' && materialProperties.roughnessMap) {
+    console.log(`Отключаем карту шероховатости в пользу пользовательского значения: ${customRoughness}`);
+    delete materialProperties.roughnessMap; // Убираем карту, чтобы использовать только числовое значение
+  }
+  
+  if (typeof customMetalness === 'number' && materialProperties.metalnessMap) {
+    console.log(`Отключаем карту металличности в пользу пользовательского значения: ${customMetalness}`);
+    delete materialProperties.metalnessMap; // Убираем карту, чтобы использовать только числовое значение
   }
   
   return new THREE.MeshStandardMaterial(materialProperties);
