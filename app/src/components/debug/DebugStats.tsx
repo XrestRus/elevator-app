@@ -4,7 +4,7 @@ import { Stats, GizmoHelper, GizmoViewport } from '@react-three/drei';
 import * as THREE from 'three';
 
 /**
- * Компонент для отображения отладочной информации Three.js
+ * Компонент для отображения отладочной информации Three.js с оптимизацией производительности
  */
 const DebugStats: React.FC<{
   showFps?: boolean;
@@ -41,9 +41,14 @@ const DebugStats: React.FC<{
     if (showWireframe) {
       // Список для хранения оригинальных состояний wireframe
       const originalWireframeState: Map<THREE.Material, boolean> = new Map();
+      const processedObjects = new Set<THREE.Object3D>();
       
-      // Функция обхода сцены и обновления материалов
+      // Функция обхода сцены и обновления материалов (оптимизированная)
       const updateMaterials = (object: THREE.Object3D) => {
+        // Пропускаем уже обработанные объекты для предотвращения дублирования
+        if (processedObjects.has(object)) return;
+        processedObjects.add(object);
+        
         if ((object as THREE.Mesh).isMesh) {
           const mesh = object as THREE.Mesh;
           let materials: THREE.Material[] = [];
@@ -70,12 +75,15 @@ const DebugStats: React.FC<{
               
               // Включаем режим wireframe
               materialWithWireframe.wireframe = true;
+              materialWithWireframe.needsUpdate = true; // Помечаем, что материал нужно обновить
             }
           });
         }
         
         // Рекурсивно обрабатываем дочерние объекты
-        object.children.forEach(updateMaterials);
+        for (let i = 0; i < object.children.length; i++) {
+          updateMaterials(object.children[i]);
+        }
       };
       
       // Применяем ко всей сцене
@@ -83,8 +91,14 @@ const DebugStats: React.FC<{
       
       // Очистка при размонтировании
       return () => {
+        // Сбрасываем Set для обработанных объектов
+        processedObjects.clear();
+        
         // Возвращаем оригинальные настройки wireframe
         const restoreMaterials = (object: THREE.Object3D) => {
+          if (processedObjects.has(object)) return;
+          processedObjects.add(object);
+          
           if ((object as THREE.Mesh).isMesh) {
             const mesh = object as THREE.Mesh;
             let materials: THREE.Material[] = [];
@@ -98,17 +112,20 @@ const DebugStats: React.FC<{
             materials.forEach(material => {
               if ('wireframe' in material && originalWireframeState.has(material)) {
                 const materialWithWireframe = material as THREE.MeshBasicMaterial | 
-                                                          THREE.MeshLambertMaterial | 
-                                                          THREE.MeshPhongMaterial | 
-                                                          THREE.MeshStandardMaterial | 
-                                                          THREE.MeshPhysicalMaterial;
+                                                         THREE.MeshLambertMaterial | 
+                                                         THREE.MeshPhongMaterial | 
+                                                         THREE.MeshStandardMaterial | 
+                                                         THREE.MeshPhysicalMaterial;
                 
                 materialWithWireframe.wireframe = originalWireframeState.get(material) || false;
+                materialWithWireframe.needsUpdate = true; // Помечаем, что материал нужно обновить
               }
             });
           }
           
-          object.children.forEach(restoreMaterials);
+          for (let i = 0; i < object.children.length; i++) {
+            restoreMaterials(object.children[i]);
+          }
         };
         
         restoreMaterials(scene);
@@ -118,12 +135,13 @@ const DebugStats: React.FC<{
   
   return (
     <>
-      {showFps && <Stats />}
+      {showFps && <Stats className="stats" showPanel={0} />}
       
       {showGizmo && (
         <GizmoHelper
           alignment="bottom-right"
           margin={[80, 80]}
+          renderPriority={-2} // Низкий приоритет рендеринга
         >
           <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor="black" />
         </GizmoHelper>

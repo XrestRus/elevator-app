@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box } from "@react-three/drei";
 import { MeshReflectorMaterial } from "@react-three/drei";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
 
 /**
  * Свойства компонента зеркала лифта
@@ -29,7 +31,7 @@ interface ElevatorMirrorProps {
 }
 
 /**
- * Компонент для отображения зеркала в лифте
+ * Компонент для отображения зеркала в лифте с оптимизацией производительности
  */
 const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
   dimensions,
@@ -38,60 +40,151 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
   lightsOn,
 }) => {
   const { isMirror, mirror } = mirrorConfig;
-
-  if (!isMirror.walls) {
-    return null;
-  }
   
-  // Общие настройки MeshReflectorMaterial для всех зеркал
-  const mirrorMaterialProps = {
+  // Получаем фактор качества для стыков и полос - используем его для определения
+  // качества зеркала, как индикатор производительности системы
+  const jointsQualityFactor = useSelector((state: RootState) => state.elevator.joints?.qualityFactor ?? 1.0);
+  const isHighQuality = jointsQualityFactor > 0.5;
+  
+  // Параметр blur для зеркала в зависимости от качества
+  const blurValue = isHighQuality ? [300, 100] as [number, number] : [400, 200] as [number, number];
+  
+  // Общие настройки MeshReflectorMaterial для всех зеркал (мемоизированные)
+  const mirrorMaterialProps = useMemo(() => ({
     color: "#ffffff",
-    blur: [50, 25] as [number, number], // Меньшее размытие для более четкого отражения
-    resolution: 2048, // Увеличил разрешение для качества
-    mixBlur: 0.0, // Минимальное смешивание размытия
-    mixStrength: 1.0, // Усилил интенсивность отражения
-    metalness: 0.5, // Максимальная металличность
-    roughness: 0.05, // Минимальная шероховатость для зеркального отражения
-    mirror: 1.0, // Максимальное отражение
-    emissiveIntensity: lightsOn ? 0.2 : 0.0 // Интенсивность свечения
-  };
+    blur: blurValue,
+    resolution: isHighQuality ? 512 : 256,
+    mixBlur: isHighQuality ? 0.2 : 0.3,
+    mixStrength: isHighQuality ? 0.8 : 0.7,
+    depthScale: isHighQuality ? 1.0 : 0.6,
+    minDepthThreshold: 0.4,
+    maxDepthThreshold: isHighQuality ? 1.5 : 0.8,
+    metalness: 0.5,
+    roughness: isHighQuality ? 0.05 : 0.07,
+    mirror: isHighQuality ? 0.9 : 0.7,
+    distortion: 0,
+    reflectorOffset: 0,
+    emissiveIntensity: lightsOn ? 0.2 : 0.0
+  }), [lightsOn, isHighQuality, blurValue]);
   
-  // Настройки для рамки зеркала
-  const mirrorFrameProps = {
+  // Настройки для рамки зеркала (мемоизированные)
+  const mirrorFrameProps = useMemo(() => ({
     position: [
       0,
       mirror.position,
-      -dimensions.depth / 2 + 0.04, // Увеличил отступ рамки от стены
+      -dimensions.depth / 2 + 0.04,
     ] as [number, number, number],
     args: [
       mirror.width + 0.05,
       mirror.height + 0.05,
       0.005,
     ] as [number, number, number],
-    castShadow: true
-  };
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
   
-  // Свойства материала для рамки зеркала
-  const mirrorFrameMaterialProps = {
+  // Свойства материала для рамки зеркала (мемоизированные)
+  const mirrorFrameMaterialProps = useMemo(() => ({
     color: materials.walls,
     metalness: 0.9,
     roughness: 0.1,
     emissive: lightsOn ? materials.walls : "#000000",
     emissiveIntensity: lightsOn ? 0.05 : 0
-  };
+  }), [materials.walls, lightsOn]);
+
+  // Вычисление позиций зеркал (мемоизированные)
+  const fullMirrorProps = useMemo(() => ({
+    position: [
+      0,
+      mirror.position,
+      -dimensions.depth / 2 + 0.05,
+    ] as [number, number, number],
+    args: [mirror.width, mirror.height, 0.01] as [number, number, number],
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
+
+  const doubleMirrorLeftProps = useMemo(() => ({
+    position: [
+      -mirror.width / 4,
+      mirror.position,
+      -dimensions.depth / 2 + 0.05,
+    ] as [number, number, number],
+    args: [
+      mirror.width / 2 - 0.05,
+      mirror.height,
+      0.01,
+    ] as [number, number, number],
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
+
+  const doubleMirrorRightProps = useMemo(() => ({
+    position: [
+      mirror.width / 4,
+      mirror.position,
+      -dimensions.depth / 2 + 0.05,
+    ] as [number, number, number],
+    args: [
+      mirror.width / 2 - 0.05,
+      mirror.height,
+      0.01,
+    ] as [number, number, number],
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
+
+  const tripleMirrorLeftProps = useMemo(() => ({
+    position: [
+      -mirror.width / 3,
+      mirror.position,
+      -dimensions.depth / 2 + 0.05,
+    ] as [number, number, number],
+    args: [
+      mirror.width / 3 - 0.05,
+      mirror.height,
+      0.01,
+    ] as [number, number, number],
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
+
+  const tripleMirrorMiddleProps = useMemo(() => ({
+    position: [
+      0,
+      mirror.position,
+      -dimensions.depth / 2 + 0.05,
+    ] as [number, number, number],
+    args: [
+      mirror.width / 3 - 0.05,
+      mirror.height,
+      0.01,
+    ] as [number, number, number],
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
+
+  const tripleMirrorRightProps = useMemo(() => ({
+    position: [
+      mirror.width / 3,
+      mirror.position,
+      -dimensions.depth / 2 + 0.05,
+    ] as [number, number, number],
+    args: [
+      mirror.width / 3 - 0.05,
+      mirror.height,
+      0.01,
+    ] as [number, number, number],
+    castShadow: false // Убрал тень для оптимизации
+  }), [mirror.position, mirror.width, mirror.height, dimensions.depth]);
+
+  // Если зеркало отключено, возвращаем null
+  if (!isMirror.walls) {
+    return null;
+  }
 
   return (
     <>
       {/* Для типа "full" (сплошное зеркало) */}
       {mirror.type === "full" && (
         <Box
-          position={[
-            0,
-            mirror.position,
-            -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-          ]}
-          args={[mirror.width, mirror.height, 0.01]}
-          castShadow
+          position={fullMirrorProps.position}
+          args={fullMirrorProps.args}
+          castShadow={fullMirrorProps.castShadow}
         >
           <MeshReflectorMaterial {...mirrorMaterialProps} />
         </Box>
@@ -101,33 +194,17 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
       {mirror.type === "double" && (
         <>
           <Box
-            position={[
-              -mirror.width / 4,
-              mirror.position,
-              -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-            ]}
-            args={[
-              mirror.width / 2 - 0.05,
-              mirror.height,
-              0.01,
-            ]}
-            castShadow
+            position={doubleMirrorLeftProps.position}
+            args={doubleMirrorLeftProps.args}
+            castShadow={doubleMirrorLeftProps.castShadow}
           >
             <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
 
           <Box
-            position={[
-              mirror.width / 4,
-              mirror.position,
-              -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-            ]}
-            args={[
-              mirror.width / 2 - 0.05,
-              mirror.height,
-              0.01,
-            ]}
-            castShadow
+            position={doubleMirrorRightProps.position}
+            args={doubleMirrorRightProps.args}
+            castShadow={doubleMirrorRightProps.castShadow}
           >
             <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
@@ -138,49 +215,25 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
       {mirror.type === "triple" && (
         <>
           <Box
-            position={[
-              -mirror.width / 3,
-              mirror.position,
-              -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-            ]}
-            args={[
-              mirror.width / 3 - 0.05,
-              mirror.height,
-              0.01,
-            ]}
-            castShadow
+            position={tripleMirrorLeftProps.position}
+            args={tripleMirrorLeftProps.args}
+            castShadow={tripleMirrorLeftProps.castShadow}
           >
             <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
 
           <Box
-            position={[
-              0,
-              mirror.position,
-              -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-            ]}
-            args={[
-              mirror.width / 3 - 0.05,
-              mirror.height,
-              0.01,
-            ]}
-            castShadow
+            position={tripleMirrorMiddleProps.position}
+            args={tripleMirrorMiddleProps.args}
+            castShadow={tripleMirrorMiddleProps.castShadow}
           >
             <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
 
           <Box
-            position={[
-              mirror.width / 3,
-              mirror.position,
-              -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-            ]}
-            args={[
-              mirror.width / 3 - 0.05,
-              mirror.height,
-              0.01,
-            ]}
-            castShadow
+            position={tripleMirrorRightProps.position}
+            args={tripleMirrorRightProps.args}
+            castShadow={tripleMirrorRightProps.castShadow}
           >
             <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>

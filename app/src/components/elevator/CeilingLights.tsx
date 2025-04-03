@@ -131,13 +131,13 @@ const CeilingLights: React.FC<{
         <group key={index} position={pos}>
           {/* Корпус светильника */}
           <mesh>
-            <cylinderGeometry args={[0.0, 0.076, 0.01, 32]} />
+            <cylinderGeometry args={[0.0, 0.076, 0.01, 16]} />
             <meshStandardMaterial color={frameLightColor} />
           </mesh>
           
           {/* Стеклянный плафон */}
           <mesh position={[0, -0.01, 0]}>
-            <cylinderGeometry args={[0.07, 0.07, 0.005, 32]} />
+            <cylinderGeometry args={[0.07, 0.07, 0.005, 16]} />
             <meshStandardMaterial 
               color={lightsOn ? color : '#e0e0e0'} 
               transparent
@@ -154,28 +154,30 @@ const CeilingLights: React.FC<{
             penumbra={0.3}
             intensity={getLightIntensity(index)}
             color={color}
-            castShadow
+            castShadow={false}
             decay={1.5}
-            distance={dimensions.height * 2}
+            distance={dimensions.height * 1.5}
           />
           
           {/* Световое пятно на полу */}
-          <group position={[0, -dimensions.height + 0.05, 0]} visible={lightsOn}>
-            <Plane 
-              args={[getSpotSize(index), getSpotSize(index)]} 
-              rotation={[-Math.PI / 2, 0, 0]}
-              position={[0, 0.01, 0]} // Слегка поднимаем над полом
-            >
-              <meshBasicMaterial 
-                color={color}
-                transparent={true}
-                opacity={getSpotIntensity(index)}
-                map={spotTexture}
-                blending={THREE.AdditiveBlending}
-                depthWrite={false}
-              />
-            </Plane>
-          </group>
+          {lightsOn && (
+            <group position={[0, -dimensions.height + 0.05, 0]}>
+              <Plane 
+                args={[getSpotSize(index), getSpotSize(index)]} 
+                rotation={[-Math.PI / 2, 0, 0]}
+                position={[0, 0.01, 0]} // Слегка поднимаем над полом
+              >
+                <meshBasicMaterial 
+                  color={color}
+                  transparent={true}
+                  opacity={getSpotIntensity(index)}
+                  map={spotTexture}
+                  blending={THREE.AdditiveBlending}
+                  depthWrite={false}
+                />
+              </Plane>
+            </group>
+          )}
         </group>
       ))}
     </group>

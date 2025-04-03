@@ -98,6 +98,7 @@ export interface DecorationStripesOptions {
   skipMirrorWall: boolean;
   offset: number;
   showOnDoors: boolean;
+  qualityFactor?: number; // Фактор качества для оптимизации (0.0-1.0), где 1.0 - высокое качество
 }
 
 /**
@@ -109,6 +110,7 @@ export interface JointOptions {
   color: string;
   material: 'metal' | 'glossy' | 'wood';
   protrusion: number; // Выступ стыков в мм
+  qualityFactor?: number; // Фактор качества для оптимизации (0.0-1.0), где 1.0 - высокое качество
 }
 
 /**
@@ -210,13 +212,15 @@ const initialState: ElevatorState = {
     skipMirrorWall: true,
     offset: 0,
     showOnDoors: true,
+    qualityFactor: 1.0
   },
   joints: {
     enabled: true,
     width: 2.5,
     color: '#888888', 
     material: 'metal',
-    protrusion: 0
+    protrusion: 0,
+    qualityFactor: 1.0
   }
 };
 

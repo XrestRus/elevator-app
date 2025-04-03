@@ -121,30 +121,24 @@ const BasicElevator: React.FC = () => {
   const floorTextures = useTexture(floorPaths);
   const ceilingTextures = useTexture(ceilingPaths);
 
-  // Добавляем обработку ошибок при загрузке текстур
+  // Обработка ошибок при загрузке текстур
   useEffect(() => {
-    // Логируем информацию о текстурах
-    console.log("Пути к текстурам стен:", wallPaths);
-    
-    // Определяем обработчик глобальных ошибок загрузки изображений
+    // Упрощенная обработка ошибок загрузки для повышения производительности
     const handleGlobalError = (event: Event) => {
       const target = event.target as HTMLImageElement;
       if (target && target.src && !target.src.includes('dummy.png')) {
         console.warn(`Не удалось загрузить текстуру: ${target.src}`);
       }
-      // Предотвращаем всплытие ошибки до консоли браузера
       event.stopPropagation();
       event.preventDefault();
     };
     
-    // Добавляем глобальный обработчик ошибок загрузки изображений
     window.addEventListener('error', handleGlobalError, true);
     
-    // Очищаем обработчик при размонтировании
     return () => {
       window.removeEventListener('error', handleGlobalError, true);
     };
-  }, [wallPaths]);
+  }, []);
 
   // Создаем PBR материалы только если есть реальные текстуры (не заглушки)
   const wallPBRMaterial = useMemo(

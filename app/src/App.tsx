@@ -1,4 +1,4 @@
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, FlyControls } from '@react-three/drei';
 import './App.css';
 import { Suspense, useEffect, useRef, useState } from 'react';
@@ -11,6 +11,48 @@ import DebugStats from './components/debug/DebugStats';
 import DebugPanel from './components/debug/DebugPanel';
 import type { RootState } from './store/store';
 import { setCamera } from './store/elevatorSlice';
+
+/**
+ * Компонент для адаптивного управления качеством рендеринга
+ */
+function PerformanceMonitor() {
+  const { gl } = useThree();
+  const frameRates = useRef<number[]>([]);
+  const lastTime = useRef<number>(performance.now());
+  const [lowPerformance, setLowPerformance] = useState(false);
+  
+  // Мониторинг FPS и адаптивное управление качеством рендеринга
+  useFrame(() => {
+    const currentTime = performance.now();
+    const delta = currentTime - lastTime.current;
+    lastTime.current = currentTime;
+    
+    // Рассчитываем текущий FPS
+    const fps = 1000 / delta;
+    
+    // Сохраняем последние 20 значений FPS для сглаживания
+    frameRates.current.push(fps);
+    if (frameRates.current.length > 20) {
+      frameRates.current.shift();
+    }
+    
+    // Рассчитываем средний FPS
+    const avgFps = frameRates.current.reduce((sum, value) => sum + value, 0) / frameRates.current.length;
+    
+    // Адаптивно настраиваем качество рендеринга
+    if (avgFps < 40 && !lowPerformance) {
+      setLowPerformance(true);
+      // Снижаем качество рендеринга
+      gl.setPixelRatio(Math.min(window.devicePixelRatio, 1)); // Ограничиваем pixelRatio
+    } else if (avgFps > 50 && lowPerformance) {
+      setLowPerformance(false);
+      // Повышаем качество рендеринга
+      gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Восстанавливаем pixelRatio
+    }
+  });
+  
+  return null;
+}
 
 /**
  * Компонент для динамического управления камерой и контроллерами
@@ -75,10 +117,15 @@ function CameraController() {
   
   // Отслеживаем изменение позиции камеры
   useEffect(() => {
-    // Устанавливаем интервал обновления позиции (100 мс = 10 раз в секунду)
+    // Устанавливаем интервал обновления позиции (200 мс = 5 раз в секунду, увеличиваем для оптимизации FPS)
     let lastPosition = { x: 0, y: 0, z: 0 };
+    let lastUpdateTime = 0;
     
     const updateCameraPosition = () => {
+      const now = performance.now();
+      // Обновляем позицию не чаще чем раз в 200 мс для оптимизации производительности
+      if (now - lastUpdateTime < 200) return;
+      
       // Получаем текущую позицию с округлением до 2 знаков
       const currentPosition = {
         x: parseFloat(camera.position.x.toFixed(2)),
@@ -86,21 +133,25 @@ function CameraController() {
         z: parseFloat(camera.position.z.toFixed(2))
       };
       
-      // Проверяем, изменилась ли позиция
-      if (lastPosition.x !== currentPosition.x || 
-          lastPosition.y !== currentPosition.y || 
-          lastPosition.z !== currentPosition.z) {
-        
+      // Проверяем, изменилась ли позиция значительно (минимум на 0.05 единиц)
+      const positionChanged = 
+        Math.abs(lastPosition.x - currentPosition.x) > 0.05 || 
+        Math.abs(lastPosition.y - currentPosition.y) > 0.05 || 
+        Math.abs(lastPosition.z - currentPosition.z) > 0.05;
+      
+      // Обновляем только если позиция значительно изменилась
+      if (positionChanged) {
         // Обновляем позицию в Redux
         dispatch(setCamera({ position: currentPosition }));
         
-        // Запоминаем последнюю позицию
+        // Запоминаем последнюю позицию и время обновления
         lastPosition = { ...currentPosition };
+        lastUpdateTime = now;
       }
     };
     
     // Устанавливаем интервал обновления
-    const intervalId = setInterval(updateCameraPosition, 100);
+    const intervalId = setInterval(updateCameraPosition, 200); // Увеличиваем до 200мс
     
     // Очищаем интервал при размонтировании
     return () => clearInterval(intervalId);
@@ -158,11 +209,20 @@ function App() {
         }}
         gl={{ 
           antialias: true,
-          pixelRatio: window.devicePixelRatio
+          powerPreference: "high-performance", 
+          alpha: false,
+          stencil: false, 
+          depth: true,
+          precision: "lowp",
+          pixelRatio: Math.min(window.devicePixelRatio, 2) // Ограничиваем pixelRatio для повышения FPS
         }}
+        frameloop="demand" // Рендер только при необходимости
         style={{ height: '100vh', width: '100%' }}
       >
         <CameraController />
+        
+        {/* Добавляем монитор производительности */}
+        <PerformanceMonitor />
         
         {/* Базовое освещение */}
         <ambientLight intensity={lighting.enabled ? 1.5 : 0.2} />
