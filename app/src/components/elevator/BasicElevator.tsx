@@ -1,14 +1,22 @@
 import React, { useMemo } from "react";
-import {
-  Box,
-  MeshReflectorMaterial,
-  useTexture,
-} from "@react-three/drei";
-import { useSpring, animated } from "@react-spring/three";
+import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import ElevatorPanel from "./ElevatorPanel.tsx";
+import ElevatorWalls from "./ElevatorWalls.tsx";
+import ElevatorFloor from "./ElevatorFloor.tsx";
+import ElevatorCeiling from "./ElevatorCeiling.tsx";
+import ElevatorDoors from "./ElevatorDoors.tsx";
+import ElevatorMirror from "./ElevatorMirror.tsx";
+import ElevatorHandrails from "./ElevatorHandrails.tsx";
+import DecorationStripes from "./DecorationStripes.tsx";
+import {
+  createWallMaterialWithCustomRepeat,
+  loadPBRTextures,
+  createTexturePaths,
+  createPBRMaterial,
+} from "./ElevatorMaterialsUtils.tsx";
 
 /**
  * Компонент, представляющий базовую геометрию лифта с анимированными дверьми
@@ -21,65 +29,6 @@ const BasicElevator: React.FC = () => {
   // Новый подход: двери занимают почти всю ширину лифта
   // Оставляем только небольшие боковые части для рамки
   const doorHeight = dimensions.height - 0.3; // Высота дверного проема
-
-  // Создаем функцию для клонирования материалов с разным повторением текстур
-  const createWallMaterialWithCustomRepeat = (
-    baseMaterial: THREE.Material,
-    repeatX: number,
-    repeatY: number
-  ) => {
-    // Клонируем исходный материал
-    const newMaterial = (baseMaterial as THREE.MeshStandardMaterial).clone();
-
-    // Если материал имеет текстуры, настраиваем их повторение
-    if (newMaterial.map) {
-      newMaterial.map = newMaterial.map.clone();
-      newMaterial.map.repeat.set(repeatX, repeatY);
-      newMaterial.map.needsUpdate = true;
-    }
-
-    if (newMaterial.normalMap) {
-      newMaterial.normalMap = newMaterial.normalMap.clone();
-      newMaterial.normalMap.repeat.set(repeatX, repeatY);
-      newMaterial.normalMap.needsUpdate = true;
-    }
-
-    if (newMaterial.roughnessMap) {
-      newMaterial.roughnessMap = newMaterial.roughnessMap.clone();
-      newMaterial.roughnessMap.repeat.set(repeatX, repeatY);
-      newMaterial.roughnessMap.needsUpdate = true;
-    }
-
-    if (newMaterial.aoMap) {
-      newMaterial.aoMap = newMaterial.aoMap.clone();
-      newMaterial.aoMap.repeat.set(repeatX, repeatY);
-      newMaterial.aoMap.needsUpdate = true;
-    }
-
-    if (newMaterial.metalnessMap) {
-      newMaterial.metalnessMap = newMaterial.metalnessMap.clone();
-      newMaterial.metalnessMap.repeat.set(repeatX, repeatY);
-      newMaterial.metalnessMap.needsUpdate = true;
-    }
-
-    return newMaterial;
-  };
-
-  // Анимация для левой двери
-  const leftDoorSpring = useSpring({
-    position: doorsOpen
-      ? [-dimensions.width / 2 - 0.3, -0.15, dimensions.depth / 2] 
-      : [-dimensions.width / 4 + 0.05, -0.15, dimensions.depth / 2],
-    config: { mass: 1, tension: 120, friction: 14 },
-  });
-
-  // Анимация для правой двери
-  const rightDoorSpring = useSpring({
-    position: doorsOpen
-      ? [dimensions.width / 2 + 0.3, -0.15, dimensions.depth / 2]
-      : [dimensions.width / 4 - 0.05, -0.15, dimensions.depth / 2],
-    config: { mass: 1, tension: 120, friction: 14 },
-  });
 
   // Базовые материалы (без текстур)
   const basicWallMaterial = useMemo(
@@ -133,83 +82,6 @@ const BasicElevator: React.FC = () => {
 
   // Кэширование PBR текстур с помощью хука useTexture
   // Используем useMemo для загрузки только при изменении пути к текстуре
-  const loadPBRTextures = (baseTexturePath: string | null) => {
-    if (!baseTexturePath || !baseTexturePath.includes("example")) {
-      return {
-        colorMapPath: null,
-        normalMapPath: null,
-        roughnessMapPath: null,
-        aoMapPath: null,
-        metalnessMapPath: null,
-        textureType: null,
-      };
-    }
-
-    // Исправляем путь, чтобы он правильно начинался с /public
-    const fixedBasePath = baseTexturePath.startsWith("/")
-      ? baseTexturePath
-      : `/${baseTexturePath}`;
-
-    // Определяем тип текстуры из пути
-    const textureType = fixedBasePath.includes("wood")
-      ? "wood"
-      : fixedBasePath.includes("marble")
-      ? "marble"
-      : fixedBasePath.includes("metal")
-      ? "metal"
-      : fixedBasePath.includes("fabric")
-      ? "fabrics"
-      : null;
-
-    if (!textureType) {
-      console.error(`Неизвестный тип текстуры: ${fixedBasePath}`);
-      return {
-        colorMapPath: null,
-        normalMapPath: null,
-        roughnessMapPath: null,
-        aoMapPath: null,
-        metalnessMapPath: null,
-        textureType: null,
-      };
-    }
-
-    // Получаем ID текстуры из пути
-    const regexResult = fixedBasePath.match(/(\w+)_(\d+)_(\w+)_(\w+)/);
-    if (!regexResult) {
-      console.error(`Не удалось извлечь ID текстуры из пути: ${fixedBasePath}`);
-      return {
-        colorMapPath: null,
-        normalMapPath: null,
-        roughnessMapPath: null,
-        aoMapPath: null,
-        metalnessMapPath: null,
-        textureType: null,
-      };
-    }
-
-    const texturePrefix = `${textureType}_${regexResult[2]}`;
-
-    // Формируем пути к файлам текстур
-    const colorMapPath = `${fixedBasePath}/${texturePrefix}_color_1k.jpg`;
-    const normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_directx_1k.png`;
-    const roughnessMapPath = `${fixedBasePath}/${texturePrefix}_roughness_1k.jpg`;
-    const aoMapPath = `${fixedBasePath}/${texturePrefix}_ao_1k.jpg`;
-    const metalnessMapPath =
-      textureType === "metal"
-        ? `${fixedBasePath}/${texturePrefix}_metallic_1k.jpg`
-        : null;
-
-    return {
-      colorMapPath,
-      normalMapPath,
-      roughnessMapPath,
-      aoMapPath,
-      metalnessMapPath,
-      textureType,
-    };
-  };
-
-  // Загружаем текстуры с помощью useTexture (кэширование)
   const wallPBRPaths = useMemo(
     () => loadPBRTextures(wallTexturePath),
     [wallTexturePath]
@@ -229,53 +101,17 @@ const BasicElevator: React.FC = () => {
 
   // Всегда включаем хотя бы одну текстуру (заглушку), чтобы хук useTexture всегда вызывался
   const wallPaths = useMemo(
-    () => ({
-      map: wallPBRPaths.colorMapPath || dummyTexturePath,
-      ...(wallPBRPaths.normalMapPath && {
-        normalMap: wallPBRPaths.normalMapPath,
-      }),
-      ...(wallPBRPaths.roughnessMapPath && {
-        roughnessMap: wallPBRPaths.roughnessMapPath,
-      }),
-      ...(wallPBRPaths.aoMapPath && { aoMap: wallPBRPaths.aoMapPath }),
-      ...(wallPBRPaths.metalnessMapPath && {
-        metalnessMap: wallPBRPaths.metalnessMapPath,
-      }),
-    }),
+    () => createTexturePaths(wallPBRPaths, dummyTexturePath),
     [wallPBRPaths]
   );
 
   const floorPaths = useMemo(
-    () => ({
-      map: floorPBRPaths.colorMapPath || dummyTexturePath,
-      ...(floorPBRPaths.normalMapPath && {
-        normalMap: floorPBRPaths.normalMapPath,
-      }),
-      ...(floorPBRPaths.roughnessMapPath && {
-        roughnessMap: floorPBRPaths.roughnessMapPath,
-      }),
-      ...(floorPBRPaths.aoMapPath && { aoMap: floorPBRPaths.aoMapPath }),
-      ...(floorPBRPaths.metalnessMapPath && {
-        metalnessMap: floorPBRPaths.metalnessMapPath,
-      }),
-    }),
+    () => createTexturePaths(floorPBRPaths, dummyTexturePath),
     [floorPBRPaths]
   );
 
   const ceilingPaths = useMemo(
-    () => ({
-      map: ceilingPBRPaths.colorMapPath || dummyTexturePath,
-      ...(ceilingPBRPaths.normalMapPath && {
-        normalMap: ceilingPBRPaths.normalMapPath,
-      }),
-      ...(ceilingPBRPaths.roughnessMapPath && {
-        roughnessMap: ceilingPBRPaths.roughnessMapPath,
-      }),
-      ...(ceilingPBRPaths.aoMapPath && { aoMap: ceilingPBRPaths.aoMapPath }),
-      ...(ceilingPBRPaths.metalnessMapPath && {
-        metalnessMap: ceilingPBRPaths.metalnessMapPath,
-      }),
-    }),
+    () => createTexturePaths(ceilingPBRPaths, dummyTexturePath),
     [ceilingPBRPaths]
   );
 
@@ -285,79 +121,22 @@ const BasicElevator: React.FC = () => {
   const ceilingTextures = useTexture(ceilingPaths);
 
   // Создаем PBR материалы только если есть реальные текстуры (не заглушки)
-  const wallPBRMaterial = useMemo(() => {
-    if (!wallPBRPaths.textureType) return null;
-
-    // Настраиваем базовые параметры текстур
-    Object.values(wallTextures).forEach((texture) => {
-      if (!(texture instanceof THREE.Texture)) return;
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      if (texture === wallTextures.map) {
-        texture.colorSpace = THREE.SRGBColorSpace;
-      }
-      texture.needsUpdate = true;
-    });
-
-    // Настраиваем свойства материала в зависимости от типа текстуры
-    const material = new THREE.MeshStandardMaterial({
-      ...wallTextures,
-      envMapIntensity: 1.0,
-      roughness: 1.0, // Будет модифицировано картой шероховатости
-      metalness: wallPBRPaths.textureType === "metal" ? 0.8 : 0.0,
-    });
-
-    return material;
-  }, [wallTextures, wallPBRPaths]);
+  const wallPBRMaterial = useMemo(
+    () => createPBRMaterial(wallTextures, wallPBRPaths.textureType),
+    [wallTextures, wallPBRPaths]
+  );
 
   // Создаем PBR материал для пола с мемоизацией
-  const floorPBRMaterial = useMemo(() => {
-    if (!floorPBRPaths.textureType) return null;
-
-    // Настраиваем базовые параметры текстур
-    Object.values(floorTextures).forEach((texture) => {
-      if (!(texture instanceof THREE.Texture)) return;
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      if (texture === floorTextures.map) {
-        texture.colorSpace = THREE.SRGBColorSpace;
-      }
-      texture.needsUpdate = true;
-    });
-
-    // Настраиваем свойства материала в зависимости от типа текстуры
-    const material = new THREE.MeshStandardMaterial({
-      ...floorTextures,
-      envMapIntensity: 1.0,
-      roughness: 1.0, // Будет модифицировано картой шероховатости
-      metalness: floorPBRPaths.textureType === "metal" ? 0.8 : 0.0,
-    });
-
-    return material;
-  }, [floorTextures, floorPBRPaths]);
+  const floorPBRMaterial = useMemo(
+    () => createPBRMaterial(floorTextures, floorPBRPaths.textureType),
+    [floorTextures, floorPBRPaths]
+  );
 
   // Создаем PBR материал для потолка с мемоизацией
-  const ceilingPBRMaterial = useMemo(() => {
-    if (!ceilingPBRPaths.textureType) return null;
-
-    // Настраиваем базовые параметры текстур
-    Object.values(ceilingTextures).forEach((texture) => {
-      if (!(texture instanceof THREE.Texture)) return;
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      if (texture === ceilingTextures.map) {
-        texture.colorSpace = THREE.SRGBColorSpace;
-      }
-      texture.needsUpdate = true;
-    });
-
-    // Настраиваем свойства материала в зависимости от типа текстуры
-    const material = new THREE.MeshStandardMaterial({
-      ...ceilingTextures,
-      envMapIntensity: 1.0,
-      roughness: 1.0, // Будет модифицировано картой шероховатости
-      metalness: ceilingPBRPaths.textureType === "metal" ? 0.8 : 0.0,
-    });
-
-    return material;
-  }, [ceilingTextures, ceilingPBRPaths]);
+  const ceilingPBRMaterial = useMemo(
+    () => createPBRMaterial(ceilingTextures, ceilingPBRPaths.textureType),
+    [ceilingTextures, ceilingPBRPaths]
+  );
 
   // Определяем, какой материал использовать: PBR или обычный
   const actualWallMaterial = wallPBRMaterial || basicWallMaterial;
@@ -402,41 +181,19 @@ const BasicElevator: React.FC = () => {
     [materials.walls]
   );
 
-  // Материал для стыка дверей
-  const doorSeamMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#000000", // Черный цвет для максимального контраста
-        metalness: 0.3,
-        roughness: 0.7,
-        emissive: "#000000",
-        emissiveIntensity: 0.2,
-      }),
-    [lightsOn]
-  );
-
-  // Материал для внешних полосок дверей (более заметный)
-  const doorOuterSeamMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#111111", // Темный цвет, но немного светлее основного стыка
-        metalness: 0.4,
-        roughness: 0.6,
-        emissive: "#111111",
-        emissiveIntensity: 0.3, // Чуть больше свечения для лучшей видимости
-      }),
-    [lightsOn]
-  );
-
   // Материал для рамки вокруг дверей (металлический)
   const doorFrameMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#555555",
+    () => {
+      const color = new THREE.Color(materials.walls);
+      // Делаем цвет немного темнее для контраста
+      color.multiplyScalar(0.7);
+      return new THREE.MeshStandardMaterial({
+        color: color,
         metalness: 0.8,
         roughness: 0.2,
-      }),
-    []
+      });
+    },
+    [materials.walls]
   );
 
   // Материал для декоративных полос
@@ -445,21 +202,29 @@ const BasicElevator: React.FC = () => {
     
     // Наследуем цвет стен, возможно с небольшим оттенком
     const baseColor = new THREE.Color(materials.walls);
-    // Если указан цвет в настройках, учитываем его как оттенок
-    if (elevator.decorationStripes.color && elevator.decorationStripes.color !== '#C0C0C0') {
-      // Смешиваем цвет стен с указанным цветом для создания оттенка
-      const accentColor = new THREE.Color(elevator.decorationStripes.color);
-      baseColor.lerp(accentColor, 0.3); // 30% влияния акцентного цвета
+    
+    // Вместо добавления небольшого оттенка используем сам цвет полос напрямую
+    let finalColor = baseColor;
+    
+    if (elevator.decorationStripes.color) {
+      // Используем цвет полос как основной
+      finalColor = new THREE.Color(elevator.decorationStripes.color);
+      
+      // Добавляем совсем небольшое влияние цвета стен только для металлических 
+      // материалов, чтобы сохранить гармоничность
+      if (elevator.decorationStripes.material === 'metal') {
+        finalColor.lerp(baseColor, 0.15); // 15% влияния цвета стен
+      }
     }
     
     return new THREE.MeshStandardMaterial({
-      color: baseColor,
+      color: finalColor,
       metalness: elevator.decorationStripes.material === 'metal' ? 0.9 : 
                 (elevator.decorationStripes.material === 'glossy' ? 0.7 : 0.1),
       roughness: elevator.decorationStripes.material === 'metal' ? 0.1 : 
                 (elevator.decorationStripes.material === 'glossy' ? 0.05 : 0.8),
       emissive: elevator.decorationStripes.material === 'glossy' ? 
-                baseColor : '#000000',
+                finalColor : '#000000',
       emissiveIntensity: elevator.decorationStripes.material === 'glossy' ? 0.05 : 0
     });
   }, [
@@ -472,357 +237,36 @@ const BasicElevator: React.FC = () => {
   return (
     <group>
       {/* Пол */}
-      <Box
-        position={[0, -dimensions.height / 2, 0]}
-        args={[dimensions.width, 0.05, dimensions.depth]}
-        receiveShadow
-      >
-        <primitive object={actualFloorMaterial} attach="material" />
-      </Box>
+      <ElevatorFloor 
+        dimensions={dimensions} 
+        floorMaterial={actualFloorMaterial} 
+      />
 
       {/* Потолок */}
-      <Box
-        position={[0, dimensions.height / 2, 0]}
-        args={[dimensions.width, 0.05, dimensions.depth]}
-        receiveShadow
-      >
-        <primitive object={actualCeilingMaterial} attach="material" />
-      </Box>
+      <ElevatorCeiling 
+        dimensions={dimensions} 
+        ceilingMaterial={actualCeilingMaterial} 
+      />
 
-      {/* Задняя стена - единственная зеркальная стена */}
-      <Box
-        position={[0, 0, -dimensions.depth / 2]}
-        args={[dimensions.width, dimensions.height, 0.05]}
-        castShadow
-        receiveShadow
-      >
-        <primitive object={backWallMaterial} attach="material" />
-      </Box>
+      {/* Стены и дверные рамки */}
+      <ElevatorWalls 
+        dimensions={dimensions}
+        backWallMaterial={backWallMaterial}
+        sideWallMaterial={sideWallMaterial}
+        frontWallMaterial={frontWallMaterial}
+        doorFrameMaterial={doorFrameMaterial}
+      />
 
-      {/* Зеркало на задней стене - отображается только если зеркало включено */}
-      {materials.isMirror.walls && (
-        <>
-          {/* Для типа "full" (сплошное зеркало) */}
-          {materials.mirror.type === "full" && (
-            <Box
-              position={[
-                0,
-                materials.mirror.position,
-                -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-              ]}
-              args={[materials.mirror.width, materials.mirror.height, 0.01]}
-              castShadow
-            >
-              <MeshReflectorMaterial
-                color={"#ffffff"}
-                blur={[50, 25]} // Меньшее размытие для более четкого отражения
-                resolution={2048} // Увеличил разрешение для качества
-                mixBlur={0.0} // Минимальное смешивание размытия
-                mixStrength={1.0} // Усилил интенсивность отражения
-                metalness={0.5} // Максимальная металличность
-                roughness={0.05} // Минимальная шероховатость для зеркального отражения
-                mirror={1.0} // Максимальное отражение
-                emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
-              />
-            </Box>
-          )}
-
-          {/* Для типа "double" (два зеркала в ряд) */}
-          {materials.mirror.type === "double" && (
-            <>
-              <Box
-                position={[
-                  -materials.mirror.width / 4,
-                  materials.mirror.position,
-                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-                ]}
-                args={[
-                  materials.mirror.width / 2 - 0.05,
-                  materials.mirror.height,
-                  0.01,
-                ]}
-                castShadow
-              >
-                <MeshReflectorMaterial
-                  color={"#ffffff"}
-                  blur={[50, 25]} 
-                  resolution={2048}
-                  mixBlur={0.0}
-                  mixStrength={1.0}
-                  metalness={0.5}
-                  roughness={0.05}
-                  mirror={1.0}
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
-                />
-              </Box>
-
-              <Box
-                position={[
-                  materials.mirror.width / 4,
-                  materials.mirror.position,
-                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-                ]}
-                args={[
-                  materials.mirror.width / 2 - 0.05,
-                  materials.mirror.height,
-                  0.01,
-                ]}
-                castShadow
-              >
-                <MeshReflectorMaterial
-                  color={"#ffffff"}
-                  blur={[50, 25]}
-                  resolution={2048}
-                  mixBlur={0.0}
-                  mixStrength={1.0}
-                  metalness={0.5}
-                  roughness={0.05}
-                  mirror={1.0}
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
-                />
-              </Box>
-            </>
-          )}
-
-          {/* Для типа "triple" (три зеркала в ряд) */}
-          {materials.mirror.type === "triple" && (
-            <>
-              <Box
-                position={[
-                  -materials.mirror.width / 3,
-                  materials.mirror.position,
-                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-                ]}
-                args={[
-                  materials.mirror.width / 3 - 0.05,
-                  materials.mirror.height,
-                  0.01,
-                ]}
-                castShadow
-              >
-                <MeshReflectorMaterial
-                  color={"#ffffff"}
-                  blur={[50, 25]}
-                  resolution={2048}
-                  mixBlur={0.0}
-                  mixStrength={1.0}
-                  metalness={0.5}
-                  roughness={0.05}
-                  mirror={1.0}
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
-                />
-              </Box>
-
-              <Box
-                position={[
-                  0,
-                  materials.mirror.position,
-                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-                ]}
-                args={[
-                  materials.mirror.width / 3 - 0.05,
-                  materials.mirror.height,
-                  0.01,
-                ]}
-                castShadow
-              >
-                <MeshReflectorMaterial
-                  color={"#ffffff"}
-                  blur={[50, 25]}
-                  resolution={2048}
-                  mixBlur={0.0}
-                  mixStrength={1.0}
-                  metalness={0.5}
-                  roughness={0.05}
-                  mirror={1.0}
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
-                />
-              </Box>
-
-              <Box
-                position={[
-                  materials.mirror.width / 3,
-                  materials.mirror.position,
-                  -dimensions.depth / 2 + 0.05, // Увеличил отступ зеркала от стены
-                ]}
-                args={[
-                  materials.mirror.width / 3 - 0.05,
-                  materials.mirror.height,
-                  0.01,
-                ]}
-                castShadow
-              >
-                <MeshReflectorMaterial
-                  color={"#ffffff"}
-                  blur={[50, 25]}
-                  resolution={2048}
-                  mixBlur={0.0}
-                  mixStrength={1.0}
-                  metalness={0.5}
-                  roughness={0.05}
-                  mirror={1.0}
-                  emissiveIntensity={lightsOn ? 0.2 : 0.0}
-                />
-              </Box>
-            </>
-          )}
-
-          {/* Рамка зеркала */}
-          <Box
-            position={[
-              0,
-              materials.mirror.position,
-              -dimensions.depth / 2 + 0.04, // Увеличил отступ рамки от стены
-            ]}
-            args={[
-              materials.mirror.width + 0.05,
-              materials.mirror.height + 0.05,
-              0.005,
-            ]}
-            castShadow
-          >
-            <meshStandardMaterial
-              color={materials.walls}
-              metalness={0.9}
-              roughness={0.1}
-              emissive={materials.walls}
-              emissiveIntensity={lightsOn ? 0.1 : 0.0}
-            />
-          </Box>
-        </>
-      )}
-
-      {/* Левая стена - всегда обычный материал */}
-      <Box
-        position={[-dimensions.width / 2, 0, 0]}
-        args={[0.05, dimensions.height, dimensions.depth]}
-        castShadow
-        receiveShadow
-      >
-        <primitive object={sideWallMaterial} attach="material" />
-      </Box>
-
-      {/* Поручень на левой стене - показываем в зависимости от настроек */}
-      {elevator.visibility.handrails && (
-        <group position={[-dimensions.width / 2 + 0.03, -0.1, 0]}>
-          {/* Основная часть поручня */}
-          <Box
-            position={[0, 0, 0]}
-            args={[0.03, 0.08, dimensions.depth * 0.6]}
-            castShadow
-          >
-            <primitive object={handrailMaterial} attach="material" />
-          </Box>
-          {/* Крепления к стене (верхнее и нижнее) */}
-          <Box
-            position={[-0.015, 0, dimensions.depth * 0.25]}
-            args={[0.03, 0.03, 0.03]}
-            castShadow
-          >
-            <primitive object={handrailMaterial} attach="material" />
-          </Box>
-          <Box
-            position={[-0.015, 0, -dimensions.depth * 0.25]}
-            args={[0.03, 0.03, 0.03]}
-            castShadow
-          >
-            <primitive object={handrailMaterial} attach="material" />
-          </Box>
-        </group>
-      )}
-
-      {/* Правая стена - всегда обычный материал */}
-      <Box
-        position={[dimensions.width / 2, 0, 0]}
-        args={[0.05, dimensions.height, dimensions.depth]}
-        castShadow
-        receiveShadow
-      >
-        <primitive object={sideWallMaterial} attach="material" />
-      </Box>
-
-      {/* Поручень на правой стене - показываем в зависимости от настроек */}
-      {elevator.visibility.handrails && (
-        <group position={[dimensions.width / 2 - 0.03, -0.1, 0]}>
-          {/* Основная часть поручня */}
-          <Box
-            position={[0, 0, 0]}
-            args={[0.03, 0.08, dimensions.depth * 0.6]}
-            castShadow
-          >
-            <primitive object={handrailMaterial} attach="material" />
-          </Box>
-          {/* Крепления к стене (верхнее и нижнее) */}
-          <Box
-            position={[0.015, 0, dimensions.depth * 0.25]}
-            args={[0.03, 0.03, 0.03]}
-            castShadow
-          >
-            <primitive object={handrailMaterial} attach="material" />
-          </Box>
-          <Box
-            position={[0.015, 0, -dimensions.depth * 0.25]}
-            args={[0.03, 0.03, 0.03]}
-            castShadow
-          >
-            <primitive object={handrailMaterial} attach="material" />
-          </Box>
-        </group>
-      )}
-
-      {/* Верхняя перемычка над дверью */}
-      <Box
-        position={[0, dimensions.height / 2 - 0.15, dimensions.depth / 2]}
-        args={[dimensions.width - 0.2, 0.3, 0.07]}
-        castShadow
-      >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
-
-      {/* Рамка для дверей (верхняя часть) */}
-      <Box
-        position={[0, dimensions.height / 2 - 0.3, dimensions.depth / 2 + 0.04]}
-        args={[dimensions.width - 0.3, 0.04, 0.02]}
-        castShadow
-      >
-        <primitive object={doorFrameMaterial} attach="material" />
-      </Box>
-
-      {/* Рамка для дверей (нижняя часть) */}
-      <Box
-        position={[0, -dimensions.height / 2 + 0.1, dimensions.depth / 2 + 0.04]}
-        args={[dimensions.width - 0.3, 0.02, 0.02]}
-        castShadow
-      >
-        <primitive object={doorFrameMaterial} attach="material" />
-      </Box>
-
-      {/* Рамка для дверей (левая часть) */}
-      <Box
-        position={[-dimensions.width / 2 + 0.25, 0, dimensions.depth / 2 + 0.04]}
-        args={[0.02, dimensions.height - 0.4, 0.02]}
-        castShadow
-      >
-        <primitive object={doorFrameMaterial} attach="material" />
-      </Box>
-
-      {/* Рамка для дверей (правая часть) */}
-      <Box
-        position={[dimensions.width / 2 - 0.25, 0, dimensions.depth / 2 + 0.04]}
-        args={[0.02, dimensions.height - 0.4, 0.02]}
-        castShadow
-      >
-        <primitive object={doorFrameMaterial} attach="material" />
-      </Box>
-
-      {/* Левая боковая панель передней стены */}
-      <Box
-        position={[-dimensions.width / 2 + 0.2, 0, dimensions.depth / 2]}
-        args={[0.4, dimensions.height, 0.07]}
-        castShadow
-      >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
+      {/* Зеркало */}
+      <ElevatorMirror
+        dimensions={dimensions}
+        materials={materials}
+        mirrorConfig={{
+          isMirror: materials.isMirror,
+          mirror: materials.mirror,
+        }}
+        lightsOn={lightsOn}
+      />
 
       {/* Панель управления на передней стене слева от дверей */}
       {elevator.visibility.controlPanel && (
@@ -833,396 +277,30 @@ const BasicElevator: React.FC = () => {
         />
       )}
 
-      {/* Правая боковая панель передней стены */}
-      <Box
-        position={[dimensions.width / 2 - 0.2, 0, dimensions.depth / 2]}
-        args={[0.4, dimensions.height, 0.07]}
-        castShadow
-      >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
+      {/* Двери */}
+      <ElevatorDoors
+        doorsOpen={doorsOpen}
+        doorHeight={doorHeight}
+        dimensions={dimensions}
+        doorMaterial={doorMaterial}
+        decorationStripes={elevator.decorationStripes}
+        decorationStripesMaterial={decorationStripesMaterial}
+      />
 
-      {/* Левая дверь - с скорректированной шириной */}
-      <animated.group {...leftDoorSpring}>
-        <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2 + 0.1, doorHeight, 0.05]} />
-          <primitive object={doorMaterial} attach="material" />
-        </mesh>
-
-        {/* Декоративные полосы на левой двери */}
-        {elevator.decorationStripes?.enabled && elevator.decorationStripes?.showOnDoors && decorationStripesMaterial && (() => {
-          const stripeWidth = (elevator.decorationStripes.width || 5) / 100;
-          const stripeCount = elevator.decorationStripes.count || 1;
-          const isHorizontal = (elevator.decorationStripes.orientation || 'horizontal') === 'horizontal';
-          const offsetMeters = (elevator.decorationStripes.offset || 0) / 100;
-          
-          // Позиции для полос
-          const doorStripePositions: number[] = [];
-          
-          if (isHorizontal) {
-            // Для горизонтальных полос на двери
-            const step = doorHeight / (stripeCount + 1);
-            for (let i = 0; i < stripeCount; i++) {
-              doorStripePositions.push(-doorHeight / 2 + (i + 1) * step);
-            }
-            
-            return doorStripePositions.map((pos, index) => (
-              <Box
-                key={`door-left-stripe-h-${index}`}
-                position={[offsetMeters, pos, 0.025]}
-                args={[dimensions.width / 2, stripeWidth, 0.005]}
-                castShadow
-              >
-                {decorationStripesMaterial && (
-                  <primitive object={decorationStripesMaterial} attach="material" />
-                )}
-              </Box>
-            ));
-          } else {
-            // Для вертикальных полос на двери
-            const doorWidth = dimensions.width / 2 + 0.1;
-            const step = doorWidth / (stripeCount + 1);
-            for (let i = 0; i < stripeCount; i++) {
-              doorStripePositions.push(-doorWidth / 2 + (i + 1) * step);
-            }
-            
-            return doorStripePositions.map((pos, index) => (
-              <Box
-                key={`door-left-stripe-v-${index}`}
-                position={[pos + offsetMeters, 0, 0.025]}
-                args={[stripeWidth, doorHeight, 0.005]}
-                castShadow
-              >
-                {decorationStripesMaterial && (
-                  <primitive object={decorationStripesMaterial} attach="material" />
-                )}
-              </Box>
-            ));
-          }
-        })()}
-
-        {/* Центральная вертикальная линия на левой створке */}
-        <mesh
-          position={[dimensions.width / 4 - 0.03, 0, 0.025]}
-          castShadow
-        >
-          <boxGeometry args={[0.01, doorHeight, 0.05]} />
-          <primitive object={doorSeamMaterial} attach="material" />
-        </mesh>
-
-        {/* Внешняя полоска на левой створке (со стороны зрителя) */}
-        <mesh
-          position={[-dimensions.width / 4 + 0.03, 0, 0.025]}
-          castShadow
-        >
-          <boxGeometry args={[0.01, doorHeight, 0.05]} />
-          <primitive object={doorOuterSeamMaterial} attach="material" />
-        </mesh>
-        
-        {/* Горизонтальная линия в центре левой двери */}
-        <mesh
-          position={[0, 0, 0.025]}
-          castShadow
-        >
-          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.01, 0.05]} />
-          <primitive object={doorSeamMaterial} attach="material" />
-        </mesh>
-      </animated.group>
-
-      {/* Правая дверь - с скорректированной шириной */}
-      <animated.group {...rightDoorSpring}>
-        <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2 + 0.1, doorHeight, 0.05]} />
-          <primitive object={doorMaterial} attach="material" />
-        </mesh>
-
-        {/* Декоративные полосы на правой двери */}
-        {elevator.decorationStripes?.enabled && elevator.decorationStripes?.showOnDoors && decorationStripesMaterial && (() => {
-          const stripeWidth = (elevator.decorationStripes.width || 5) / 100;
-          const stripeCount = elevator.decorationStripes.count || 1;
-          const isHorizontal = (elevator.decorationStripes.orientation || 'horizontal') === 'horizontal';
-          const offsetMeters = (elevator.decorationStripes.offset || 0) / 100;
-          
-          // Позиции для полос
-          const doorStripePositions: number[] = [];
-          
-          if (isHorizontal) {
-            // Для горизонтальных полос на двери
-            const step = doorHeight / (stripeCount + 1);
-            for (let i = 0; i < stripeCount; i++) {
-              doorStripePositions.push(-doorHeight / 2 + (i + 1) * step);
-            }
-            
-            return doorStripePositions.map((pos, index) => (
-              <Box
-                key={`door-right-stripe-h-${index}`}
-                position={[offsetMeters, pos, 0.025]}
-                args={[dimensions.width / 2, stripeWidth, 0.005]}
-                castShadow
-              >
-                {decorationStripesMaterial && (
-                  <primitive object={decorationStripesMaterial} attach="material" />
-                )}
-              </Box>
-            ));
-          } else {
-            // Для вертикальных полос на двери
-            const doorWidth = dimensions.width / 2 + 0.1;
-            const step = doorWidth / (stripeCount + 1);
-            for (let i = 0; i < stripeCount; i++) {
-              doorStripePositions.push(-doorWidth / 2 + (i + 1) * step);
-            }
-            
-            return doorStripePositions.map((pos, index) => (
-              <Box
-                key={`door-right-stripe-v-${index}`}
-                position={[pos + offsetMeters, 0, 0.025]}
-                args={[stripeWidth, doorHeight, 0.005]}
-                castShadow
-              >
-                {decorationStripesMaterial && (
-                  <primitive object={decorationStripesMaterial} attach="material" />
-                )}
-              </Box>
-            ));
-          }
-        })()}
-
-        {/* Центральная вертикальная линия на правой створке */}
-        <mesh
-          position={[-dimensions.width / 4 + 0.03, 0, 0.025]}
-          castShadow
-        >
-          <boxGeometry args={[0.01, doorHeight, 0.05]} />
-          <primitive object={doorSeamMaterial} attach="material" />
-        </mesh>
-
-        {/* Внешняя полоска на правой створке (со стороны зрителя) */}
-        <mesh
-          position={[dimensions.width / 4 - 0.03, 0, 0.025]}
-          castShadow
-        >
-          <boxGeometry args={[0.01, doorHeight, 0.05]} />
-          <primitive object={doorOuterSeamMaterial} attach="material" />
-        </mesh>
-        
-        {/* Горизонтальная линия в центре правой двери */}
-        <mesh
-          position={[0, 0, 0.025]}
-          castShadow
-        >
-          <boxGeometry args={[dimensions.width / 2 + 0.1, 0.01, 0.05]} />
-          <primitive object={doorSeamMaterial} attach="material" />
-        </mesh>
-      </animated.group>
+      {/* Поручни */}
+      <ElevatorHandrails
+        dimensions={dimensions}
+        handrailMaterial={handrailMaterial}
+        isVisible={elevator.visibility.handrails}
+      />
 
       {/* Декоративные полосы на стенах */}
-      {elevator.decorationStripes?.enabled && decorationStripesMaterial && (
-        <>
-          {/* Функция для определения позиций полос в зависимости от их расположения */}
-          {(() => {
-            // Ширина полосы в метрах
-            const stripeWidth = (elevator.decorationStripes.width || 5) / 100;
-            // Количество полос
-            const stripeCount = elevator.decorationStripes.count || 1;
-            // Расстояние между полосами в метрах - используется в расчетах позиций
-            const spacingMeters = (elevator.decorationStripes.spacing || 3) / 100;
-            // Ориентация полос
-            const isHorizontal = (elevator.decorationStripes.orientation || 'horizontal') === 'horizontal';
-            // Пропускать ли заднюю стену с зеркалом
-            const skipMirrorWall = elevator.decorationStripes.skipMirrorWall ?? true;
-            // Смещение от центра в метрах
-            const offsetMeters = (elevator.decorationStripes.offset || 0) / 100;
-            
-            // Получаем позиции полос в зависимости от настройки position
-            const positions: number[] = [];
-            
-            switch (elevator.decorationStripes.position) {
-              case 'top': {
-                // Верхние полосы
-                if (isHorizontal) {
-                  // Для горизонтальных полос - позиции по высоте
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(dimensions.height / 3 + i * (stripeWidth + spacingMeters));
-                  }
-                } else {
-                  // Для вертикальных полос - позиции от верхней точки
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(i * (stripeWidth + spacingMeters) - (stripeCount - 1) * (stripeWidth + spacingMeters) / 2);
-                  }
-                }
-                break;
-              }
-              case 'bottom': {
-                // Нижние полосы
-                if (isHorizontal) {
-                  // Для горизонтальных полос - позиции по высоте
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(-dimensions.height / 3 - i * (stripeWidth + spacingMeters));
-                  }
-                } else {
-                  // Для вертикальных полос - позиции от нижней точки
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(i * (stripeWidth + spacingMeters) - (stripeCount - 1) * (stripeWidth + spacingMeters) / 2);
-                  }
-                }
-                break;
-              }
-              case 'all': {
-                // Полосы во всю высоту/ширину, равномерно распределенные
-                if (isHorizontal) {
-                  // Для горизонтальных полос - позиции по высоте
-                  const step = dimensions.height / (stripeCount + 1);
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(-dimensions.height / 2 + (i + 1) * step);
-                  }
-                } else {
-                  // Для вертикальных полос - равномерно распределяем по ширине/глубине
-                  const step = (dimensions.width - 0.1) / (stripeCount + 1);
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(-dimensions.width / 2 + 0.05 + (i + 1) * step);
-                  }
-                }
-                break;
-              }
-              default: { // 'middle'
-                // По умолчанию полосы в центре
-                if (isHorizontal) {
-                  // Для горизонтальных полос - позиции по высоте
-                  const middleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(- middleOffset + i * (stripeWidth + spacingMeters));
-                  }
-                } else {
-                  // Для вертикальных полос - позиции по ширине от центра
-                  const middleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
-                  for (let i = 0; i < stripeCount; i++) {
-                    positions.push(- middleOffset + i * (stripeWidth + spacingMeters));
-                  }
-                }
-                break;
-              }
-            }
-            
-            // Создаем дополнительные позиции для боковых стен при вертикальной ориентации
-            const sideWallPositions: number[] = [];
-            if (!isHorizontal) {
-              if (elevator.decorationStripes.position === 'all') {
-                // Распределяем полосы равномерно по глубине боковых стен
-                const step = dimensions.depth / (stripeCount + 1);
-                for (let i = 0; i < stripeCount; i++) {
-                  sideWallPositions.push(-dimensions.depth / 2 + (i + 1) * step);
-                }
-              } else {
-                // Используем то же расстояние между полосами, что и для задней стены
-                const sideWallMiddleOffset = (stripeCount - 1) * (stripeWidth + spacingMeters) / 2;
-                for (let i = 0; i < stripeCount; i++) {
-                  sideWallPositions.push(- sideWallMiddleOffset + i * (stripeWidth + spacingMeters));
-                }
-              }
-            }
-                        
-            return (
-              <>
-                {/* Задняя стена - показываем полосы только если нет зеркала или не выбран пропуск стены с зеркалом */}
-                {(!materials.isMirror.walls || !skipMirrorWall) && (
-                  isHorizontal ? (
-                    // Горизонтальные полосы на задней стене
-                    positions.map((pos, index) => (
-                      <Box
-                        key={`back-wall-stripe-${index}`}
-                        position={[offsetMeters, pos, -dimensions.depth / 2 + 0.025]}
-                        args={[dimensions.width - 0.06, stripeWidth, 0.005]}
-                        castShadow
-                      >
-                        {decorationStripesMaterial && (
-                          <primitive object={decorationStripesMaterial} attach="material" />
-                        )}
-                      </Box>
-                    ))
-                  ) : (
-                    // Вертикальные полосы на задней стене
-                    positions.map((pos, index) => (
-                      <Box
-                        key={`back-wall-stripe-${index}`}
-                        position={[pos + offsetMeters, 0, -dimensions.depth / 2 + 0.025]}
-                        args={[stripeWidth, dimensions.height - 0.06, 0.005]}
-                        castShadow
-                      >
-                        {decorationStripesMaterial && (
-                          <primitive object={decorationStripesMaterial} attach="material" />
-                        )}
-                      </Box>
-                    ))
-                  )
-                )}
-                
-                {/* Левая стена */}
-                {isHorizontal ? (
-                  // Горизонтальные полосы на левой стене
-                  positions.map((pos, index) => (
-                    <Box
-                      key={`left-wall-stripe-${index}`}
-                      position={[-dimensions.width / 2 + 0.025, pos, offsetMeters]}
-                      args={[0.005, stripeWidth, dimensions.depth - 0.06]}
-                      castShadow
-                    >
-                      {decorationStripesMaterial && (
-                        <primitive object={decorationStripesMaterial} attach="material" />
-                      )}
-                    </Box>
-                  ))
-                ) : (
-                  // Вертикальные полосы на левой стене
-                  sideWallPositions.map((zPos, index) => (
-                    <Box
-                      key={`left-wall-stripe-${index}`}
-                      position={[-dimensions.width / 2 + 0.025, offsetMeters, zPos + offsetMeters]}
-                      args={[0.005, dimensions.height - 0.06, stripeWidth]}
-                      castShadow
-                    >
-                      {decorationStripesMaterial && (
-                        <primitive object={decorationStripesMaterial} attach="material" />
-                      )}
-                    </Box>
-                  ))
-                )}
-                
-                {/* Правая стена */}
-                {isHorizontal ? (
-                  // Горизонтальные полосы на правой стене
-                  positions.map((pos, index) => (
-                    <Box
-                      key={`right-wall-stripe-${index}`}
-                      position={[dimensions.width / 2 - 0.025, pos, offsetMeters]}
-                      args={[0.005, stripeWidth, dimensions.depth - 0.06]}
-                      castShadow
-                    >
-                      {decorationStripesMaterial && (
-                        <primitive object={decorationStripesMaterial} attach="material" />
-                      )}
-                    </Box>
-                  ))
-                ) : (
-                  // Вертикальные полосы на правой стене
-                  sideWallPositions.map((zPos, index) => (
-                    <Box
-                      key={`right-wall-stripe-${index}`}
-                      position={[dimensions.width / 2 - 0.025, offsetMeters, zPos + offsetMeters]}
-                      args={[0.005, dimensions.height - 0.06, stripeWidth]}
-                      castShadow
-                    >
-                      {decorationStripesMaterial && (
-                        <primitive object={decorationStripesMaterial} attach="material" />
-                      )}
-                    </Box>
-                  ))
-                )}
-              </>
-            );
-          })()}
-        </>
-      )}
+      <DecorationStripes
+        dimensions={dimensions}
+        decorationStripes={elevator.decorationStripes || {}}
+        decorationStripesMaterial={decorationStripesMaterial}
+        hasMirror={materials.isMirror.walls}
+      />
     </group>
   );
 };

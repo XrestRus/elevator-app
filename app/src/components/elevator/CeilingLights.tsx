@@ -19,6 +19,14 @@ const CeilingLights: React.FC<{
   // Получаем состояние света из Redux
   const { dimensions } = useSelector((state: RootState) => state.elevator);
   const lightsOn = useSelector((state: RootState) => state.elevator.lighting.enabled ?? true);
+  const wallColor = useSelector((state: RootState) => state.elevator.materials.walls);
+  
+  // Создаем цвет корпуса светильника на основе цвета стен
+  const frameLightColor = React.useMemo(() => {
+    const color = new THREE.Color(wallColor);
+    color.multiplyScalar(0.8); // Делаем цвет немного темнее стен
+    return color;
+  }, [wallColor]);
   
   // Расположение светильников на потолке
   const positions: [number, number, number][] = [];
@@ -124,7 +132,7 @@ const CeilingLights: React.FC<{
           {/* Корпус светильника */}
           <mesh>
             <cylinderGeometry args={[0.0, 0.076, 0.01, 32]} />
-            <meshStandardMaterial color="#666666" />
+            <meshStandardMaterial color={frameLightColor} />
           </mesh>
           
           {/* Стеклянный плафон */}

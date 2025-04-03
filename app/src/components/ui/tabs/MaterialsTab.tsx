@@ -7,6 +7,7 @@ import {
   setTexture,
   setRoughness,
   setMetalness,
+  setDecorationStripes,
 } from "../../../store/elevatorSlice";
 import {
   RangeSlider,
@@ -111,6 +112,7 @@ const MaterialPresets: React.FC = () => {
     dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
     dispatch(setRoughness({ part: 'doors', value: 0.1 }));
     dispatch(setRoughness({ part: 'floor', value: 0.3 })); // Невысокая шероховатость для пола
+    dispatch(setDecorationStripes({ color: '#302010', material: 'metal' }));
   };
   
   const applyBronzePreset = () => {
@@ -126,6 +128,7 @@ const MaterialPresets: React.FC = () => {
     dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
     dispatch(setRoughness({ part: 'doors', value: 0.2 }));
     dispatch(setRoughness({ part: 'floor', value: 0.5 })); // Средняя шероховатость для пола
+    dispatch(setDecorationStripes({ color: '#E2C87A', material: 'metal' }));
   };
   
   const applySilverPreset = () => {
@@ -141,6 +144,7 @@ const MaterialPresets: React.FC = () => {
     dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
     dispatch(setRoughness({ part: 'doors', value: 0.1 }));
     dispatch(setRoughness({ part: 'floor', value: 0.2 })); // Низкая шероховатость для пола
+    dispatch(setDecorationStripes({ color: '#1A1A1A', material: 'metal' })); // Темные полосы для контраста
   };
   
   const applyCopperPreset = () => {
@@ -156,6 +160,40 @@ const MaterialPresets: React.FC = () => {
     dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
     dispatch(setRoughness({ part: 'doors', value: 0.2 }));
     dispatch(setRoughness({ part: 'floor', value: 0.3 })); // Низкая шероховатость для пола
+    dispatch(setDecorationStripes({ color: '#FFCA80', material: 'metal' })); // Светлые золотистые полосы
+  };
+  
+  // Новые пресеты
+  const applyMinimalistPreset = () => {
+    dispatch(setMaterial({ part: 'walls', color: '#F2F2F2' })); // Светло-серые стены
+    dispatch(setMaterial({ part: 'ceiling', color: '#FFFFFF' })); // Белый потолок 
+    dispatch(setMaterial({ part: 'floor', color: '#333333' })); // Тёмный пол
+    dispatch(setMaterial({ part: 'doors', color: '#E0E0E0' })); // Светло-серые двери
+    dispatch(setMetalness({ part: 'walls', value: 0.1 }));
+    dispatch(setMetalness({ part: 'ceiling', value: 0.0 }));
+    dispatch(setMetalness({ part: 'doors', value: 0.3 }));
+    dispatch(setMetalness({ part: 'floor', value: 0.2 }));
+    dispatch(setRoughness({ part: 'walls', value: 0.7 }));
+    dispatch(setRoughness({ part: 'ceiling', value: 0.8 }));
+    dispatch(setRoughness({ part: 'doors', value: 0.4 }));
+    dispatch(setRoughness({ part: 'floor', value: 0.5 }));
+    dispatch(setDecorationStripes({ color: '#000000', material: 'glossy' }));
+  };
+  
+  const applyLuxuryBluePreset = () => {
+    dispatch(setMaterial({ part: 'walls', color: '#1E2D48' })); // Темно-синие стены
+    dispatch(setMaterial({ part: 'ceiling', color: '#1E2D48' })); // Темно-синий потолок 
+    dispatch(setMaterial({ part: 'floor', color: '#0A0A0A' })); // Почти черный пол
+    dispatch(setMaterial({ part: 'doors', color: '#2C3C56' })); // Чуть светлее, чем стены
+    dispatch(setMetalness({ part: 'walls', value: 0.6 }));
+    dispatch(setMetalness({ part: 'ceiling', value: 0.6 }));
+    dispatch(setMetalness({ part: 'doors', value: 0.7 }));
+    dispatch(setMetalness({ part: 'floor', value: 0.8 }));
+    dispatch(setRoughness({ part: 'walls', value: 0.3 }));
+    dispatch(setRoughness({ part: 'ceiling', value: 0.3 }));
+    dispatch(setRoughness({ part: 'doors', value: 0.2 }));
+    dispatch(setRoughness({ part: 'floor', value: 0.2 }));
+    dispatch(setDecorationStripes({ color: '#C0AA70', material: 'metal' })); // Золотистые полосы
   };
   
   return (
@@ -181,6 +219,16 @@ const MaterialPresets: React.FC = () => {
         <PresetButton 
           label="Медный" 
           onClick={applyCopperPreset} 
+        />
+
+        <PresetButton 
+          label="Минимализм" 
+          onClick={applyMinimalistPreset} 
+        />
+
+        <PresetButton 
+          label="Синий люкс" 
+          onClick={applyLuxuryBluePreset} 
         />
       </div>
     </div>

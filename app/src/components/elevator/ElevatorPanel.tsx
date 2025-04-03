@@ -36,19 +36,21 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         color: panelColor,
         metalness: 0.6,
         roughness: 0.3,
+        emissive: lightsOn ? panelColor : "#000000",
+        emissiveIntensity: lightsOn ? 0.05 : 0,
       }),
-    [panelColor]
+    [panelColor, lightsOn]
   );
 
   // Материал для экрана
   const displayMaterial = useMemo(
     () => 
       new THREE.MeshStandardMaterial({
-        color: "gray",
-        emissive: "#004488",
+        color: panelColor,
+        emissive: lightsOn ? panelColor : "#000000",
         emissiveIntensity: lightsOn ? 0.5 : 0.0,
       }),
-    [lightsOn]
+    [panelColor, lightsOn]
   );
 
   // Материал для кнопок (наследует цвет стен но слегка светлее)
@@ -68,14 +70,16 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const buttonRimMaterial = useMemo(
     () => {
       const rimColor = new THREE.Color(buttonColor);
-      rimColor.multiplyScalar(1.2); // Делаем обводку еще светлее
+      rimColor.multiplyScalar(1.3); // Делаем обводку ещё светлее для лучшего контраста
       return new THREE.MeshStandardMaterial({
         color: rimColor,
         metalness: 0.9,
         roughness: 0.1,
+        emissive: lightsOn ? rimColor : "#000000",
+        emissiveIntensity: lightsOn ? 0.1 : 0,
       });
     },
-    [buttonColor]
+    [buttonColor, lightsOn]
   );
 
   // Позиции кнопок в соответствии с изображением
