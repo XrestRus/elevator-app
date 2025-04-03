@@ -38,17 +38,17 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
   // Анимация для левой двери
   const leftDoorSpring = useSpring({
     position: doorsOpen
-      ? [-dimensions.width / 2 - 0.3, -0.15, dimensions.depth / 2]
-      : [-dimensions.width / 4 + 0.05, -0.15, dimensions.depth / 2],
-    config: { mass: 1, tension: 120, friction: 14 },
+      ? [-dimensions.width / 2, -0.15, dimensions.depth / 2]
+      : [-dimensions.width / 4.45, -0.15, dimensions.depth / 2],
+    config: { mass: 0.1, tension: 100, friction: 14 },
   });
 
   // Анимация для правой двери
   const rightDoorSpring = useSpring({
     position: doorsOpen
-      ? [dimensions.width / 2 + 0.3, -0.15, dimensions.depth / 2]
-      : [dimensions.width / 4 - 0.05, -0.15, dimensions.depth / 2],
-    config: { mass: 1, tension: 120, friction: 14 },
+      ? [dimensions.width / 2, -0.15, dimensions.depth / 2]
+      : [dimensions.width / 4.45, -0.15, dimensions.depth / 2],
+    config: { mass: 0.1, tension: 100, friction: 14 },
   });
 
   return (
@@ -56,7 +56,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
       {/* Левая дверь - с скорректированной шириной */}
       <animated.group {...leftDoorSpring}>
         <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2 + 0.1, doorHeight, 0.05]} />
+          <boxGeometry args={[dimensions.width / 2.23, doorHeight, 0.05]} />
           <primitive object={doorMaterial} attach="material" />
         </mesh>
       </animated.group>
@@ -64,7 +64,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
       {/* Правая дверь - с скорректированной шириной */}
       <animated.group {...rightDoorSpring}>
         <mesh castShadow>
-          <boxGeometry args={[dimensions.width / 2 + 0.1, doorHeight, 0.05]} />
+          <boxGeometry args={[dimensions.width / 2.23, doorHeight, 0.05]} />
           <primitive object={doorMaterial} attach="material" />
         </mesh>
       </animated.group>
