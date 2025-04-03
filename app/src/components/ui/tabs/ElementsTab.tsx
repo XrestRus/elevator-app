@@ -9,7 +9,6 @@ import {
   RangeSlider,
   ColorPicker,
   SelectInput,
-  PresetButton,
   CheckboxInput
 } from "../common/UIControls";
 
@@ -108,13 +107,6 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
     label: `${i + 1} ${i === 0 ? 'полоса' : i < 4 ? 'полосы' : 'полос'}`
   }));
   
-  // Опции для выбора материала полос
-  const materialOptions = [
-    { value: 'metal', label: 'Металл' },
-    { value: 'glossy', label: 'Глянцевый' },
-    { value: 'wood', label: 'Дерево' }
-  ];
-  
   return (
     <div style={{ marginBottom: '16px' }}>
       <h4>Декоративные полосы</h4>
@@ -161,19 +153,10 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             options={countOptions}
           />
           
-          <CheckboxInput
-            id="stripesOnDoors"
-            label="Полосы на дверях"
-            checked={elevator.decorationStripes?.showOnDoors ?? false}
-            onChange={(checked) => dispatch(setDecorationStripes({ 
-              showOnDoors: checked 
-            }))}
-          />
-          
           <RangeSlider
             label="Ширина полосы (см):"
             min={0.1}
-            max={15}
+            max={30}
             step={0.1}
             value={elevator.decorationStripes?.width ?? 5}
             onChange={(value) => dispatch(setDecorationStripes({ 
@@ -181,13 +164,13 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             }))}
             centerLabel={(value) => `${value.toFixed(1)} см`}
             leftLabel="0.1 см"
-            rightLabel="15 см"
+            rightLabel="30 см"
           />
           
           <RangeSlider
             label="Расстояние между полосами (см):"
             min={1}
-            max={20}
+            max={30}
             step={0.5}
             value={elevator.decorationStripes?.spacing ?? 3}
             onChange={(value) => dispatch(setDecorationStripes({ 
@@ -195,21 +178,7 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             }))}
             centerLabel={(value) => `${value.toFixed(1)} см`}
             leftLabel="1 см"
-            rightLabel="20 см"
-          />
-          
-          <RangeSlider
-            label="Смещение от центра (см):"
-            min={-20}
-            max={20}
-            step={0.5}
-            value={elevator.decorationStripes?.offset ?? 0}
-            onChange={(value) => dispatch(setDecorationStripes({ 
-              offset: value 
-            }))}
-            centerLabel={(value) => `${value.toFixed(1)} см`}
-            leftLabel="Левее"
-            rightLabel="Правее"
+            rightLabel="30 см"
           />
           
           <CheckboxInput
@@ -221,17 +190,6 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             }))}
           />
           
-          <SelectInput
-            label="Материал полос:"
-            value={elevator.decorationStripes?.material ?? 'metal'}
-            onChange={(value) => {
-              if (value === 'metal' || value === 'glossy' || value === 'wood') {
-                dispatch(setDecorationStripes({ material: value }));
-              }
-            }}
-            options={materialOptions}
-          />
-          
           <ColorPicker
             label="Цвет полос:"
             value={elevator.decorationStripes?.color ?? '#C0C0C0'}
@@ -239,153 +197,8 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
               color: value 
             }))}
           />
-          
-          <StripesPresets />
         </>
       )}
-    </div>
-  );
-};
-
-/**
- * Компонент с пресетами декоративных полос
- */
-const StripesPresets: React.FC = () => {
-  const dispatch = useDispatch();
-  
-  const applyGoldStripe = () => {
-    dispatch(setDecorationStripes({
-      enabled: true,
-      position: 'middle',
-      count: 1,
-      width: 5,
-      material: 'metal',
-      color: '#FFD700', // Золотой цвет
-      orientation: 'horizontal',
-      spacing: 3,
-      skipMirrorWall: true,
-      offset: 0,
-      showOnDoors: false
-    }));
-  };
-  
-  const applySilverStripe = () => {
-    dispatch(setDecorationStripes({
-      enabled: true,
-      position: 'middle',
-      count: 1,
-      width: 3,
-      material: 'metal',
-      color: '#C0C0C0', // Серебряный цвет
-      orientation: 'horizontal',
-      spacing: 3,
-      skipMirrorWall: true,
-      offset: 0,
-      showOnDoors: false
-    }));
-  };
-  
-  const applyWoodenStripes = () => {
-    dispatch(setDecorationStripes({
-      enabled: true,
-      position: 'all',
-      count: 3,
-      width: 8,
-      material: 'wood',
-      color: '#8B4513', // Деревянный цвет
-      orientation: 'horizontal',
-      spacing: 3,
-      skipMirrorWall: true,
-      offset: 0,
-      showOnDoors: false
-    }));
-  };
-  
-  const applyVerticalStripes = () => {
-    dispatch(setDecorationStripes({
-      enabled: true,
-      position: 'all',
-      count: 5,
-      width: 2,
-      material: 'metal',
-      color: '#C0C0C0', // Серебряный цвет
-      orientation: 'vertical',
-      spacing: 3,
-      skipMirrorWall: true,
-      offset: 0,
-      showOnDoors: false
-    }));
-  };
-  
-  const applyGoldStripeWithDoors = () => {
-    dispatch(setDecorationStripes({
-      enabled: true,
-      position: 'middle',
-      count: 1,
-      width: 5,
-      material: 'metal',
-      color: '#FFD700', // Золотой цвет
-      orientation: 'horizontal',
-      spacing: 3,
-      skipMirrorWall: true,
-      offset: 0,
-      showOnDoors: true
-    }));
-  };
-  
-  const applyVerticalStripesWithDoors = () => {
-    dispatch(setDecorationStripes({
-      enabled: true,
-      position: 'all',
-      count: 3,
-      width: 2,
-      material: 'metal',
-      color: '#C0C0C0', // Серебряный цвет
-      orientation: 'vertical',
-      spacing: 3,
-      skipMirrorWall: true,
-      offset: 0,
-      showOnDoors: true
-    }));
-  };
-  
-  return (
-    <div style={{ marginBottom: '8px' }}>
-      <PresetButton 
-        label="Золотая полоса" 
-        onClick={applyGoldStripe} 
-        fullWidth={true}
-      />
-      
-      <PresetButton 
-        label="Серебряная полоса" 
-        onClick={applySilverStripe} 
-        fullWidth={true}
-      />
-      
-      <PresetButton 
-        label="Деревянные полосы" 
-        onClick={applyWoodenStripes} 
-        fullWidth={true}
-      />
-      
-      <PresetButton 
-        label="Вертикальные полосы" 
-        onClick={applyVerticalStripes} 
-        fullWidth={true}
-      />
-      
-      <PresetButton 
-        label="Золотая полоса с дверями" 
-        onClick={applyGoldStripeWithDoors} 
-        fullWidth={true}
-      />
-      
-      <PresetButton 
-        label="Вертикальные полосы с дверями" 
-        onClick={applyVerticalStripesWithDoors} 
-        fullWidth={true}
-      />
     </div>
   );
 };

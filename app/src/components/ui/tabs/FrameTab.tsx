@@ -7,7 +7,6 @@ import {
 } from "../../../store/elevatorSlice";
 import {
   RangeSlider,
-  SelectInput,
   PresetButton,
   CheckboxInput
 } from "../common/UIControls";
@@ -31,9 +30,6 @@ const FrameTab: React.FC<FrameTabProps> = ({ elevator }) => {
       {/* Основные размеры */}
       <DimensionsSection elevator={elevator} />
       
-      {/* Сохраненные размеры */}
-      <PresetsSection />
-      
       {/* Управление камерой */}
       <CameraSection elevator={elevator} />
       
@@ -53,26 +49,9 @@ interface DimensionsSectionProps {
 const DimensionsSection: React.FC<DimensionsSectionProps> = ({ elevator }) => {
   const dispatch = useDispatch();
   
-  // Опции типа лифта
-  const typeOptions = [
-    { value: 'residential', label: 'Пассажирский' },
-    { value: 'cargo', label: 'Грузовой' },
-    { value: 'panoramic', label: 'Панорамный' }
-  ];
-  
   return (
     <div style={{ marginBottom: '16px' }}>
       <h4>Основные размеры</h4>
-      
-      <SelectInput
-        label="Тип лифта:"
-        value={'residential'} // в типе данных отсутствует поле type, вместо этого используем фиксированное значение
-        onChange={(value) => {
-          // Здесь можно добавить логику для изменения типа лифта
-          console.log("Выбран тип лифта:", value);
-        }}
-        options={typeOptions}
-      />
       
       <RangeSlider
         label="Высота (м):"
@@ -109,98 +88,6 @@ const DimensionsSection: React.FC<DimensionsSectionProps> = ({ elevator }) => {
         leftLabel="1.5 м"
         rightLabel="3.0 м"
       />
-    </div>
-  );
-};
-
-/**
- * Компонент с пресетами размеров лифта
- */
-const PresetsSection: React.FC = () => {
-  const dispatch = useDispatch();
-  
-  const applySmallSize = () => {
-    dispatch(setElevatorDimensions({
-      height: 2.2,
-      width: 1.1,
-      depth: 1.4
-    }));
-  };
-  
-  const applyMediumSize = () => {
-    dispatch(setElevatorDimensions({
-      height: 2.4,
-      width: 1.5,
-      depth: 1.7
-    }));
-  };
-  
-  const applyLargeSize = () => {
-    dispatch(setElevatorDimensions({
-      height: 2.6,
-      width: 2.0,
-      depth: 2.1
-    }));
-  };
-  
-  const applyCargoSize = () => {
-    dispatch(setElevatorDimensions({
-      height: 2.8,
-      width: 2.3,
-      depth: 2.7
-    }));
-  };
-  
-  const applyWideSize = () => {
-    dispatch(setElevatorDimensions({
-      height: 2.4,
-      width: 2.0,
-      depth: 1.5
-    }));
-  };
-  
-  const applyDeepSize = () => {
-    dispatch(setElevatorDimensions({
-      height: 2.4,
-      width: 1.2,
-      depth: 2.4
-    }));
-  };
-  
-  return (
-    <div style={{ marginBottom: '16px' }}>
-      <h4>Стандартные размеры</h4>
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        <PresetButton 
-          label="Малый (4 чел.)" 
-          onClick={applySmallSize} 
-        />
-        
-        <PresetButton 
-          label="Средний (6 чел.)" 
-          onClick={applyMediumSize} 
-        />
-        
-        <PresetButton 
-          label="Большой (10 чел.)" 
-          onClick={applyLargeSize} 
-        />
-        
-        <PresetButton 
-          label="Грузовой" 
-          onClick={applyCargoSize} 
-        />
-        
-        <PresetButton 
-          label="Широкий" 
-          onClick={applyWideSize} 
-        />
-        
-        <PresetButton 
-          label="Глубокий" 
-          onClick={applyDeepSize} 
-        />
-      </div>
     </div>
   );
 };

@@ -4,7 +4,6 @@ import { RootState } from "../../store/store";
 import FrameTab from "./tabs/FrameTab.tsx";
 import MaterialsTab from "./tabs/MaterialsTab.tsx";
 import ElementsTab from "./tabs/ElementsTab.tsx";
-import { PresetButton } from "./common/UIControls";
 
 /**
  * Основной компонент панели управления UI
@@ -138,9 +137,6 @@ const UIPanel: React.FC = () => {
           >
             {renderTabContent()}
           </div>
-
-          {/* Нижняя панель с кнопками */}
-          <FooterPanel />
         </>
       )}
     </div>
@@ -174,58 +170,6 @@ const TabButton: React.FC<TabButtonProps> = ({ active, onClick, label }) => {
     >
       {label}
     </button>
-  );
-};
-
-/**
- * Компонент нижней панели с кнопками действий
- */
-const FooterPanel: React.FC = () => {
-  const handleSaveConfig = () => {
-    // Здесь будет логика сохранения конфигурации
-    alert("Сохранение конфигурации лифта...");
-  };
-
-  const handleShareConfig = () => {
-    // Здесь будет логика для поделиться ссылкой
-    alert("Копирование ссылки на конфигурацию...");
-  };
-
-  const handleResetConfig = () => {
-    // Здесь будет логика сброса настроек
-    if (window.confirm("Вы уверены, что хотите сбросить все настройки?")) {
-      alert("Настройки сброшены!");
-    }
-  };
-
-  return (
-    <div
-      style={{
-        padding: "12px 16px",
-        borderTop: "1px solid rgba(200, 200, 200, 0.5)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-      }}
-    >
-      <PresetButton
-        label="Сохранить конфигурацию"
-        onClick={handleSaveConfig}
-        fullWidth={true}
-      />
-      
-      <div style={{ display: "flex", gap: "8px" }}>
-        <PresetButton
-          label="Поделиться"
-          onClick={handleShareConfig}
-        />
-        
-        <PresetButton
-          label="Сбросить"
-          onClick={handleResetConfig}
-        />
-      </div>
-    </div>
   );
 };
 
