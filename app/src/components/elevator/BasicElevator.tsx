@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useSelector } from "react-redux";
@@ -11,6 +11,7 @@ import ElevatorDoors from "./ElevatorDoors.tsx";
 import ElevatorMirror from "./ElevatorMirror.tsx";
 import ElevatorHandrails from "./ElevatorHandrails.tsx";
 import DecorationStripes from "./DecorationStripes.tsx";
+import JointStripes from "./JointStripes";
 import {
   createWallMaterialWithCustomRepeat,
   loadPBRTextures,
@@ -119,6 +120,31 @@ const BasicElevator: React.FC = () => {
   const wallTextures = useTexture(wallPaths);
   const floorTextures = useTexture(floorPaths);
   const ceilingTextures = useTexture(ceilingPaths);
+
+  // Добавляем обработку ошибок при загрузке текстур
+  useEffect(() => {
+    // Логируем информацию о текстурах
+    console.log("Пути к текстурам стен:", wallPaths);
+    
+    // Определяем обработчик глобальных ошибок загрузки изображений
+    const handleGlobalError = (event: Event) => {
+      const target = event.target as HTMLImageElement;
+      if (target && target.src && !target.src.includes('dummy.png')) {
+        console.warn(`Не удалось загрузить текстуру: ${target.src}`);
+      }
+      // Предотвращаем всплытие ошибки до консоли браузера
+      event.stopPropagation();
+      event.preventDefault();
+    };
+    
+    // Добавляем глобальный обработчик ошибок загрузки изображений
+    window.addEventListener('error', handleGlobalError, true);
+    
+    // Очищаем обработчик при размонтировании
+    return () => {
+      window.removeEventListener('error', handleGlobalError, true);
+    };
+  }, [wallPaths]);
 
   // Создаем PBR материалы только если есть реальные текстуры (не заглушки)
   const wallPBRMaterial = useMemo(
@@ -234,6 +260,50 @@ const BasicElevator: React.FC = () => {
     materials.walls
   ]);
 
+  // Материал для стыков между стенами
+  const jointStripeMaterial = useMemo(() => {
+    // Если стыки не включены, возвращаем null
+    if (!elevator.joints?.enabled) return null;
+    
+    // Если полосы активированы, используем их цвет и материал для стыков
+    if (elevator.decorationStripes?.enabled && decorationStripesMaterial) {
+      return decorationStripesMaterial;
+    }
+    
+    // Если указан цвет стыков, используем его
+    if (elevator.joints?.color) {
+      const jointColor = new THREE.Color(elevator.joints.color);
+      
+      return new THREE.MeshStandardMaterial({
+        color: jointColor,
+        metalness: elevator.joints.material === 'metal' ? 0.9 : 
+                  (elevator.joints.material === 'glossy' ? 0.7 : 0.1),
+        roughness: elevator.joints.material === 'metal' ? 0.1 : 
+                  (elevator.joints.material === 'glossy' ? 0.05 : 0.8),
+        emissive: elevator.joints.material === 'glossy' ? 
+                  jointColor : '#000000',
+        emissiveIntensity: elevator.joints.material === 'glossy' ? 0.05 : 0
+      });
+    }
+    
+    // Если цвет не указан, используем цвет стен, но делаем его гораздо темнее
+    const color = new THREE.Color(materials.walls);
+    color.multiplyScalar(0.5); // Делаем цвет ещё темнее (50% от исходного)
+    
+    return new THREE.MeshStandardMaterial({
+      color: color,
+      metalness: 0.9, // Увеличиваем металличность
+      roughness: 0.1, // Уменьшаем шероховатость для более заметного блеска
+    });
+  }, [
+    elevator.joints?.enabled,
+    elevator.joints?.color,
+    elevator.joints?.material,
+    elevator.decorationStripes?.enabled,
+    decorationStripesMaterial,
+    materials.walls
+  ]);
+
   return (
     <group>
       {/* Пол */}
@@ -300,6 +370,13 @@ const BasicElevator: React.FC = () => {
         decorationStripes={elevator.decorationStripes || {}}
         decorationStripesMaterial={decorationStripesMaterial}
         hasMirror={materials.isMirror.walls}
+      />
+
+      {/* Стыки между стенами */}
+      <JointStripes
+        dimensions={dimensions}
+        jointStripeMaterial={jointStripeMaterial}
+        jointOptions={elevator.joints}
       />
     </group>
   );

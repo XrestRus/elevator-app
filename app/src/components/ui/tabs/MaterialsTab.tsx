@@ -471,7 +471,7 @@ const TextureControls: React.FC<TextureControlsProps> = ({ elevator }) => {
   const textureOptions = [
     { value: "", label: "Без текстуры" },
     { value: "/textures/example/wood_0066_1k_HoQeAg", label: "Дерево (PBR)" },
-    { value: "/textures/example/metal_0067_1k_AdqCdW", label: "Металл 1 (PBR)" },
+    { value: "/textures/example/metal_0049_1k_1dmpSz", label: "Металл 1 (PBR)" },
     { value: "/textures/example/metal_0071_1k_HD5XFx", label: "Металл 2 (PBR)" },
     { value: "/textures/example/metal_0081_1k_qh6kbG", label: "Металл 3 (PBR)" },
     { value: "/textures/example/metal_0082_1k_je0RXH", label: "Металл 4 (PBR)" },

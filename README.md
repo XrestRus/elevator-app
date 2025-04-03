@@ -1,7 +1,6 @@
 # AI Elevator - Конфигуратор 3D лифтов
 
 ## Текстуры и материалы
-- https://www.texturecan.com/category/
 
 ### Добавление новых текстур
 

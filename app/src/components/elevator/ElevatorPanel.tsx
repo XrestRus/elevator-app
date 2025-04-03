@@ -57,13 +57,13 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const buttonMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: buttonColor,
+        color: panelColor,
         metalness: 0.8,
         roughness: 0.2,
-        emissive: buttonColor,
-        emissiveIntensity: 0.1,
+        emissive: panelColor,
+        emissiveIntensity: lightsOn ? 0.5 : 0.0,
       }),
-    [buttonColor]
+    [panelColor, lightsOn]
   );
 
   // Материал для обводки кнопок (еще светлее основного цвета кнопок)
@@ -76,7 +76,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         metalness: 0.9,
         roughness: 0.1,
         emissive: lightsOn ? rimColor : "#000000",
-        emissiveIntensity: lightsOn ? 0.1 : 0,
+        emissiveIntensity: lightsOn ? 0.34 : 0,
       });
     },
     [buttonColor, lightsOn]

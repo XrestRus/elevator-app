@@ -70,6 +70,9 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
     };
   }
 
+  // Проверка и логирование пути
+  console.log(`Загружаем текстуры из ${baseTexturePath}`);
+
   // Исправляем путь, чтобы он правильно начинался с /public
   const fixedBasePath = baseTexturePath.startsWith("/")
     ? baseTexturePath
@@ -121,7 +124,25 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
 
   // Формируем пути к файлам текстур
   const colorMapPath = `${fixedBasePath}/${texturePrefix}_color_1k.jpg`;
-  const normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_directx_1k.png`;
+  
+  // Проверяем, является ли это проблемной текстурой metal_0049
+  let normalMapPath = null;
+  if (textureType === "metal" && regexResult[2] === "0049") {
+    // Используем точное имя файла, которое мы обнаружили в директории
+    normalMapPath = `${fixedBasePath}/metal_0049_normal_direct_1k.png`;
+  } else {
+    // Для остальных текстур используем стандартное именование
+    normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_directx_1k.png`;
+  }
+  
+  // Альтернативные пути к карте нормалей, если стандартный файл отсутствует
+  const normalMapAlternatives = [
+    `${fixedBasePath}/${texturePrefix}_normal_direct_1k.png`,
+    `${fixedBasePath}/${texturePrefix}_normal_1k.png`,
+    `${fixedBasePath}/${texturePrefix}_normal_gl_1k.png`,
+    `${fixedBasePath}/${texturePrefix}_normal_opengl_1k.png`
+  ];
+  
   const roughnessMapPath = `${fixedBasePath}/${texturePrefix}_roughness_1k.jpg`;
   const aoMapPath = `${fixedBasePath}/${texturePrefix}_ao_1k.jpg`;
   const metalnessMapPath =
@@ -132,6 +153,7 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
   return {
     colorMapPath,
     normalMapPath,
+    normalMapAlternatives,  // Добавляем альтернативные пути
     roughnessMapPath,
     aoMapPath,
     metalnessMapPath,
@@ -147,12 +169,26 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
  */
 export const createTexturePaths = (
   pbrPaths: ReturnType<typeof loadPBRTextures>,
-  dummyTexturePath: string = "/textures/dummy.png"
+  dummyTexturePath: string = "/textures/example/wood_0066_1k_HoQeAg/wood_0066_color_1k.jpg"
 ) => {
+  // Выбираем основной путь к карте нормалей или первую альтернативу
+  let normalMapPathToUse = pbrPaths.normalMapPath;
+  if (pbrPaths.normalMapAlternatives && pbrPaths.normalMapAlternatives.length > 0) {
+    // Если основной путь не существует, пробуем альтернативы
+    if (!pbrPaths.normalMapPath) {
+      normalMapPathToUse = pbrPaths.normalMapAlternatives[0];
+    }
+  }
+  
   return {
     map: pbrPaths.colorMapPath || dummyTexturePath,
-    ...(pbrPaths.normalMapPath && {
-      normalMap: pbrPaths.normalMapPath,
+    ...(normalMapPathToUse && {
+      normalMap: normalMapPathToUse,
+    }),
+    // Если основной путь не работает, добавляем все альтернативы как запасные
+    // Three.js автоматически попробует загрузить первую успешную текстуру
+    ...(pbrPaths.normalMapAlternatives && pbrPaths.normalMapAlternatives.length > 0 && !normalMapPathToUse && {
+      normalMap: pbrPaths.normalMapAlternatives[0], // Используем первую альтернативу
     }),
     ...(pbrPaths.roughnessMapPath && {
       roughnessMap: pbrPaths.roughnessMapPath,

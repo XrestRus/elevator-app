@@ -101,6 +101,27 @@ export interface DecorationStripesOptions {
 }
 
 /**
+ * Интерфейс для настроек стыков между стенами
+ */
+export interface JointOptions {
+  enabled: boolean;
+  width: number;
+  color: string;
+  material: 'metal' | 'glossy' | 'wood';
+  protrusion: number; // Выступ стыков в мм
+}
+
+/**
+ * Интерфейс для настроек зеркала
+ */
+export interface MirrorOptions {
+  width: number;
+  height: number;
+  type: 'full' | 'double' | 'triple';
+  position: number;
+}
+
+/**
  * Интерфейс состояния лифта
  */
 export interface ElevatorState {
@@ -111,6 +132,7 @@ export interface ElevatorState {
   visibility: VisibilityOptions;
   camera: CameraOptions;
   decorationStripes?: DecorationStripesOptions;
+  joints?: JointOptions;
 }
 
 /**
@@ -124,7 +146,7 @@ const initialState: ElevatorState = {
   },
   doorsOpen: false,
   materials: {
-    floor: '#8B4513',
+    floor: '#F5F5F5',
     ceiling: '#F5F5F5',
     walls: '#E8E8E8',
     doors: '#A9A9A9',
@@ -177,17 +199,24 @@ const initialState: ElevatorState = {
     cameraHeight: 0.2
   },
   decorationStripes: {
-    enabled: false,
-    position: 'middle',
-    count: 1,
-    width: 5,
+    enabled: true,
+    position: 'all',
+    count: 4,
+    width: 0.1,
     material: 'metal',
     color: '#C0C0C0',
-    orientation: 'horizontal',
+    orientation: 'vertical',
     spacing: 3,
     skipMirrorWall: true,
     offset: 0,
-    showOnDoors: false
+    showOnDoors: true,
+  },
+  joints: {
+    enabled: true,
+    width: 2.5,
+    color: '#888888', 
+    material: 'metal',
+    protrusion: 0
   }
 };
 
@@ -265,12 +294,12 @@ const elevatorSlice = createSlice({
       if (!state.decorationStripes) {
         state.decorationStripes = {
           enabled: false,
-          position: 'middle',
-          count: 1,
+          position: 'all',
+          count: 4,
           width: 5,
           material: 'metal',
           color: '#C0C0C0',
-          orientation: 'horizontal',
+          orientation: 'vertical',
           spacing: 3,
           skipMirrorWall: true,
           offset: 0,
@@ -278,6 +307,20 @@ const elevatorSlice = createSlice({
         };
       }
       state.decorationStripes = { ...state.decorationStripes, ...action.payload };
+    },
+    
+    // Обновление настроек стыков
+    setJoints: (state, action: PayloadAction<Partial<JointOptions>>) => {
+      if (!state.joints) {
+        state.joints = {
+          enabled: false,
+          width: 2.5,
+          color: '#888888',
+          material: 'metal',
+          protrusion: 0
+        };
+      }
+      state.joints = { ...state.joints, ...action.payload };
     }
   }
 });
@@ -295,7 +338,8 @@ export const {
   setVisibility,
   setCamera,
   setMirrorOptions,
-  setDecorationStripes
+  setDecorationStripes,
+  setJoints
 } = elevatorSlice.actions;
 
 // Экспорт reducer

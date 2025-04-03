@@ -59,7 +59,17 @@ function CameraController() {
       // КОНЕЦ БЛОКА ДЛЯ РЕДАКТИРОВАНИЯ
       // =====================================
     }
-  }, [camera, cameraSettings.freeCamera, dimensions, cameraSettings.cameraHeight]);
+  }, [camera, cameraSettings.freeCamera, cameraSettings.cameraHeight]);
+  
+  // Обновляем высоту камеры при изменении высоты лифта только в режиме свободного полета
+  useEffect(() => {
+    if (cameraSettings.freeCamera) {
+      // Сохраняем X и Z координаты, меняем только Y
+      const x = camera.position.x;
+      const z = camera.position.z;
+      camera.position.set(x, dimensions.height * 0.8 - 0.8, z);
+    }
+  }, [camera, dimensions.height, cameraSettings.freeCamera]);
   
   // Отслеживаем изменение позиции камеры
   useEffect(() => {

@@ -4,6 +4,7 @@ import {
   setVisibility,
   setDecorationStripes,
   setLighting,
+  setJoints
 } from "../../../store/elevatorSlice";
 import {
   RangeSlider,
@@ -33,6 +34,9 @@ const ElementsTab: React.FC<ElementsTabProps> = ({ elevator }) => {
       
       {/* Декоративные полосы */}
       <DecorationStripes elevator={elevator} />
+      
+      {/* Стыки между стенами */}
+      <JointControls elevator={elevator} />
       
       {/* Освещение */}
       <LightingControls elevator={elevator} />
@@ -194,6 +198,90 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             label="Цвет полос:"
             value={elevator.decorationStripes?.color ?? '#C0C0C0'}
             onChange={(value) => dispatch(setDecorationStripes({ 
+              color: value 
+            }))}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Компонент управления стыками между стенами
+ */
+interface JointControlsProps {
+  elevator: ElevatorState;
+}
+
+const JointControls: React.FC<JointControlsProps> = ({ elevator }) => {
+  const dispatch = useDispatch();
+  
+  // Опции для выбора материала стыков
+  const materialOptions = [
+    { value: 'metal', label: 'Металл' },
+    { value: 'glossy', label: 'Глянцевый' },
+    { value: 'wood', label: 'Дерево' }
+  ];
+  
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h4>Стыки между стенами</h4>
+      
+      <CheckboxInput
+        id="showJoints"
+        label="Показать стыки между стенами"
+        checked={elevator.joints?.enabled ?? false}
+        onChange={(checked) => dispatch(setJoints({ 
+          enabled: checked
+        }))}
+      />
+      
+      {(elevator.joints?.enabled ?? false) && (
+        <>
+          <RangeSlider
+            label="Ширина стыка (мм):"
+            min={1}
+            max={20}
+            step={0.5}
+            value={elevator.joints?.width ?? 4}
+            onChange={(value) => dispatch(setJoints({ 
+              width: value 
+            }))}
+            centerLabel={(value) => `${value.toFixed(1)} мм`}
+            leftLabel="1 мм"
+            rightLabel="20 мм"
+          />
+          
+          <RangeSlider
+            label="Выступ стыка (мм):"
+            min={0}
+            max={10}
+            step={0.5}
+            value={elevator.joints?.protrusion ?? 3}
+            onChange={(value) => dispatch(setJoints({ 
+              protrusion: value 
+            }))}
+            centerLabel={(value) => `${value.toFixed(1)} мм`}
+            leftLabel="0 мм"
+            rightLabel="10 мм"
+          />
+          
+          <SelectInput
+            label="Материал стыков:"
+            value={elevator.joints?.material ?? 'metal'}
+            onChange={(value) => {
+              if (value === 'metal' || value === 'glossy' || value === 'wood') {
+                dispatch(setJoints({ material: value }));
+              }
+            }}
+            options={materialOptions}
+          />
+          
+          <ColorPicker
+            label="Цвет стыков:"
+            value={elevator.joints?.color ?? '#888888'}
+            onChange={(value) => dispatch(setJoints({ 
               color: value 
             }))}
           />
