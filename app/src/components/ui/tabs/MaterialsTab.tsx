@@ -483,6 +483,20 @@ const TextureControls: React.FC<TextureControlsProps> = ({ elevator }) => {
     <div style={{ marginBottom: '16px' }}>
       <h4>Текстуры</h4>
       
+      <div style={{ 
+        padding: '8px 12px',
+        marginBottom: '12px',
+        borderRadius: '4px',
+        backgroundColor: '#f0f8ff',
+        border: '1px solid #add8e6',
+        fontSize: '0.9rem'
+      }}>
+        <p style={{ margin: '0' }}>
+          <strong>Совет:</strong> Выбранный цвет материала автоматически применяется к текстуре, 
+          окрашивая её. Попробуйте выбрать текстуру и изменить цвет!
+        </p>
+      </div>
+      
       <SelectInput
         label="Текстура стен:"
         value={elevator.materials.texture.walls || ""}

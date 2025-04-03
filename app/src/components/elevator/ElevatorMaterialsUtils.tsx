@@ -204,11 +204,13 @@ export const createTexturePaths = (
  * Настраивает загруженные текстуры для правильного отображения
  * @param textures Объект с текстурами
  * @param textureType Тип текстуры
+ * @param color Цвет материала для окрашивания текстуры
  * @returns Новый материал с настроенными текстурами
  */
 export const createPBRMaterial = (
   textures: Record<string, THREE.Texture>,
-  textureType: string | null
+  textureType: string | null,
+  color?: string | THREE.Color
 ) => {
   if (!textureType) return null;
 
@@ -227,6 +229,11 @@ export const createPBRMaterial = (
     ...textures,
     envMapIntensity: 1.0,
   };
+  
+  // Если предоставлен цвет, применяем его к текстуре
+  if (color) {
+    materialProperties.color = new THREE.Color(color);
+  }
   
   // Настраиваем свойства материала в зависимости от типа текстуры
   if (textureType === "metal") {

@@ -179,20 +179,20 @@ const BasicElevator: React.FC = () => {
 
   // Создаем PBR материалы только если есть реальные текстуры (не заглушки)
   const wallPBRMaterial = useMemo(
-    () => createPBRMaterial(wallTextures, wallPBRPaths.textureType),
-    [wallTextures, wallPBRPaths]
+    () => createPBRMaterial(wallTextures, wallPBRPaths.textureType, materials.walls),
+    [wallTextures, wallPBRPaths, materials.walls]
   );
 
   // Создаем PBR материал для пола с мемоизацией
   const floorPBRMaterial = useMemo(
-    () => createPBRMaterial(floorTextures, floorPBRPaths.textureType),
-    [floorTextures, floorPBRPaths]
+    () => createPBRMaterial(floorTextures, floorPBRPaths.textureType, materials.floor),
+    [floorTextures, floorPBRPaths, materials.floor]
   );
 
   // Создаем PBR материал для потолка с мемоизацией
   const ceilingPBRMaterial = useMemo(
-    () => createPBRMaterial(ceilingTextures, ceilingPBRPaths.textureType),
-    [ceilingTextures, ceilingPBRPaths]
+    () => createPBRMaterial(ceilingTextures, ceilingPBRPaths.textureType, materials.ceiling),
+    [ceilingTextures, ceilingPBRPaths, materials.ceiling]
   );
 
   // Определяем, какой материал использовать: PBR или обычный
