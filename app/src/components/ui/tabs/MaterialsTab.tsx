@@ -531,6 +531,26 @@ const TextureControls: React.FC<TextureControlsProps> = ({ elevator }) => {
         }))}
         options={textureOptions}
       />
+      
+      <SelectInput
+        label="Текстура дверей:"
+        value={elevator.materials.texture.doors || ""}
+        onChange={(value) => dispatch(setTexture({ 
+          part: 'doors', 
+          value: value || null 
+        }))}
+        options={textureOptions}
+      />
+      
+      <SelectInput
+        label="Текстура передней стены:"
+        value={elevator.materials.texture.frontWall || ""}
+        onChange={(value) => dispatch(setTexture({ 
+          part: 'frontWall', 
+          value: value || null 
+        }))}
+        options={textureOptions}
+      />
     </div>
   );
 };

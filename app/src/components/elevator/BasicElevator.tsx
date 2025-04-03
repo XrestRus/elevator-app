@@ -83,6 +83,8 @@ const BasicElevator: React.FC = () => {
   const wallTexturePath = materials.texture?.walls || "";
   const floorTexturePath = materials.texture?.floor || "";
   const ceilingTexturePath = materials.texture?.ceiling || "";
+  const doorsTexturePath = materials.texture?.doors || "";
+  const frontWallTexturePath = materials.texture?.frontWall || "";
 
   // Кэширование PBR текстур с помощью хука useTexture
   // Используем useMemo для загрузки только при изменении пути к текстуре
@@ -97,6 +99,14 @@ const BasicElevator: React.FC = () => {
   const ceilingPBRPaths = useMemo(
     () => loadPBRTextures(ceilingTexturePath),
     [ceilingTexturePath]
+  );
+  const doorsPBRPaths = useMemo(
+    () => loadPBRTextures(doorsTexturePath),
+    [doorsTexturePath]
+  );
+  const frontWallPBRPaths = useMemo(
+    () => loadPBRTextures(frontWallTexturePath),
+    [frontWallTexturePath]
   );
 
   // Для предотвращения ошибок загрузки, используем заглушки для отсутствующих текстур
@@ -119,10 +129,22 @@ const BasicElevator: React.FC = () => {
     [ceilingPBRPaths]
   );
 
+  const doorsPaths = useMemo(
+    () => createTexturePaths(doorsPBRPaths, dummyTexturePath),
+    [doorsPBRPaths]
+  );
+
+  const frontWallPaths = useMemo(
+    () => createTexturePaths(frontWallPBRPaths, dummyTexturePath),
+    [frontWallPBRPaths]
+  );
+
   // Теперь useTexture всегда вызывается с каким-то путем
   const wallTextures = useTexture(wallPaths);
   const floorTextures = useTexture(floorPaths);
   const ceilingTextures = useTexture(ceilingPaths);
+  const doorsTextures = useTexture(doorsPaths);
+  const frontWallTextures = useTexture(frontWallPaths);
   
   // Оптимизация текстур в зависимости от производительности устройства
   useEffect(() => {
@@ -155,8 +177,10 @@ const BasicElevator: React.FC = () => {
     Object.values(wallTextures).forEach(optimizeTexture);
     Object.values(floorTextures).forEach(optimizeTexture);
     Object.values(ceilingTextures).forEach(optimizeTexture);
+    Object.values(doorsTextures).forEach(optimizeTexture);
+    Object.values(frontWallTextures).forEach(optimizeTexture);
     
-  }, [wallTextures, floorTextures, ceilingTextures, isHighPerformance]);
+  }, [wallTextures, floorTextures, ceilingTextures, doorsTextures, frontWallTextures, isHighPerformance]);
 
   // Обработка ошибок при загрузке текстур
   useEffect(() => {
@@ -203,20 +227,16 @@ const BasicElevator: React.FC = () => {
     [ceilingTextures, ceilingPBRPaths, materials.ceiling]
   );
 
-  // Определяем, какой материал использовать: PBR или обычный
-  const actualWallMaterial = wallPBRMaterial || basicWallMaterial;
-  const actualFloorMaterial = floorPBRMaterial || basicFloorMaterial;
-  const actualCeilingMaterial = ceilingPBRMaterial || basicCeilingMaterial;
-
-  // Материалы с разным повторением текстур для разных стен (мемоизация)
-  const sideWallMaterial = useMemo(
-    () => createWallMaterialWithCustomRepeat(actualWallMaterial, 1, 1),
-    [actualWallMaterial]
+  // Создаем PBR материал для дверей с мемоизацией
+  const doorsPBRMaterial = useMemo(
+    () => createPBRMaterial(doorsTextures, doorsPBRPaths.textureType, materials.doors),
+    [doorsTextures, doorsPBRPaths, materials.doors]
   );
 
-  const backWallMaterial = useMemo(
-    () => createWallMaterialWithCustomRepeat(actualWallMaterial, 1, 1),
-    [actualWallMaterial]
+  // Создаем PBR материал для передней стены с мемоизацией
+  const frontWallPBRMaterial = useMemo(
+    () => createPBRMaterial(frontWallTextures, frontWallPBRPaths.textureType, materials.walls),
+    [frontWallTextures, frontWallPBRPaths, materials.walls]
   );
 
   // Создаем материал для стены с дверью без текстуры (мемоизация)
@@ -228,6 +248,24 @@ const BasicElevator: React.FC = () => {
         roughness: 0.3,
       }),
     [materials.walls]
+  );
+
+  // Определяем, какой материал использовать: PBR или обычный
+  const actualWallMaterial = wallPBRMaterial || basicWallMaterial;
+  const actualFloorMaterial = floorPBRMaterial || basicFloorMaterial;
+  const actualCeilingMaterial = ceilingPBRMaterial || basicCeilingMaterial;
+  const actualDoorMaterial = doorsPBRMaterial || doorMaterial;
+  const actualFrontWallMaterial = frontWallPBRMaterial || frontWallMaterial;
+
+  // Материалы с разным повторением текстур для разных стен (мемоизация)
+  const sideWallMaterial = useMemo(
+    () => createWallMaterialWithCustomRepeat(actualWallMaterial, 1, 1),
+    [actualWallMaterial]
+  );
+
+  const backWallMaterial = useMemo(
+    () => createWallMaterialWithCustomRepeat(actualWallMaterial, 1, 1),
+    [actualWallMaterial]
   );
 
   // Материал для поручней (наследует цвет стен)
@@ -362,7 +400,7 @@ const BasicElevator: React.FC = () => {
         dimensions={dimensions}
         backWallMaterial={backWallMaterial}
         sideWallMaterial={sideWallMaterial}
-        frontWallMaterial={frontWallMaterial}
+        frontWallMaterial={actualFrontWallMaterial}
         doorFrameMaterial={doorFrameMaterial}
       />
       
@@ -391,7 +429,7 @@ const BasicElevator: React.FC = () => {
         doorsOpen={doorsOpen}
         doorHeight={doorHeight}
         dimensions={dimensions}
-        doorMaterial={doorMaterial}
+        doorMaterial={actualDoorMaterial}
       />
 
       {/* Поручни - с оптимизацией */}

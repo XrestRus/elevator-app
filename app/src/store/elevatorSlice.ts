@@ -54,6 +54,8 @@ export interface Materials {
     walls: string | null;
     floor: string | null;
     ceiling: string | null;
+    doors: string | null;
+    frontWall: string | null;
   };
   roughness: {
     walls: number;
@@ -164,7 +166,9 @@ const initialState: ElevatorState = {
     texture: {
       walls: null,
       floor: null,
-      ceiling: null
+      ceiling: null,
+      doors: null,
+      frontWall: null
     },
     roughness: {
       walls: 0.4,
