@@ -245,30 +245,6 @@ interface MirrorControlsProps {
 const MirrorControls: React.FC<MirrorControlsProps> = ({ elevator }) => {
   const dispatch = useDispatch();
   
-  const setLargeMirror = () => {
-    dispatch(setMirrorOptions({ 
-      width: Math.min(elevator.dimensions.width * 0.9, 2.5),
-      height: elevator.dimensions.height * 0.8,
-      type: 'full' 
-    }));
-  };
-
-  const setDoubleMirror = () => {
-    dispatch(setMirrorOptions({ 
-      width: Math.min(elevator.dimensions.width * 0.4, 1.0),
-      height: elevator.dimensions.height * 0.6,
-      type: 'double' 
-    }));
-  };
-
-  const setTripleMirror = () => {
-    dispatch(setMirrorOptions({ 
-      width: Math.min(elevator.dimensions.width * 0.25, 0.7),
-      height: elevator.dimensions.height * 0.5,
-      type: 'triple' 
-    }));
-  };
-  
   const mirrorTypeOptions = [
     { value: 'full', label: 'Сплошное зеркало' },
     { value: 'double', label: 'Два зеркала в ряд' },
@@ -328,25 +304,6 @@ const MirrorControls: React.FC<MirrorControlsProps> = ({ elevator }) => {
             }))}
             options={mirrorTypeOptions}
           />
-          
-          {/* Пресеты для зеркал */}
-          <div style={{ marginBottom: '8px' }}>
-            <label style={{ display: 'block', marginBottom: '4px' }}>Пресеты зеркал:</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <PresetButton 
-                label="Большое зеркало" 
-                onClick={setLargeMirror} 
-              />
-              <PresetButton 
-                label="Два зеркала" 
-                onClick={setDoubleMirror} 
-              />
-              <PresetButton 
-                label="Три зеркала" 
-                onClick={setTripleMirror} 
-              />
-            </div>
-          </div>
         </>
       )}
     </div>

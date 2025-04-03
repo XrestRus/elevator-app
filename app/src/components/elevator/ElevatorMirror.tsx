@@ -42,6 +42,43 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
   if (!isMirror.walls) {
     return null;
   }
+  
+  // Общие настройки MeshReflectorMaterial для всех зеркал
+  const mirrorMaterialProps = {
+    color: "#ffffff",
+    blur: [50, 25] as [number, number], // Меньшее размытие для более четкого отражения
+    resolution: 2048, // Увеличил разрешение для качества
+    mixBlur: 0.0, // Минимальное смешивание размытия
+    mixStrength: 1.0, // Усилил интенсивность отражения
+    metalness: 0.5, // Максимальная металличность
+    roughness: 0.05, // Минимальная шероховатость для зеркального отражения
+    mirror: 1.0, // Максимальное отражение
+    emissiveIntensity: lightsOn ? 0.2 : 0.0 // Интенсивность свечения
+  };
+  
+  // Настройки для рамки зеркала
+  const mirrorFrameProps = {
+    position: [
+      0,
+      mirror.position,
+      -dimensions.depth / 2 + 0.04, // Увеличил отступ рамки от стены
+    ] as [number, number, number],
+    args: [
+      mirror.width + 0.05,
+      mirror.height + 0.05,
+      0.005,
+    ] as [number, number, number],
+    castShadow: true
+  };
+  
+  // Свойства материала для рамки зеркала
+  const mirrorFrameMaterialProps = {
+    color: materials.walls,
+    metalness: 0.9,
+    roughness: 0.1,
+    emissive: lightsOn ? materials.walls : "#000000",
+    emissiveIntensity: lightsOn ? 0.05 : 0
+  };
 
   return (
     <>
@@ -56,17 +93,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
           args={[mirror.width, mirror.height, 0.01]}
           castShadow
         >
-          <MeshReflectorMaterial
-            color={"#ffffff"}
-            blur={[50, 25]} // Меньшее размытие для более четкого отражения
-            resolution={2048} // Увеличил разрешение для качества
-            mixBlur={0.0} // Минимальное смешивание размытия
-            mixStrength={1.0} // Усилил интенсивность отражения
-            metalness={0.5} // Максимальная металличность
-            roughness={0.05} // Минимальная шероховатость для зеркального отражения
-            mirror={1.0} // Максимальное отражение
-            emissiveIntensity={lightsOn ? 0.2 : 0.0} // Интенсивность свечения
-          />
+          <MeshReflectorMaterial {...mirrorMaterialProps} />
         </Box>
       )}
 
@@ -86,17 +113,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
             ]}
             castShadow
           >
-            <MeshReflectorMaterial
-              color={"#ffffff"}
-              blur={[50, 25]}
-              resolution={2048}
-              mixBlur={0.0}
-              mixStrength={1.0}
-              metalness={0.5}
-              roughness={0.05}
-              mirror={1.0}
-              emissiveIntensity={lightsOn ? 0.2 : 0.0}
-            />
+            <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
 
           <Box
@@ -112,17 +129,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
             ]}
             castShadow
           >
-            <MeshReflectorMaterial
-              color={"#ffffff"}
-              blur={[50, 25]}
-              resolution={2048}
-              mixBlur={0.0}
-              mixStrength={1.0}
-              metalness={0.5}
-              roughness={0.05}
-              mirror={1.0}
-              emissiveIntensity={lightsOn ? 0.2 : 0.0}
-            />
+            <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
         </>
       )}
@@ -143,17 +150,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
             ]}
             castShadow
           >
-            <MeshReflectorMaterial
-              color={"#ffffff"}
-              blur={[50, 25]}
-              resolution={2048}
-              mixBlur={0.0}
-              mixStrength={1.0}
-              metalness={0.5}
-              roughness={0.05}
-              mirror={1.0}
-              emissiveIntensity={lightsOn ? 0.2 : 0.0}
-            />
+            <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
 
           <Box
@@ -169,17 +166,7 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
             ]}
             castShadow
           >
-            <MeshReflectorMaterial
-              color={"#ffffff"}
-              blur={[50, 25]}
-              resolution={2048}
-              mixBlur={0.0}
-              mixStrength={1.0}
-              metalness={0.5}
-              roughness={0.05}
-              mirror={1.0}
-              emissiveIntensity={lightsOn ? 0.2 : 0.0}
-            />
+            <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
 
           <Box
@@ -195,41 +182,19 @@ const ElevatorMirror: React.FC<ElevatorMirrorProps> = ({
             ]}
             castShadow
           >
-            <MeshReflectorMaterial
-              color={"#ffffff"}
-              blur={[50, 25]}
-              resolution={2048}
-              mixBlur={0.0}
-              mixStrength={1.0}
-              metalness={0.5}
-              roughness={0.05}
-              mirror={1.0}
-              emissiveIntensity={lightsOn ? 0.2 : 0.0}
-            />
+            <MeshReflectorMaterial {...mirrorMaterialProps} />
           </Box>
         </>
       )}
 
       {/* Рамка зеркала */}
       <Box
-        position={[
-          0,
-          mirror.position,
-          -dimensions.depth / 2 + 0.04, // Увеличил отступ рамки от стены
-        ]}
-        args={[
-          mirror.width + 0.05,
-          mirror.height + 0.05,
-          0.005,
-        ]}
-        castShadow
+        position={mirrorFrameProps.position}
+        args={mirrorFrameProps.args}
+        castShadow={mirrorFrameProps.castShadow}
       >
         <meshStandardMaterial
-          color={materials.walls}
-          metalness={0.9}
-          roughness={0.1}
-          emissive={lightsOn ? materials.walls : "#000000"}
-          emissiveIntensity={lightsOn ? 0.05 : 0}
+          {...mirrorFrameMaterialProps}
         />
       </Box>
     </>

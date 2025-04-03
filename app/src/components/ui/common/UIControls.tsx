@@ -36,8 +36,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
       <label style={{ display: "block", marginBottom: "4px", color: "#000" }}>{label}</label>
       <input
         type="range"
-        min={min.toString()}
-        max={max.toString()}
+        min={min.toFixed(2).toString()}
+        max={max.toFixed(2).toString()}
         step={step.toString()}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
@@ -45,9 +45,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
         disabled={disabled}
       />
       <div style={{ display: "flex", justifyContent: "space-between", color: "#000" }}>
-        <span>{leftLabel || min}</span>
+        <span>{leftLabel || min.toFixed(2).toString()}</span>
         <span>{centerLabel(value)}</span>
-        <span>{rightLabel || max}</span>
+        <span>{rightLabel || max.toFixed(2).toString()}</span>
       </div>
     </div>
   );
