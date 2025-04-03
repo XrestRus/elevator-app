@@ -18,11 +18,29 @@ export interface HoverableObject {
   };
   position?: THREE.Vector3;
   additionalInfo?: Record<string, unknown>;
+  userData?: {
+    hoverable?: boolean;
+    requiresDoubleClick?: boolean;
+    [key: string]: unknown;
+  };
 }
 
 /**
- * Хук для отслеживания наведения мыши на объекты в Three.js сцене
- * и получения информации о них
+ * Хук для отслеживания наведения мыши на объекты в Three.js сцене и получения информации о них
+ * 
+ * Принцип работы:
+ * 1. Отслеживает движение мыши в окне браузера
+ * 2. Преобразует координаты мыши в нормализованные координаты Three.js (-1 до 1)
+ * 3. Использует Three.js Raycaster для определения объектов под курсором
+ * 4. Проверяет наличие метаданных (userData.hoverable) у пересеченных объектов
+ * 5. Создает структуру HoverableObject для первого подходящего объекта
+ * 6. Предоставляет:
+ *    - hoveredObject: информацию о наведенном объекте (или null)
+ *    - mousePosition: текущие координаты мыши для позиционирования тултипа
+ * 
+ * Интегрируется с компонентом MakeHoverable, который добавляет необходимые метаданные к объектам.
+ * 
+ * @returns {Object} Объект с информацией о наведении и позиции курсора
  */
 export function useObjectHover() {
   const { camera, scene } = useThree();
@@ -64,7 +82,8 @@ export function useObjectHover() {
             material: object.userData.material,
             dimensions: object.userData.dimensions,
             position: object.position.clone(),
-            additionalInfo: object.userData.additionalInfo
+            additionalInfo: object.userData.additionalInfo,
+            userData: object.userData
           });
         } else {
           setHoveredObject(null);

@@ -148,7 +148,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px; /* Фиксированная высота для блока с подсказкой */
+  min-height: 60px; /* Фиксированная высота для блока с подсказкой */
 }
 
 .object-info-panel-hover-hint strong {

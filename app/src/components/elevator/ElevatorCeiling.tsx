@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { Box } from "@react-three/drei";
 import * as THREE from "three";
-import { makeHoverable } from "../../utils/objectInfo";
+import MakeHoverable from "../ui/makeHoverable";
+import colorUtils from "../../utils/colorUtils";
 
 /**
  * Свойства компонента потолка лифта
@@ -22,34 +23,39 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
   dimensions,
   ceilingMaterial,
 }) => {
-  // Ссылка на элемент потолка
-  const ceilingRef = useRef<THREE.Mesh>(null);
+  // Получаем цвет материала потолка для отображения в тултипе
+  const getCeilingColor = () => colorUtils.getMaterialColor(ceilingMaterial);
   
-  // Добавляем информацию для наведения мыши
-  useEffect(() => {
-    if (ceilingRef.current) {
-      makeHoverable(ceilingRef.current, {
-        name: "Потолок лифта",
-        description: "Верхняя поверхность лифта, на которой расположены светильники",
-        material: "Материал потолка",
-        dimensions: {
-          width: dimensions.width,
-          height: 0.05,
-          depth: dimensions.depth
-        }
-      });
-    }
-  }, [dimensions]);
-  
-  return (
+  // Компонент потолка
+  const Ceiling = (
     <Box
-      ref={ceilingRef}
       position={[0, dimensions.height / 2, 0]}
       args={[dimensions.width, 0.05, dimensions.depth]}
       receiveShadow
     >
       <primitive object={ceilingMaterial} attach="material" />
     </Box>
+  );
+  
+  return (
+    <MakeHoverable
+      name="Потолок лифта"
+      type="Элемент конструкции"
+      description="Верхняя поверхность лифта, на которой расположены светильники"
+      material="Материал потолка"
+      dimensions={{
+        width: dimensions.width,
+        height: 0.05,
+        depth: dimensions.depth
+      }}
+      additionalInfo={{
+        color: getCeilingColor(),
+        texture: "Матовая поверхность со встроенным освещением"
+      }}
+      requiresDoubleClick={false}
+    >
+      {Ceiling}
+    </MakeHoverable>
   );
 };
 

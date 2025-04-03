@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { Box } from "@react-three/drei";
 import * as THREE from "three";
-import { makeHoverable } from "../../utils/objectInfo";
+import MakeHoverable from "../ui/makeHoverable";
+import colorUtils from "../../utils/colorUtils";
 
 /**
  * Свойства компонента стен лифта
@@ -27,165 +28,196 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
   sideWallMaterial,
   frontWallMaterial,
 }) => {
-  // Создаем ссылки на объекты для добавления информации при наведении
-  const backWallRef = useRef<THREE.Mesh>(null);
-  const leftWallRef = useRef<THREE.Mesh>(null);
-  const rightWallRef = useRef<THREE.Mesh>(null);
-  const topFrameRef = useRef<THREE.Mesh>(null);
-  const leftFrameRef = useRef<THREE.Mesh>(null);
-  const rightFrameRef = useRef<THREE.Mesh>(null);
+  // Получаем цвета материалов для отображения в тултипе
+  const getBackWallColor = () => colorUtils.getMaterialColor(backWallMaterial);
+  const getSideWallColor = () => colorUtils.getMaterialColor(sideWallMaterial);
+  const getFrontWallColor = () => colorUtils.getMaterialColor(frontWallMaterial);
+
+  // Создаем компоненты стен с поддержкой наведения
+  const BackWall = (
+    <Box
+      position={[0, 0, -dimensions.depth / 2]}
+      args={[dimensions.width, dimensions.height, 0.05]}
+      castShadow
+      receiveShadow
+    >
+      <primitive object={backWallMaterial} attach="material" />
+    </Box>
+  );
   
-  // Добавляем информацию для наведения мыши
-  useEffect(() => {
-    // Задняя стена
-    if (backWallRef.current) {
-      makeHoverable(backWallRef.current, {
-        name: "Задняя стена",
-        description: "Задняя стена лифта",
-        material: "Стандартный материал стен",
-        dimensions: {
-          width: dimensions.width,
-          height: dimensions.height,
-          depth: 0.05
-        }
-      });
-    }
-    
-    // Левая стена
-    if (leftWallRef.current) {
-      makeHoverable(leftWallRef.current, {
-        name: "Левая стена",
-        description: "Боковая стена лифта",
-        material: "Стандартный материал стен",
-        dimensions: {
-          width: 0.05,
-          height: dimensions.height,
-          depth: dimensions.depth
-        }
-      });
-    }
-    
-    // Правая стена
-    if (rightWallRef.current) {
-      makeHoverable(rightWallRef.current, {
-        name: "Правая стена",
-        description: "Боковая стена лифта",
-        material: "Стандартный материал стен",
-        dimensions: {
-          width: 0.05,
-          height: dimensions.height,
-          depth: dimensions.depth
-        }
-      });
-    }
-    
-    // Верхняя перемычка
-    if (topFrameRef.current) {
-      makeHoverable(topFrameRef.current, {
-        name: "Верхняя перемычка",
-        description: "Верхняя часть дверного проема",
-        material: "Материал передней стены",
-        dimensions: {
-          width: dimensions.width - 0.2,
-          height: 0.3,
-          depth: 0.07
-        }
-      });
-    }
-    
-    // Левая панель передней стены
-    if (leftFrameRef.current) {
-      makeHoverable(leftFrameRef.current, {
-        name: "Левая панель передней стены",
-        description: "Боковая часть дверного проема",
-        material: "Материал передней стены",
-        dimensions: {
-          width: 0.4,
-          height: dimensions.height,
-          depth: 0.07
-        }
-      });
-    }
-    
-    // Правая панель передней стены
-    if (rightFrameRef.current) {
-      makeHoverable(rightFrameRef.current, {
-        name: "Правая панель передней стены",
-        description: "Боковая часть дверного проема",
-        material: "Материал передней стены",
-        dimensions: {
-          width: 0.4,
-          height: dimensions.height,
-          depth: 0.07
-        }
-      });
-    }
-  }, [dimensions]);
+  const LeftWall = (
+    <Box
+      position={[-dimensions.width / 2, 0, 0]}
+      args={[0.05, dimensions.height, dimensions.depth]}
+      castShadow
+      receiveShadow
+    >
+      <primitive object={sideWallMaterial} attach="material" />
+    </Box>
+  );
+  
+  const RightWall = (
+    <Box
+      position={[dimensions.width / 2, 0, 0]}
+      args={[0.05, dimensions.height, dimensions.depth]}
+      castShadow
+      receiveShadow
+    >
+      <primitive object={sideWallMaterial} attach="material" />
+    </Box>
+  );
+  
+  const TopFrame = (
+    <Box
+      position={[0, dimensions.height / 2 - 0.15, dimensions.depth / 2]}
+      args={[dimensions.width - 0.2, 0.3, 0.07]}
+      castShadow
+    >
+      <primitive object={frontWallMaterial} attach="material" />
+    </Box>
+  );
+  
+  const LeftFrame = (
+    <Box
+      position={[-dimensions.width / 2 + 0.2, 0, dimensions.depth / 2]}
+      args={[0.4, dimensions.height, 0.07]}
+      castShadow
+    >
+      <primitive object={frontWallMaterial} attach="material" />
+    </Box>
+  );
+  
+  const RightFrame = (
+    <Box
+      position={[dimensions.width / 2 - 0.2, 0, dimensions.depth / 2]}
+      args={[0.4, dimensions.height, 0.07]}
+      castShadow
+    >
+      <primitive object={frontWallMaterial} attach="material" />
+    </Box>
+  );
 
   return (
     <>
       {/* Задняя стена */}
-      <Box
-        ref={backWallRef}
-        position={[0, 0, -dimensions.depth / 2]}
-        args={[dimensions.width, dimensions.height, 0.05]}
-        castShadow
-        receiveShadow
+      <MakeHoverable
+        name="Задняя стена"
+        type="Элемент конструкции"
+        description="Задняя стена лифта"
+        material="Стандартный материал стен"
+        dimensions={{
+          width: dimensions.width,
+          height: dimensions.height,
+          depth: 0.05
+        }}
+        additionalInfo={{
+          color: getBackWallColor(),
+          texture: "Матовая поверхность"
+        }}
+        requiresDoubleClick={false}
       >
-        <primitive object={backWallMaterial} attach="material" />
-      </Box>
+        {BackWall}
+      </MakeHoverable>
 
       {/* Левая стена */}
-      <Box
-        ref={leftWallRef}
-        position={[-dimensions.width / 2, 0, 0]}
-        args={[0.05, dimensions.height, dimensions.depth]}
-        castShadow
-        receiveShadow
+      <MakeHoverable
+        name="Левая стена"
+        type="Элемент конструкции"
+        description="Боковая стена лифта"
+        material="Стандартный материал стен"
+        dimensions={{
+          width: 0.05,
+          height: dimensions.height,
+          depth: dimensions.depth
+        }}
+        additionalInfo={{
+          color: getSideWallColor(),
+          texture: "Матовая поверхность"
+        }}
+        requiresDoubleClick={false}
       >
-        <primitive object={sideWallMaterial} attach="material" />
-      </Box>
+        {LeftWall}
+      </MakeHoverable>
 
       {/* Правая стена */}
-      <Box
-        ref={rightWallRef}
-        position={[dimensions.width / 2, 0, 0]}
-        args={[0.05, dimensions.height, dimensions.depth]}
-        castShadow
-        receiveShadow
+      <MakeHoverable
+        name="Правая стена"
+        type="Элемент конструкции"
+        description="Боковая стена лифта"
+        material="Стандартный материал стен"
+        dimensions={{
+          width: 0.05,
+          height: dimensions.height,
+          depth: dimensions.depth
+        }}
+        additionalInfo={{
+          color: getSideWallColor(),
+          texture: "Матовая поверхность"
+        }}
+        requiresDoubleClick={false}
       >
-        <primitive object={sideWallMaterial} attach="material" />
-      </Box>
+        {RightWall}
+      </MakeHoverable>
 
       {/* Верхняя перемычка над дверью */}
-      <Box
-        ref={topFrameRef}
-        position={[0, dimensions.height / 2 - 0.15, dimensions.depth / 2]}
-        args={[dimensions.width - 0.2, 0.3, 0.07]}
-        castShadow
+      <MakeHoverable
+        name="Верхняя перемычка"
+        type="Элемент конструкции"
+        description="Верхняя часть дверного проема"
+        material="Материал передней стены"
+        dimensions={{
+          width: dimensions.width - 0.2,
+          height: 0.3,
+          depth: 0.07
+        }}
+        additionalInfo={{
+          color: getFrontWallColor(),
+          texture: "Матовая поверхность"
+        }}
+        requiresDoubleClick={false}
       >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
+        {TopFrame}
+      </MakeHoverable>
 
       {/* Левая боковая панель передней стены */}
-      <Box
-        ref={leftFrameRef}
-        position={[-dimensions.width / 2 + 0.2, 0, dimensions.depth / 2]}
-        args={[0.4, dimensions.height, 0.07]}
-        castShadow
+      <MakeHoverable
+        name="Левая панель передней стены"
+        type="Элемент конструкции"
+        description="Боковая часть дверного проема"
+        material="Материал передней стены"
+        dimensions={{
+          width: 0.4,
+          height: dimensions.height,
+          depth: 0.07
+        }}
+        additionalInfo={{
+          color: getFrontWallColor(),
+          texture: "Матовая поверхность"
+        }}
+        requiresDoubleClick={false}
       >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
+        {LeftFrame}
+      </MakeHoverable>
 
       {/* Правая боковая панель передней стены */}
-      <Box
-        ref={rightFrameRef}
-        position={[dimensions.width / 2 - 0.2, 0, dimensions.depth / 2]}
-        args={[0.4, dimensions.height, 0.07]}
-        castShadow
+      <MakeHoverable
+        name="Правая панель передней стены"
+        type="Элемент конструкции"
+        description="Боковая часть дверного проема"
+        material="Материал передней стены"
+        dimensions={{
+          width: 0.4,
+          height: dimensions.height,
+          depth: 0.07
+        }}
+        additionalInfo={{
+          color: getFrontWallColor(),
+          texture: "Матовая поверхность"
+        }}
+        requiresDoubleClick={false}
       >
-        <primitive object={frontWallMaterial} attach="material" />
-      </Box>
+        {RightFrame}
+      </MakeHoverable>
     </>
   );
 };

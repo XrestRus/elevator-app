@@ -20,13 +20,43 @@ export interface MakeHoverableProps {
   };
   additionalInfo?: Record<string, unknown>;
   onSelect?: (object: HoverableObject) => void;
+  requiresDoubleClick?: boolean;
 }
 
 /**
- * Компонент-обертка для добавления возможности наведения на компоненты Three.js
+ * Компонент-обертка для добавления возможности наведения и взаимодействия с компонентами Three.js
+ * 
+ * Принцип отслеживания:
+ * 1. Компонент оборачивает любой 3D объект, добавляя к нему метаданные в userData
+ * 2. Все дочерние объекты также получают метаданные через traverse
+ * 3. Объект становится доступен для:
+ *    - Наведения (показывает информацию при наведении курсора)
+ *    - Выбора (одинарный или двойной клик, в зависимости от requiresDoubleClick)
+ * 4. Взаимодействие обрабатывается через систему событий Three.js и передается в глобальный стор useHoverStore
+ * 5. При выборе объекта создается структура HoverableObject, которая содержит всю информацию об объекте
+ * 
+ * @param children - React компоненты Three.js, которые будут обернуты
+ * @param name - Название объекта для отображения в интерфейсе
+ * @param type - Тип объекта (например, "Элемент конструкции", "Панель управления")
+ * @param description - Описание объекта
+ * @param material - Информация о материале объекта
+ * @param dimensions - Размеры объекта {width, height, depth}
+ * @param additionalInfo - Дополнительная информация для отображения (цвет, текстура и т.д.)
+ * @param onSelect - Функция обратного вызова при выборе объекта
+ * @param requiresDoubleClick - Требуется ли двойной клик для выбора (по умолчанию false)
  */
 const makeHoverable = forwardRef<Group, MakeHoverableProps>(
-  ({ children, name, type, description, material, dimensions, additionalInfo, onSelect }, ref) => {
+  ({ 
+    children, 
+    name, 
+    type, 
+    description, 
+    material, 
+    dimensions, 
+    additionalInfo, 
+    onSelect,
+    requiresDoubleClick = false
+  }, ref) => {
     const groupRef = useRef<Group>(null);
     const { setSelectedObject } = useHoverStore();
     
@@ -43,7 +73,8 @@ const makeHoverable = forwardRef<Group, MakeHoverableProps>(
           description,
           material,
           dimensions,
-          additionalInfo
+          additionalInfo,
+          requiresDoubleClick  // Добавляем флаг, указывающий нужен ли двойной клик
         };
         
         // Добавляем данные к группе
@@ -66,7 +97,7 @@ const makeHoverable = forwardRef<Group, MakeHoverableProps>(
           object.name = name;
         });
       }
-    }, [name, type, description, material, dimensions, additionalInfo]);
+    }, [name, type, description, material, dimensions, additionalInfo, requiresDoubleClick]);
     
     // Обработчик клика для прямого выбора объекта
     const handleClick = (e: React.MouseEvent) => {
@@ -81,7 +112,11 @@ const makeHoverable = forwardRef<Group, MakeHoverableProps>(
           material,
           dimensions,
           position: groupRef.current.position.clone(),
-          additionalInfo
+          additionalInfo,
+          userData: {
+            hoverable: true,
+            requiresDoubleClick
+          }
         };
         
         setSelectedObject(objectData);

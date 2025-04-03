@@ -4,6 +4,8 @@ import type { RootState } from "../../store/store";
 import { Plane, Instance, Instances } from "@react-three/drei";
 import * as THREE from "three";
 import PerformanceOptimizer from "../../utils/PerformanceOptimizer";
+import MakeHoverable from "../ui/makeHoverable";
+import colorUtils from "../../utils/colorUtils";
 
 /**
  * Компонент для отображения точечных светильников на потолке лифта с оптимизацией
@@ -261,6 +263,11 @@ const CeilingLights: React.FC<{
     });
   }, [color, ceilingGlowTexture]);
 
+  // Преобразуем цвет в строковый формат для тултипа
+  const getColorString = (colorValue: string | THREE.Color) => {
+    return colorUtils.colorToRGBString(colorValue);
+  };
+
   return (
     <group position={[0, dimensions.height / 2 - 0.05, 0]}>
       {/* Используем инстансинг для оптимизации рендеринга однотипных мешей */}
@@ -277,55 +284,78 @@ const CeilingLights: React.FC<{
 
       {/* Оптимизированная отрисовка плафонов и света */}
       {positions.map((pos, index) => (
-        <group key={`light-${index}`} position={pos}>
-          {/* Стеклянный плафон */}
-          <mesh
-            position={[0, -0.01, 0]}
-            geometry={glassGeometry}
-            material={glassMaterial}
-          />
-
-          {/* Ореол света на потолке */}
-          {lightsOn && (
-            <Plane
-              args={[0.4, 0.4]}
-              position={[0, 0.01, 0]}
-              rotation={[-Math.PI / 2, 0, 0]}
-              material={ceilingGlowMaterial}
+        <MakeHoverable
+          key={`light-${index}`}
+          name={count === 5 && index === 0 ? "Центральный светильник" : `Светильник ${index + 1}`}
+          type="Светотехника"
+          description={count === 5 && index === 0 
+            ? "Основной потолочный светильник лифта"
+            : "Вспомогательный потолочный светильник лифта"}
+          material="Металл, матовый рассеиватель"
+          dimensions={{
+            width: 0.1,
+            height: 0.03,
+            depth: 0.1
+          }}
+          additionalInfo={{
+            color: getColorString(color),
+            texture: "Матовый металл с рассеивателем",
+            "Интенсивность": getLightIntensity(index).toFixed(1),
+            "Состояние": lightsOn ? "Включен" : "Выключен",
+            "Тип": "Встроенный LED-светильник"
+          }}
+          requiresDoubleClick={false}
+        >
+          <group position={pos}>
+            {/* Стеклянный плафон */}
+            <mesh
+              position={[0, -0.01, 0]}
+              geometry={glassGeometry}
+              material={glassMaterial}
             />
-          )}
 
-          {/* Сам источник света - с оптимизированными параметрами */}
-          <spotLight
-            position={[0, -0.02, 0]}
-            angle={Math.PI / 3}
-            penumbra={0.8} // Увеличено для более мягких краев теней
-            intensity={getLightIntensity(index)}
-            color={color}
-            castShadow={highPerformance}
-            decay={2}
-            distance={dimensions.height * 1.5}
-            shadow-mapSize-width={highPerformance ? 2048 : 512}
-            shadow-mapSize-height={highPerformance ? 2048 : 512}
-            shadow-bias={-0.001}
-            shadow-normalBias={0.05}
-            shadow-focus={0.7}
-            shadow-radius={8}
-            shadow-blurSamples={highPerformance ? 16 : 4}
-          />
-
-          {/* Световое пятно на полу - только если свет включен */}
-          {lightsOn && (
-            <group position={[0, -dimensions.height + 0.05, 0]}>
+            {/* Ореол света на потолке */}
+            {lightsOn && (
               <Plane
-                args={[getSpotSize(index) * 1.2, getSpotSize(index) * 1.2]}
+                args={[0.4, 0.4]}
+                position={[0, 0.01, 0]}
                 rotation={[-Math.PI / 2, 0, 0]}
-                position={[0, 0.01, 0]} // Слегка поднимаем над полом
-                material={spotPlaneMaterial}
+                material={ceilingGlowMaterial}
               />
-            </group>
-          )}
-        </group>
+            )}
+
+            {/* Сам источник света - с оптимизированными параметрами */}
+            <spotLight
+              position={[0, -0.02, 0]}
+              angle={Math.PI / 3}
+              penumbra={0.8} // Увеличено для более мягких краев теней
+              intensity={getLightIntensity(index)}
+              color={color}
+              castShadow={highPerformance}
+              decay={2}
+              distance={dimensions.height * 1.5}
+              shadow-mapSize-width={highPerformance ? 2048 : 512}
+              shadow-mapSize-height={highPerformance ? 2048 : 512}
+              shadow-bias={-0.001}
+              shadow-normalBias={0.05}
+              shadow-focus={0.7}
+              shadow-radius={8}
+              shadow-blurSamples={highPerformance ? 16 : 4}
+            />
+
+            {/* Световое пятно на полу - только если свет включен */}
+            {lightsOn && (
+              <group position={[0, -dimensions.height + 0.05, 0]}>
+                <Plane
+                  args={[getSpotSize(index) * 1.2, getSpotSize(index) * 1.2]}
+                  rotation={[-Math.PI / 2, 0, 0]}
+                  position={[0, 0.01, 0]} // Слегка поднимаем над полом
+                  material={spotPlaneMaterial}
+                />
+              </group>
+            )}
+          </group>
+        </MakeHoverable>
       ))}
     </group>
   );

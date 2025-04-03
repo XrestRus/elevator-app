@@ -39,7 +39,7 @@ const ObjectTooltip: React.FC = () => {
         visibility: 'hidden'
       });
     }
-  }, [hoveredObject, mousePosition]);
+  }, [hoveredObject, mousePosition, style]);
 
   // Если нет объекта под курсором, не отображаем тултип
   if (!hoveredObject) {
@@ -59,6 +59,48 @@ const ObjectTooltip: React.FC = () => {
       dimensions.push(`Глубина: ${hoveredObject.dimensions.depth.toFixed(2)}м`);
     
     return dimensions.join(', ');
+  };
+  
+  // Отображение информации о цвете
+  const getColorInfo = () => {
+    if (!hoveredObject.additionalInfo) return null;
+    
+    // Проверяем есть ли информация о цвете
+    const colorInfo = hoveredObject.additionalInfo.color;
+    if (!colorInfo) return null;
+    
+    return (
+      <div className="object-tooltip-row">
+        <span className="object-tooltip-label">Цвет: </span>
+        <span className="color-preview" style={{ 
+          backgroundColor: typeof colorInfo === 'string' ? colorInfo : '#cccccc',
+          display: 'inline-block',
+          width: '12px',
+          height: '12px',
+          marginRight: '5px',
+          border: '1px solid #666',
+          borderRadius: '2px',
+          verticalAlign: 'middle'
+        }}></span>
+        {typeof colorInfo === 'string' ? colorInfo : JSON.stringify(colorInfo)}
+      </div>
+    );
+  };
+  
+  // Отображение информации о текстуре
+  const getTextureInfo = () => {
+    if (!hoveredObject.additionalInfo) return null;
+    
+    // Проверяем есть ли информация о текстуре
+    const textureInfo = hoveredObject.additionalInfo.texture;
+    if (!textureInfo) return null;
+    
+    return (
+      <div className="object-tooltip-row">
+        <span className="object-tooltip-label">Текстура: </span>
+        {typeof textureInfo === 'string' ? textureInfo : JSON.stringify(textureInfo)}
+      </div>
+    );
   };
 
   return (
@@ -88,6 +130,12 @@ const ObjectTooltip: React.FC = () => {
         </div>
       )}
       
+      {/* Добавляем информацию о цвете */}
+      {getColorInfo()}
+      
+      {/* Добавляем информацию о текстуре */}
+      {getTextureInfo()}
+      
       {hoveredObject.dimensions && (
         <div className="object-tooltip-row">
           <span className="object-tooltip-label">Размеры: </span>
@@ -95,14 +143,18 @@ const ObjectTooltip: React.FC = () => {
         </div>
       )}
       
-      {hoveredObject.additionalInfo && Object.keys(hoveredObject.additionalInfo).length > 0 && (
+      {hoveredObject.additionalInfo && Object.keys(hoveredObject.additionalInfo).length > 0 && 
+       hoveredObject.additionalInfo.color === undefined && 
+       hoveredObject.additionalInfo.texture === undefined && (
         <div className="object-tooltip-additional">
-          {Object.entries(hoveredObject.additionalInfo).map(([key, value]) => (
-            <div key={key} className="object-tooltip-row">
-              <span className="object-tooltip-label">{key}: </span>
-              {String(value)}
-            </div>
-          ))}
+          {Object.entries(hoveredObject.additionalInfo)
+            .filter(([key]) => key !== 'color' && key !== 'texture')
+            .map(([key, value]) => (
+              <div key={key} className="object-tooltip-row">
+                <span className="object-tooltip-label">{key}: </span>
+                {String(value)}
+              </div>
+            ))}
         </div>
       )}
     </div>

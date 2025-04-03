@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { Box } from "@react-three/drei";
 import * as THREE from "three";
-import { makeHoverable } from "../../utils/objectInfo";
+import MakeHoverable from "../ui/makeHoverable";
+import colorUtils from "../../utils/colorUtils";
 
 /**
  * Свойства компонента пола лифта
@@ -22,34 +23,39 @@ const ElevatorFloor: React.FC<ElevatorFloorProps> = ({
   dimensions,
   floorMaterial,
 }) => {
-  // Ссылка на элемент пола
-  const floorRef = useRef<THREE.Mesh>(null);
+  // Получаем цвет материала пола для отображения в тултипе
+  const getFloorColor = () => colorUtils.getMaterialColor(floorMaterial);
   
-  // Добавляем информацию для наведения мыши
-  useEffect(() => {
-    if (floorRef.current) {
-      makeHoverable(floorRef.current, {
-        name: "Пол лифта",
-        description: "Поверхность пола лифта",
-        material: "Материал пола",
-        dimensions: {
-          width: dimensions.width,
-          height: 0.05,
-          depth: dimensions.depth
-        }
-      });
-    }
-  }, [dimensions]);
-  
-  return (
+  // Компонент пола
+  const Floor = (
     <Box
-      ref={floorRef}
       position={[0, -dimensions.height / 2, 0]}
       args={[dimensions.width, 0.05, dimensions.depth]}
       receiveShadow
     >
       <primitive object={floorMaterial} attach="material" />
     </Box>
+  );
+  
+  return (
+    <MakeHoverable
+      name="Пол лифта"
+      type="Элемент конструкции"
+      description="Поверхность пола лифта"
+      material="Материал пола"
+      dimensions={{
+        width: dimensions.width,
+        height: 0.05,
+        depth: dimensions.depth
+      }}
+      additionalInfo={{
+        color: getFloorColor(),
+        texture: "Структурная поверхность"
+      }}
+      requiresDoubleClick={false}
+    >
+      {Floor}
+    </MakeHoverable>
   );
 };
 

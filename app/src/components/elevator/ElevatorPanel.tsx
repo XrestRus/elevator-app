@@ -2,6 +2,8 @@ import React, { useMemo } from "react";
 import { Box, Cylinder, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { CSSProperties } from 'react';
+import MakeHoverable from "../ui/makeHoverable";
+import colorUtils from "../../utils/colorUtils";
 
 /**
  * Компонент панели управления лифтом с кнопками, индикаторами и экраном
@@ -15,18 +17,12 @@ interface ElevatorPanelProps {
 const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor }) => {
   // Создаем цвет панели чуть темнее цвета стен
   const panelColor = useMemo(() => {
-    const color = new THREE.Color(wallColor);
-    // Делаем цвет немного темнее
-    color.multiplyScalar(0.9);
-    return color;
+    return colorUtils.darkenColor(wallColor, 0.9);
   }, [wallColor]);
 
   // Создаем цвет кнопок чуть светлее цвета стен
   const buttonColor = useMemo(() => {
-    const color = new THREE.Color(wallColor);
-    // Делаем цвет немного светлее
-    color.multiplyScalar(1.1);
-    return color;
+    return colorUtils.lightenColor(wallColor, 1.1);
   }, [wallColor]);
 
   // Материал для панели (наследует цвет стен но слегка темнее)
@@ -69,8 +65,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   // Материал для обводки кнопок (еще светлее основного цвета кнопок)
   const buttonRimMaterial = useMemo(
     () => {
-      const rimColor = new THREE.Color(buttonColor);
-      rimColor.multiplyScalar(1.3); // Делаем обводку ещё светлее для лучшего контраста
+      const rimColor = colorUtils.lightenColor(buttonColor, 1.3); // Делаем обводку ещё светлее для лучшего контраста
       return new THREE.MeshStandardMaterial({
         color: rimColor,
         metalness: 0.9,
@@ -111,7 +106,12 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     fontWeight: '600',
   };
 
-  return (
+  // Получаем цветовую информацию для тултипа
+  const colorInfoString = useMemo(() => {
+    return colorUtils.colorToRGBString(panelColor);
+  }, [panelColor]);
+
+  const panelContent = (
     <group position={new THREE.Vector3(...position)} rotation={[0, 3.2, 0]}>
       {/* Основа панели - теперь плоская и уже по ширине */}
       <Box args={[0.25, 0.75, 0.0001]} castShadow>
@@ -222,6 +222,30 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         </Html>
       </group>
     </group>
+  );
+
+  // Оборачиваем панель в компонент makeHoverable
+  return (
+    <MakeHoverable
+      name="Панель управления лифтом"
+      type="Элемент управления"
+      description="Панель с кнопками для управления лифтом"
+      material="Металл, пластик"
+      dimensions={{
+        width: 0.25,
+        height: 0.75,
+        depth: 0.02
+      }}
+      additionalInfo={{
+        color: colorInfoString,
+        texture: "Металлик с матовым покрытием",
+        "Количество кнопок": buttonPositions.length + 2,
+        "Тип освещения": lightsOn ? "Включено" : "Выключено"
+      }}
+      requiresDoubleClick={false}
+    >
+      {panelContent}
+    </MakeHoverable>
   );
 };
 

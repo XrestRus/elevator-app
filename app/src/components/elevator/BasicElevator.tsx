@@ -13,7 +13,6 @@ import ElevatorHandrails from "./ElevatorHandrails.tsx";
 import DecorationStripes from "./DecorationStripes.tsx";
 import JointStripes from "./JointStripes";
 import PerformanceOptimizer from "../../utils/PerformanceOptimizer";
-import { ObjectInfoUtils, makeHoverable } from "../../utils/objectInfo";
 import {
   createWallMaterialWithCustomRepeat,
   loadPBRTextures,
