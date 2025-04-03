@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 
 /**
+ * @deprecated Используйте компонент MakeHoverable из components/ui/makeHoverable вместо этой утилиты
  * Утилита для добавления метаданных к объектам Three.js для отображения в тултипах
  */
 export const ObjectInfoUtils = {
   /**
+   * @deprecated Используйте компонент MakeHoverable из components/ui/makeHoverable вместо этого метода
    * Добавляет информацию к объекту для отображения при наведении мыши
    * @param object Объект Three.js
    * @param info Информация для добавления
@@ -20,6 +22,8 @@ export const ObjectInfoUtils = {
     };
     additionalInfo?: Record<string, unknown>;
   }): THREE.Object3D {
+    console.warn('Deprecated: используйте компонент MakeHoverable из components/ui/makeHoverable вместо этого метода');
+    
     // Устанавливаем имя объекта, если оно предоставлено
     if (info.name) {
       object.name = info.name;
@@ -100,6 +104,7 @@ export const ObjectInfoUtils = {
 };
 
 /**
+ * @deprecated Используйте компонент MakeHoverable из components/ui/makeHoverable вместо этой функции
  * Добавляет информацию к объекту для отображения при наведении мыши
  * @param object Объект Three.js
  * @param info Информация для добавления

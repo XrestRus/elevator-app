@@ -1,0 +1,36 @@
+/* Стили для тултипа при наведении на объекты */
+.object-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background-color: rgba(30, 30, 46, 0.95);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  max-width: 300px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border: 1px solid #3d3d4f;
+}
+
+.object-tooltip-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #a9caff;
+}
+
+.object-tooltip-row {
+  margin-bottom: 4px;
+}
+
+.object-tooltip-label {
+  opacity: 0.7;
+  color: #a9caff;
+}
+
+.object-tooltip-additional {
+  border-top: 1px solid #3d3d4f;
+  padding-top: 4px;
+  margin-top: 4px;
+} 

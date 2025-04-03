@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
 import { JointOptions } from "../../store/elevatorSlice";
-import { makeHoverable } from "../../utils/objectInfo";
+import MakeHoverable from "../../components/ui/makeHoverable";
 
 /**
  * Свойства компонента стыков между стенами
@@ -270,7 +270,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
     });
 
     return joints;
-  }, [dimensions, jointOptions]);
+  }, [dimensions, jointOptions, jointStripeMaterial]);
 
   // Создаем общую геометрию для всех стыков
   const boxGeometry = useMemo(() => {
@@ -287,8 +287,6 @@ const JointStripes: React.FC<JointStripesProps> = ({
   useEffect(() => {
     if (instancedMeshRef.current && jointInfos.length > 0) {
       const mesh = instancedMeshRef.current;
-      // Создаем массив объектов для хранения информации о каждом стыке
-      const jointObjects: THREE.Object3D[] = [];
       
       // Создаем инстансы для каждого стыка
       jointInfos.forEach((joint, index) => {
@@ -307,29 +305,16 @@ const JointStripes: React.FC<JointStripesProps> = ({
         // Применяем матрицу к инстансу
         mesh.setMatrixAt(index, tempObject.matrix);
         
-        // Сохраняем объект для возможного использования в будущем
-        jointObjects.push(tempObject);
-        
         // Сохраняем название стыка в userData инстанса
         if (!mesh.userData.jointNames) {
           mesh.userData.jointNames = [];
+          mesh.userData.hoverable = true;
         }
         mesh.userData.jointNames[index] = joint.name;
       });
       
       // Уведомляем Three.js, что матрицы изменены
       mesh.instanceMatrix.needsUpdate = true;
-      
-      // Добавление информации для наведения мыши
-      makeHoverable(mesh, {
-        name: "Стык",
-        description: "Декоративная накладка на стыке элементов лифта",
-        material: "Материал стыков",
-        additionalInfo: {
-          толщина: `${(jointOptions?.width || 4)} мм`,
-          выступ: `${(jointOptions?.protrusion || 3)} мм`
-        }
-      });
     }
   }, [jointInfos, jointOptions, instancedMeshRef]);
 
@@ -338,13 +323,30 @@ const JointStripes: React.FC<JointStripesProps> = ({
     return null;
   }
 
-  // Рендерим InstancedMesh с указанным количеством инстансов
+  // Рендерим InstancedMesh обернутый в MakeHoverable
   return (
-    <instancedMesh 
-      ref={instancedMeshRef} 
-      args={[boxGeometry, jointStripeMaterial, jointInfos.length]}
-      castShadow={false}
-    />
+    <MakeHoverable
+      name="Стыки элементов"
+      type="Декоративный элемент"
+      description="Декоративные накладки на стыках элементов лифта"
+      material="Металлическая фурнитура"
+      dimensions={{
+        width: (jointOptions?.width || 4) / 1000,
+        depth: (jointOptions?.width || 4) / 1000,
+        height: dimensions.height
+      }}
+      additionalInfo={{
+        "Толщина": `${(jointOptions?.width || 4)} мм`,
+        "Выступ": `${(jointOptions?.protrusion || 3)} мм`,
+        "Количество": jointInfos.length
+      }}
+    >
+      <instancedMesh 
+        ref={instancedMeshRef} 
+        args={[boxGeometry, jointStripeMaterial, jointInfos.length]}
+        castShadow={false}
+      />
+    </MakeHoverable>
   );
 };
 

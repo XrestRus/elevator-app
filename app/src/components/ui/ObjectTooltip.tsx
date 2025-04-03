@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHoverStore } from './ObjectHoverHandler';
+import '../../styles/Tooltip.css';
 
 /**
  * Компонент для отображения информации об объекте при наведении мыши

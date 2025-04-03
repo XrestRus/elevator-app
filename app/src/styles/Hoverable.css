@@ -1,0 +1,31 @@
+/* Стили для наводимых объектов */
+.hoverable-object {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hoverable-object:hover {
+  outline: 1px solid rgba(169, 200, 230, 0.5);
+}
+
+/* Стиль для выбранного объекта */
+.hoverable-object-selected {
+  outline: 2px solid rgba(169, 200, 230, 0.8);
+}
+
+/* Индикатор при наведении */
+.hover-indicator {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.hover-indicator-content {
+  background-color: rgba(30, 30, 46, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+} 
