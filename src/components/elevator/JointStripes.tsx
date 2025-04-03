@@ -37,12 +37,6 @@ const JointStripes: React.FC<JointStripesProps> = ({
 }) => {
   const dispatch = useDispatch();
   
-  // Обработчик клика по стыку
-  const handleJointClick = (jointName: string) => {
-    console.log("Выбран стык:", jointName);
-    dispatch(setJoints({ selectedJoint: jointName }));
-  };
-
   // Мемоизированный массив данных о стыках и их преобразованиях
   const jointInfos = useMemo<JointInfo[]>(() => {
     // Если материал не определен или стыки отключены, возвращаем пустой массив
@@ -290,7 +284,12 @@ const JointStripes: React.FC<JointStripesProps> = ({
     const elements: React.ReactElement[] = [];
     
     // Для каждого стыка создаем отдельный элемент
-    jointInfos.forEach((joint, index) => {
+    jointInfos.forEach((joint, index) => {  
+      // Обработчик клика по стыку
+      const handleJointClick = (jointName: string) => {
+        dispatch(setJoints({ selectedJoint: jointName }));
+      };
+    
       elements.push(
         <MakeHoverable
           key={`joint-${index}`}
@@ -321,7 +320,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
     });
     
     return elements;
-  }, [jointInfos, jointStripeMaterial, jointOptions, handleJointClick]);
+  }, [jointInfos, jointStripeMaterial, jointOptions, dispatch]);
 
   // Если материал не определен или стыки отключены, возвращаем null
   if (!jointStripeMaterial || !jointOptions?.enabled || jointInfos.length === 0) {
