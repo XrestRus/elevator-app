@@ -89,10 +89,23 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 /**
  * Интерфейс опции для селектора
  */
-interface SelectOption {
+export interface SelectOption {
   value: string;
   label: string;
 }
+
+/**
+ * Интерфейс для группированных опций селектора
+ */
+export interface SelectOptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+
+/**
+ * Тип, объединяющий обычные опции и группы опций
+ */
+export type SelectOptionOrGroup = SelectOption | SelectOptionGroup;
 
 /**
  * Интерфейс пропсов для компонента SelectInput
@@ -101,7 +114,7 @@ interface SelectInputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: SelectOptionOrGroup[];
 }
 
 /**
@@ -126,18 +139,41 @@ export const SelectInput: React.FC<SelectInputProps> = ({
           backgroundColor: "#fff"
         }}
       >
-        {options.map((option) => (
-          <option 
-            key={option.value} 
-            value={option.value} 
-            style={{ 
-              color: "#000",
-              backgroundColor: "#fff" 
-            }}
-          >
-            {option.label}
-          </option>
-        ))}
+        {options.map((option) => {
+          // Проверяем, является ли опция группой
+          if ('options' in option) {
+            return (
+              <optgroup key={option.label} label={option.label}>
+                {option.options.map((subOption) => (
+                  <option 
+                    key={subOption.value} 
+                    value={subOption.value} 
+                    style={{ 
+                      color: "#000",
+                      backgroundColor: "#fff" 
+                    }}
+                  >
+                    {subOption.label}
+                  </option>
+                ))}
+              </optgroup>
+            );
+          }
+          
+          // Обычная опция
+          return (
+            <option 
+              key={option.value} 
+              value={option.value} 
+              style={{ 
+                color: "#000",
+                backgroundColor: "#fff" 
+              }}
+            >
+              {option.label}
+            </option>
+          );
+        })}
       </select>
     </div>
   );

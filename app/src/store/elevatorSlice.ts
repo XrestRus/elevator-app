@@ -260,8 +260,17 @@ const elevatorSlice = createSlice({
     // Обновление текстур
     setTexture: (state, action: PayloadAction<{ part: keyof Materials['texture'], value: string | null }>) => {
       const { part, value } = action.payload;
-      console.log(`Устанавливаю текстуру для ${part}:`, value);
+      
+      // Текущий цвет для этой части лифта (будет применен к текстуре)
+      const currentColor = state.materials[part as keyof Pick<Materials, 'walls' | 'floor' | 'ceiling' | 'doors'>];
+      
+      console.log(`Устанавливаю текстуру для ${part}:`, value, `(текущий цвет: ${currentColor})`);
+      
+      // Сохраняем выбранную текстуру
       state.materials.texture[part] = value;
+      
+      // Важно: цвет НЕ сбрасывается при смене текстуры
+      // Цвет материала сохраняется и применяется к новой текстуре
     },
     
     // Обновление шероховатости

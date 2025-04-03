@@ -8,12 +8,14 @@ import BasicElevator from './components/elevator/BasicElevator';
 import CeilingLights from './components/elevator/CeilingLights';
 import DebugStats from './components/debug/DebugStats';
 import DebugPanel from './components/debug/DebugPanel';
-import SceneOptimizer from './components/elevator/SceneOptimizer';
 import DoorAnimationUpdater from './components/elevator/DoorAnimationUpdater';
 import CameraController from './components/camera/CameraController';
-import ShadowOptimizer from './components/optimization/ShadowOptimizer';
-import PerformanceMonitor from './components/optimization/PerformanceMonitor';
-import PerformanceOptimizer from './utils/PerformanceOptimizer';
+import { 
+  ShadowOptimizer, 
+  PerformanceMonitor,
+  SceneOptimizerComponent 
+} from './components/optimization';
+import { PerformanceOptimizer } from './utils/optimization';
 import SoftShadowEnhancer from './components/camera/SoftShadowEnhancer';
 import type { RootState } from './store/store';
 
@@ -89,7 +91,7 @@ function App() {
         <SoftShadowEnhancer />
         
         {/* Добавляем компонент для оптимизации сцены */}
-        <SceneOptimizer />
+        <SceneOptimizerComponent />
         
         {/* Базовое освещение - оптимизированное */}
         <ambientLight intensity={lighting.enabled ? 0.7 : 0.2} />

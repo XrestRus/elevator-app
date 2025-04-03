@@ -211,6 +211,9 @@ export const createPBRMaterial = (
   // Если предоставлен цвет, применяем его к текстуре
   if (color) {
     materialProperties.color = new THREE.Color(color);
+    console.log(`Применяем цвет ${color} к текстуре типа ${textureType}`);
+  } else {
+    console.log(`Внимание: цвет не предоставлен для текстуры типа ${textureType}, используется цвет по умолчанию`);
   }
   
   // Настраиваем свойства материала в зависимости от типа текстуры
