@@ -1,12 +1,14 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, FlyControls } from '@react-three/drei';
 import './App.css';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as THREE from 'three';
 import UIPanel from './components/ui/UIPanel.tsx';
 import BasicElevator from './components/elevator/BasicElevator';
 import CeilingLights from './components/elevator/CeilingLights';
+import DebugStats from './components/debug/DebugStats';
+import DebugPanel from './components/debug/DebugPanel';
 import type { RootState } from './store/store';
 import { setCamera } from './store/elevatorSlice';
 
@@ -138,6 +140,14 @@ function App() {
   const lighting = useSelector((state: RootState) => state.elevator.lighting);
   const cameraSettings = useSelector((state: RootState) => state.elevator.camera);
   
+  // Состояние отладочных инструментов
+  const [debugSettings, setDebugSettings] = useState({
+    showFps: true,
+    showWireframe: false,
+    showAxes: false,
+    showGizmo: true
+  });
+  
   return (
     <div className="app-container">
       <Canvas
@@ -166,9 +176,27 @@ function App() {
             color={lighting.color} 
             intensity={lighting.intensity} 
           />
+          
+          {/* Добавляем отладочные инструменты */}
+          <DebugStats 
+            showFps={debugSettings.showFps}
+            showWireframe={debugSettings.showWireframe}
+            showAxes={debugSettings.showAxes}
+            showGizmo={debugSettings.showGizmo}
+          />
         </Suspense>
       </Canvas>
+      
+      {/* Панель управления для UI */}
       <UIPanel />
+      
+      {/* Панель отладки */}
+      <DebugPanel 
+        onToggleFps={(show) => setDebugSettings({...debugSettings, showFps: show})}
+        onToggleWireframe={(show) => setDebugSettings({...debugSettings, showWireframe: show})}
+        onToggleAxes={(show) => setDebugSettings({...debugSettings, showAxes: show})}
+        onToggleGizmo={(show) => setDebugSettings({...debugSettings, showGizmo: show})}
+      />
     </div>
   );
 }
