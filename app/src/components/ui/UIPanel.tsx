@@ -205,6 +205,86 @@ const UIPanel = () => {
             </div>
 
             <div style={{ marginBottom: "16px" }}>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                Высота камеры:
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="1.8"
+                step="0.05"
+                value={elevator.camera.cameraHeight ?? 1.2}
+                onChange={(e) =>
+                  dispatch(setCamera({ cameraHeight: parseFloat(e.target.value) }))
+                }
+                style={{ width: "100%" }}
+                disabled={elevator.camera.freeCamera}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Очень низко</span>
+                <span>{(elevator.camera.cameraHeight ?? 1.2).toFixed(2)} м</span>
+                <span>Высоко</span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Недоступно в режиме свободного полета
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                <input 
+                  type="checkbox" 
+                  id="freeCameraMode"
+                  checked={elevator.camera.freeCamera}
+                  onChange={() => dispatch(setCamera({ 
+                    freeCamera: !elevator.camera.freeCamera 
+                  }))}
+                  style={{ marginRight: '8px' }}
+                />
+                <label htmlFor="freeCameraMode">Режим свободного полета</label>
+              </div>
+              <div style={{ fontSize: '12px', color: '#666', marginLeft: '22px' }}>
+                <div style={{ marginBottom: '4px', fontWeight: 'bold' }}>В режиме свободного полета:</div>
+                <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                  <li>WASD - движение вперед/назад/влево/вправо</li>
+                  <li>R/F - движение вверх/вниз</li>
+                  <li>Мышь с зажатой ЛКМ - поворот камеры</li>
+                </ul>
+                <div style={{ marginTop: '8px', marginBottom: '4px', fontWeight: 'bold' }}>В обычном режиме:</div>
+                <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                  <li>Камера очень низко (20 см от пола по умолчанию)</li>
+                  <li>Вращение происходит вокруг точки наблюдения</li>
+                  <li>Изменение высоты не сбрасывает взгляд</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Отображение координат камеры */}
+            <div style={{ marginBottom: "16px" }}>
+              <h4 style={{ marginBottom: '8px', fontSize: '14px' }}>Текущее положение камеры:</h4>
+              <div style={{ 
+                padding: '8px', 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '13px'
+              }}>
+                X: {elevator.camera.position?.x ?? 0}<br />
+                Y: {elevator.camera.position?.y ?? 0}<br />
+                Z: {elevator.camera.position?.z ?? 0}
+              </div>
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Чтобы изменить позицию камеры по умолчанию:
+                <ol style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                  <li>Откройте файл app/src/App.tsx</li>
+                  <li>Найдите блоки с комментариями "БЛОК ДЛЯ РЕДАКТИРОВАНИЯ ПОЗИЦИИ КАМЕРЫ"</li>
+                  <li>Измените числовые значения в строке camera.position.set(X, Y, Z)</li>
+                  <li>Чтобы изменения вступили в силу, перезапустите приложение</li>
+                </ol>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "16px" }}>
               <button
                 style={{
                   padding: "8px 16px",

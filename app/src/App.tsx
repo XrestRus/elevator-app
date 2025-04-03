@@ -1,20 +1,27 @@
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, FlyControls } from '@react-three/drei';
 import './App.css';
-import { Suspense, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { Suspense, useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import * as THREE from 'three';
 import UIPanel from './components/ui/UIPanel.tsx';
 import BasicElevator from './components/elevator/BasicElevator';
 import CeilingLights from './components/elevator/CeilingLights';
 import type { RootState } from './store/store';
+import { setCamera } from './store/elevatorSlice';
 
 /**
- * Компонент для динамического управления камерой
+ * Компонент для динамического управления камерой и контроллерами
  */
 function CameraController() {
   const { camera } = useThree();
   const cameraSettings = useSelector((state: RootState) => state.elevator.camera);
+  const dimensions = useSelector((state: RootState) => state.elevator.dimensions);
+  const dispatch = useDispatch();
+  
+  // Референсы для контроллеров
+  const orbitControlsRef = useRef(null);
+  const flyControlsRef = useRef(null);
   
   // Применяем настройки камеры при изменении
   useEffect(() => {
@@ -25,7 +32,92 @@ function CameraController() {
     }
   }, [camera, cameraSettings.fov]);
   
-  return null;
+  // Изменяем позицию камеры при переключении режима
+  useEffect(() => {
+    if (cameraSettings.freeCamera) {
+      // =====================================
+      // НАЧАЛО БЛОКА ДЛЯ РЕДАКТИРОВАНИЯ ПОЗИЦИИ КАМЕРЫ В РЕЖИМЕ СВОБОДНОГО ПОЛЕТА
+      // =====================================
+      // Здесь можно изменить начальную позицию камеры в режиме свободного полета
+      // Формат: camera.position.set(X, Y, Z);
+      // X - влево/вправо, Y - вверх/вниз, Z - вперед/назад
+      camera.position.set(0, dimensions.height * 0.8 - 0.8, 0); // На уровне глаз человека
+      // =====================================
+      // КОНЕЦ БЛОКА ДЛЯ РЕДАКТИРОВАНИЯ
+      // =====================================
+    } else {
+      // =====================================
+      // НАЧАЛО БЛОКА ДЛЯ РЕДАКТИРОВАНИЯ ПОЗИЦИИ КАМЕРЫ В ОБЫЧНОМ РЕЖИМЕ
+      // =====================================
+      // Здесь можно изменить начальную позицию камеры в обычном режиме
+      // Формат: camera.position.set(X, Y, Z);
+      // X - влево/вправо, Y - вверх/вниз, Z - вперед/назад
+      const cameraHeight = cameraSettings.cameraHeight ?? 1.2; // Используем значение из Redux
+      camera.position.set(0, cameraHeight, 0); // Высота из настроек
+      // Направление взгляда сохраняется автоматически
+      // =====================================
+      // КОНЕЦ БЛОКА ДЛЯ РЕДАКТИРОВАНИЯ
+      // =====================================
+    }
+  }, [camera, cameraSettings.freeCamera, dimensions, cameraSettings.cameraHeight]);
+  
+  // Отслеживаем изменение позиции камеры
+  useEffect(() => {
+    // Устанавливаем интервал обновления позиции (100 мс = 10 раз в секунду)
+    let lastPosition = { x: 0, y: 0, z: 0 };
+    
+    const updateCameraPosition = () => {
+      // Получаем текущую позицию с округлением до 2 знаков
+      const currentPosition = {
+        x: parseFloat(camera.position.x.toFixed(2)),
+        y: parseFloat(camera.position.y.toFixed(2)),
+        z: parseFloat(camera.position.z.toFixed(2))
+      };
+      
+      // Проверяем, изменилась ли позиция
+      if (lastPosition.x !== currentPosition.x || 
+          lastPosition.y !== currentPosition.y || 
+          lastPosition.z !== currentPosition.z) {
+        
+        // Обновляем позицию в Redux
+        dispatch(setCamera({ position: currentPosition }));
+        
+        // Запоминаем последнюю позицию
+        lastPosition = { ...currentPosition };
+      }
+    };
+    
+    // Устанавливаем интервал обновления
+    const intervalId = setInterval(updateCameraPosition, 100);
+    
+    // Очищаем интервал при размонтировании
+    return () => clearInterval(intervalId);
+  }, [camera, dispatch]);
+  
+  return (
+    <>
+      {cameraSettings.freeCamera ? (
+        <FlyControls 
+          movementSpeed={2.0}
+          rollSpeed={2.0}
+          dragToLook={true}
+          ref={flyControlsRef}
+        />
+      ) : (
+        <OrbitControls 
+          ref={orbitControlsRef}
+          enablePan={false}
+          enableZoom={false}
+          target={[0, cameraSettings.cameraHeight ?? 0.2, -0.2]}
+          minPolarAngle={Math.PI / 10}        // Расширяем диапазон сверху
+          maxPolarAngle={Math.PI * 9 / 10}    // Расширяем диапазон снизу
+          rotateSpeed={1.5}
+          enableDamping={true}
+          dampingFactor={0.1}
+        />
+      )}
+    </>
+  );
 }
 
 /**
@@ -65,14 +157,6 @@ function App() {
             intensity={lighting.intensity} 
           />
         </Suspense>
-        
-        <OrbitControls 
-          enablePan={false}
-          enableZoom={false}
-          target={[0, 0, -0.1]}
-          minPolarAngle={0.1}
-          maxPolarAngle={Math.PI - 0.1}
-        />
       </Canvas>
       <UIPanel />
     </div>

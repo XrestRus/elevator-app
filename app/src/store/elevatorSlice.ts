@@ -24,6 +24,13 @@ export interface LightingOptions {
  */
 export interface CameraOptions {
   fov: number;
+  freeCamera: boolean;
+  cameraHeight?: number;
+  position?: {
+    x: number;
+    y: number;
+    z: number;
+  };
 }
 
 /**
@@ -165,7 +172,9 @@ const initialState: ElevatorState = {
     floorNumber: true
   },
   camera: {
-    fov: 75
+    fov: 90,
+    freeCamera: false,
+    cameraHeight: 0.2
   },
   decorationStripes: {
     enabled: false,
