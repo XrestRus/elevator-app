@@ -330,7 +330,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({ elevator }) => {
       <RangeSlider
         label="Интенсивность:"
         min={0.5}
-        max={15}
+        max={50}
         step={0.1}
         value={elevator.lighting.intensity}
         onChange={(value) => dispatch(setLighting({ intensity: value }))}

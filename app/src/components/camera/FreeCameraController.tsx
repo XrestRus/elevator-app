@@ -39,7 +39,7 @@ const FreeCameraController: React.FC = () => {
     const baseSpeed = 0.2;
     
     // Применяем ускорение при нажатии Shift
-    const speedMultiplier = isPressed.current['shift'] ? 3.0 : 1.0;
+    const speedMultiplier = isPressed.current['shift'] ? 3.0 : 0.5;
     const moveSpeed = baseSpeed * speedMultiplier;
     
     // Направление взгляда камеры
