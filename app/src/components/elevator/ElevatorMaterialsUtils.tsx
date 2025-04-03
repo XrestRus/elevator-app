@@ -75,16 +75,21 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
     ? baseTexturePath
     : `/${baseTexturePath}`;
 
-  // Определяем тип текстуры из пути
-  const textureType = fixedBasePath.includes("wood")
-    ? "wood"
-    : fixedBasePath.includes("marble")
-    ? "marble"
-    : fixedBasePath.includes("metal")
-    ? "metal"
-    : fixedBasePath.includes("fabric")
-    ? "fabrics"
-    : null;
+  /**
+   * Определяем тип текстуры из пути
+   * Поддерживаемые типы:
+   * - wood (дерево)
+   * - metal (металл)
+   * - fabric (ткань)
+   */
+  let textureType = null;
+  if (fixedBasePath.includes("wood")) {
+    textureType = "wood";
+  } else if (fixedBasePath.includes("metal")) {
+    textureType = "metal";
+  } else if (fixedBasePath.includes("fabric")) {
+    textureType = "fabrics";
+  }
 
   if (!textureType) {
     console.error(`Неизвестный тип текстуры: ${fixedBasePath}`);
@@ -182,10 +187,22 @@ export const createPBRMaterial = (
   });
 
   // Настраиваем свойства материала в зависимости от типа текстуры
-  return new THREE.MeshStandardMaterial({
+  const materialProperties: THREE.MeshStandardMaterialParameters = {
     ...textures,
     envMapIntensity: 1.0,
-    roughness: 1.0, // Будет модифицировано картой шероховатости
-    metalness: textureType === "metal" ? 0.8 : 0.0,
-  });
+  };
+  
+  // Настраиваем свойства материала в зависимости от типа текстуры
+  if (textureType === "metal") {
+    materialProperties.roughness = 0.5; // Базовая шероховатость для металла
+    materialProperties.metalness = 0.9; // Более высокая металличность для металла
+  } else if (textureType === "wood") {
+    materialProperties.roughness = 0.7; // Повышенная шероховатость для дерева
+    materialProperties.metalness = 0.0; // Нет металличности для дерева
+  } else {
+    materialProperties.roughness = 1.0;
+    materialProperties.metalness = 0.0;
+  }
+  
+  return new THREE.MeshStandardMaterial(materialProperties);
 }; 

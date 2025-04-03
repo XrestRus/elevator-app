@@ -324,6 +324,19 @@ const RoughnessControls: React.FC<RoughnessControlsProps> = ({ elevator }) => {
     <div style={{ marginBottom: '16px' }}>
       <h4>Шероховатость поверхностей</h4>
       
+      <details>
+        <summary>О параметре шероховатости</summary>
+        <div style={{ padding: '8px', fontSize: '0.9em', backgroundColor: '#f5f5f5', borderRadius: '4px', marginBottom: '8px' }}>
+          <strong>Шероховатость поверхностей (roughness):</strong>
+          <ul style={{ marginTop: '4px', paddingLeft: '16px' }}>
+            <li>Определяет насколько поверхность гладкая или шероховатая</li>
+            <li>Низкое значение (0-0.3) - глянцевая, зеркальная поверхность с чёткими отражениями</li>
+            <li>Высокое значение (0.7-1.0) - матовая, диффузная поверхность без бликов</li>
+            <li>Влияет на рассеивание света и характер отражений</li>
+          </ul>
+        </div>
+      </details>
+      
       <RangeSlider
         label="Стены:"
         min={0}
@@ -376,6 +389,19 @@ const MetalnessControls: React.FC<MetalnessControlsProps> = ({ elevator }) => {
   return (
     <div style={{ marginBottom: '16px' }}>
       <h4>Металличность поверхностей</h4>
+      
+      <details>
+        <summary>О параметре металличности</summary>
+        <div style={{ padding: '8px', fontSize: '0.9em', backgroundColor: '#f5f5f5', borderRadius: '4px', marginBottom: '8px' }}>
+          <strong>Металличность поверхностей (metalness):</strong>
+          <ul style={{ marginTop: '4px', paddingLeft: '16px' }}>
+            <li>Определяет металлический характер материала</li>
+            <li>Низкое значение (0-0.3) - неметаллические материалы (дерево, пластик, стекло)</li>
+            <li>Высокое значение (0.7-1.0) - металлические материалы (сталь, золото, серебро)</li>
+            <li>Влияет на тип и интенсивность отражений, характер бликов и светопоглощение</li>
+          </ul>
+        </div>
+      </details>
       
       <RangeSlider
         label="Стены:"
@@ -434,12 +460,23 @@ interface TextureControlsProps {
 const TextureControls: React.FC<TextureControlsProps> = ({ elevator }) => {
   const dispatch = useDispatch();
   
+  /**
+   * Опции текстур, доступные для выбора.
+   * Для добавления новых текстур:
+   * 1. Добавьте папку с PBR-текстурами в app/public/textures/example/
+   * 2. Добавьте новый элемент в массив textureOptions, где:
+   *    - value: путь к директории с текстурами (относительно public)
+   *    - label: отображаемое имя текстуры в интерфейсе
+   */
   const textureOptions = [
     { value: "", label: "Без текстуры" },
     { value: "/textures/example/wood_0066_1k_HoQeAg", label: "Дерево (PBR)" },
-    { value: "/textures/example/marble_0018_1k_pq6AtM", label: "Мрамор (PBR)" },
-    { value: "/textures/example/metal_0084_1k_uJitA0", label: "Металл (PBR)" },
-    { value: "/textures/example/fabrics_0080_1k_1jAg4B", label: "Ткань (PBR)" }
+    { value: "/textures/example/metal_0067_1k_AdqCdW", label: "Металл 1 (PBR)" },
+    { value: "/textures/example/metal_0071_1k_HD5XFx", label: "Металл 2 (PBR)" },
+    { value: "/textures/example/metal_0081_1k_qh6kbG", label: "Металл 3 (PBR)" },
+    { value: "/textures/example/metal_0082_1k_je0RXH", label: "Металл 4 (PBR)" },
+    { value: "/textures/example/metal_0083_1k_r9ZJJl", label: "Металл 5 (PBR)" },
+    { value: "/textures/example/metal_0084_1k_uJitA0", label: "Металл 6 (PBR)" }
   ];
   
   return (
