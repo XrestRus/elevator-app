@@ -53,8 +53,8 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
   // Анимация для левой двери с оптимизированными параметрами
   const leftDoorSpring = useSpring({
     position: doorsOpen
-      ? [-dimensions.width / 2, -0.15, dimensions.depth / 2]
-      : [-dimensions.width / 4.45, -0.15, dimensions.depth / 2],
+      ? [-dimensions.width / 2, -0.15, dimensions.depth / 1.9]
+      : [-dimensions.width / 4.45, -0.15, dimensions.depth / 1.9],
     config: animConfig,
     // Обратный вызов для обновления рендера до окончания анимации
     onRest: () => {
@@ -65,8 +65,8 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
   // Анимация для правой двери с оптимизированными параметрами
   const rightDoorSpring = useSpring({
     position: doorsOpen
-      ? [dimensions.width / 2, -0.15, dimensions.depth / 2]
-      : [dimensions.width / 4.45, -0.15, dimensions.depth / 2],
+      ? [dimensions.width / 2, -0.15, dimensions.depth / 1.9]
+      : [dimensions.width / 4.45, -0.15, dimensions.depth / 1.9],
     config: animConfig,
   });
   
