@@ -16,6 +16,7 @@ export interface LightingOptions {
   count: number;
   color: string;
   intensity: number;
+  diffusion: number; // Рассеивание света
   enabled: boolean;
 }
 
@@ -247,6 +248,7 @@ const initialState: ElevatorState = {
     count: 4,
     color: '#ffffff',
     intensity: 6,
+    diffusion: 0.5, // Значение рассеивания по умолчанию
     enabled: true
   },
   visibility: {

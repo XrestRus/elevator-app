@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import { Plane, Instance, Instances } from "@react-three/drei";
@@ -22,6 +22,9 @@ const CeilingLights: React.FC<{
   );
   const wallColor = useSelector(
     (state: RootState) => state.elevator.materials.walls
+  );
+  const diffusion = useSelector(
+    (state: RootState) => state.elevator.lighting.diffusion ?? 0.5
   );
   const highPerformance = useMemo(
     () => PerformanceOptimizer.isHighPerformanceDevice(),
@@ -74,19 +77,28 @@ const CeilingLights: React.FC<{
 
   // Рассчитываем размер и интенсивность светового пятна
   const getSpotSize = (index: number) => {
-    // Центральный светильник (индекс 0) делаем немного больше и ярче
-    if (count === 5 && index === 0) {
-      return dimensions.height * 0.7;
-    }
-    return dimensions.height * 0.4;
+    // Базовый размер светового пятна с учетом рассеивания
+    const baseSize = dimensions.height * 0.4;
+    // Добавляем центральному светильнику размер, если их 5
+    const centerMultiplier = (count === 5 && index === 0) ? 1.75 : 1;
+    // Для рассеянного света увеличиваем размер пятна
+    const diffusionMultiplier = 1 + diffusion; // Увеличиваем размер при большем рассеивании
+    
+    return baseSize * centerMultiplier * diffusionMultiplier;
   };
 
   const getLightIntensity = (index: number) => {
+    // Базовая интенсивность с корректировкой на рассеивание
+    // При большем рассеивании снижаем воспринимаемую интенсивность
+    const diffusionFactor = 1 - diffusion * 0.4; // Уменьшаем фактор не более чем на 40%
+    
+    // Для выключенных светильников - 0
+    if (!lightsOn) return 0;
+    
     // Центральный светильник ярче
-    if (count === 5 && index === 0) {
-      return lightsOn ? intensity * 1.1 : 0;
-    }
-    return lightsOn ? intensity * 0.7 : 0;
+    const centerBoost = (count === 5 && index === 0) ? 1.1 : 0.7;
+    
+    return intensity * centerBoost * diffusionFactor;
   };
 
   // Создаем текстуру для светового пятна с оптимизацией
@@ -124,13 +136,16 @@ const CeilingLights: React.FC<{
 
       const rgb = hexToRgb(color);
 
-      // Создаем более реалистичный градиент с мягкими переходами
+      // Корректируем градиент в зависимости от параметра рассеивания
+      // Чем выше рассеивание, тем менее выражен центр и более плавные переходы
+      const diffusionOffset = diffusion * 0.2; // Сдвиг для границ градиента
+      
       gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1.0)`); // Яркий центр
-      gradient.addColorStop(0.1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.9)`); // Ближайшее свечение
-      gradient.addColorStop(0.2, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.7)`);
-      gradient.addColorStop(0.4, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
-      gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
-      gradient.addColorStop(0.8, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+      gradient.addColorStop(0.1 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.9 - diffusion * 0.3})`);
+      gradient.addColorStop(0.2 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.7 - diffusion * 0.2})`);
+      gradient.addColorStop(0.4 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.5 - diffusion * 0.1})`);
+      gradient.addColorStop(0.6 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+      gradient.addColorStop(0.8 - diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
       gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)"); // Полное затухание на краях
 
       context.fillStyle = gradient;
@@ -163,7 +178,7 @@ const CeilingLights: React.FC<{
     texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
 
     return texture;
-  }, [color, highPerformance]); // Зависимость от цвета светильника и производительности устройства
+  }, [color, highPerformance, diffusion]); // Добавляем зависимость от diffusion, angle не влияет на текстуру, только на размер
 
   // Новая текстура для ореола на потолке
   const ceilingGlowTexture = useMemo(() => {
@@ -228,7 +243,7 @@ const CeilingLights: React.FC<{
     [highPerformance]
   );
 
-  // Материалы для плафона и световых пятен - оптимизируем с помощью мемоизации
+  // Материалы для плафона светильника - оптимизируем с помощью мемоизации
   const glassMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: lightsOn ? color : "#e0e0e0",
@@ -238,18 +253,6 @@ const CeilingLights: React.FC<{
       emissiveIntensity: lightsOn ? 1 : 0,
     });
   }, [lightsOn, color]);
-
-  const spotPlaneMaterial = useMemo(() => {
-    return new THREE.MeshBasicMaterial({
-      color: color,
-      transparent: true,
-      opacity: 0.8,
-      map: spotTexture,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    });
-  }, [color, spotTexture]);
 
   const ceilingGlowMaterial = useMemo(() => {
     return new THREE.MeshBasicMaterial({
@@ -266,6 +269,93 @@ const CeilingLights: React.FC<{
   // Преобразуем цвет в строковый формат для тултипа
   const getColorString = (colorValue: string | THREE.Color) => {
     return colorUtils.colorToRGBString(colorValue);
+  };
+
+  // Оптимизация текстур в зависимости от цвета и рассеивания
+  useEffect(() => {
+    // Применяем оптимизацию к загруженным текстурам
+    const optimizeTexture = (texture: THREE.Texture | undefined) => {
+      if (!texture) return;
+      
+      // Если устройство не мощное, используем менее качественные настройки текстур
+      if (!highPerformance) {
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
+        texture.anisotropy = 1; // Минимальная анизотропная фильтрация
+      } else {
+        // Для мощных устройств используем более качественные настройки
+        texture.anisotropy = 4; // Повышаем качество текстур на мощных устройствах
+      }
+      
+      // Освобождаем память GPU, если текстура больше не используется
+      texture.dispose = function() {
+        if (this.image instanceof HTMLImageElement) {
+          this.image.onload = null;
+        }
+        // Вызываем стандартный dispose
+        THREE.Texture.prototype.dispose.call(this);
+      };
+    };
+    
+    // Оптимизируем текстуры
+    optimizeTexture(spotTexture);
+    optimizeTexture(ceilingGlowTexture);
+    
+  }, [spotTexture, ceilingGlowTexture, highPerformance]);
+
+  // Также параметризуем радиус светового пятна в зависимости от размера лифта
+  const lightSpotRenderer = (index: number) => {
+    if (!lightsOn) return null;
+    
+    // Радиус светового пятна зависит от рассеивания
+    const spotSize = getSpotSize(index);
+    
+    // Фиксированное положение светового пятна на полу
+    const spotPositionY = -(dimensions.height * 0.5);
+    
+    // Для большего рассеивания увеличиваем размер вторичного ореола
+    const secondarySize = spotSize * (1 + diffusion * 0.6);
+    
+    return (
+      <group key={`spotLight_${index}`}>
+        {/* Основное световое пятно */}
+        <Plane
+          scale={[spotSize, spotSize, 1]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, spotPositionY, 0]}
+        >
+          <meshBasicMaterial
+            map={spotTexture}
+            color={color}
+            transparent={true}
+            opacity={getLightIntensity(index) * 0.1}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
+        </Plane>
+        
+        {/* Вторичный ореол - более широкий и слабый, для рассеянного света */}
+        {diffusion > 0.3 && (
+          <Plane
+            scale={[secondarySize, secondarySize, 1]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, spotPositionY + 0.01, 0]}
+          >
+            <meshBasicMaterial
+              map={spotTexture}
+              color={color}
+              transparent={true}
+              opacity={getLightIntensity(index) * 0.05 * diffusion}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+              side={THREE.DoubleSide}
+            />
+          </Plane>
+        )}
+      </group>
+    );
   };
 
   return (
@@ -346,12 +436,7 @@ const CeilingLights: React.FC<{
             {/* Световое пятно на полу - только если свет включен */}
             {lightsOn && (
               <group position={[0, -dimensions.height + 0.05, 0]}>
-                <Plane
-                  args={[getSpotSize(index) * 1.2, getSpotSize(index) * 1.2]}
-                  rotation={[-Math.PI / 2, 0, 0]}
-                  position={[0, 0.01, 0]} // Слегка поднимаем над полом
-                  material={spotPlaneMaterial}
-                />
+                {lightSpotRenderer(index)}
               </group>
             )}
           </group>

@@ -342,6 +342,17 @@ const LightingControls: React.FC<LightingControlsProps> = ({ elevator }) => {
         rightLabel="Яркий"
       />
       
+      <RangeSlider
+        label="Рассеивание:"
+        min={0}
+        max={1}
+        step={0.05}
+        value={elevator.lighting.diffusion}
+        onChange={(value) => dispatch(setLighting({ diffusion: value }))}
+        leftLabel="Сфокусированный"
+        rightLabel="Рассеянный"
+      />
+      
       <CheckboxInput
         id="enableLighting"
         label="Включить свет"
