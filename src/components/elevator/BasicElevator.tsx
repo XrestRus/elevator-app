@@ -12,7 +12,7 @@ import ElevatorMirror from "./ElevatorMirror.tsx";
 import ElevatorHandrails from "./ElevatorHandrails.tsx";
 import DecorationStripes from "./DecorationStripes.tsx";
 import JointStripes from "./JointStripes";
-import PerformanceOptimizer from "../../utils/PerformanceOptimizer";
+import PerformanceOptimizer from "../../utils/optimization/PerformanceOptimizer";
 import {
   createWallMaterialWithCustomRepeat,
   loadPBRTextures,

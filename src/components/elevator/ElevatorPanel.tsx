@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, Cylinder, Html } from "@react-three/drei";
+import { Cylinder, Html, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import { CSSProperties } from 'react';
 import MakeHoverable from "../ui/makeHoverable";
@@ -15,27 +15,45 @@ interface ElevatorPanelProps {
 }
 
 const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor }) => {
-  // Создаем цвет панели чуть темнее цвета стен
+  // Создаем цвет панели чуть светлее цвета стен для контраста
   const panelColor = useMemo(() => {
-    return colorUtils.darkenColor(wallColor, 0.9);
+    return colorUtils.lightenColor(wallColor, 1.05);
   }, [wallColor]);
+
+  // Создаем цвет рамки панели темнее цвета панели
+  const panelBorderColor = useMemo(() => {
+    return colorUtils.darkenColor(panelColor, 0.8);
+  }, [panelColor]);
 
   // Создаем цвет кнопок чуть светлее цвета стен
   const buttonColor = useMemo(() => {
     return colorUtils.lightenColor(wallColor, 1.1);
   }, [wallColor]);
 
-  // Материал для панели (наследует цвет стен но слегка темнее)
+  // Материал для основной панели (светлый)
   const panelMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: panelColor,
-        metalness: 0.6,
-        roughness: 0.3,
+        metalness: 0.3,
+        roughness: 0.4,
         emissive: lightsOn ? panelColor : "#000000",
         emissiveIntensity: lightsOn ? 0.05 : 0,
       }),
     [panelColor, lightsOn]
+  );
+
+  // Материал для рамки/углубления панели (темнее)
+  const panelBorderMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: panelBorderColor,
+        metalness: 0.5,
+        roughness: 0.3,
+        emissive: lightsOn ? panelBorderColor : "#000000",
+        emissiveIntensity: lightsOn ? 0.02 : 0,
+      }),
+    [panelBorderColor, lightsOn]
   );
 
   // Материал для экрана
@@ -113,15 +131,28 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
   const panelContent = (
     <group position={new THREE.Vector3(...position)} rotation={[0, 3.2, 0]}>
-      {/* Основа панели - теперь плоская и уже по ширине */}
-      <Box args={[0.25, 0.75, 0.0001]} castShadow>
-        <primitive object={panelMaterial} attach="material" />
-      </Box>
+      {/* Внешняя рамка с углублением */}
+      <RoundedBox args={[0.28, 0.78, 0.015]} radius={0.02} smoothness={4} castShadow>
+        <primitive object={panelBorderMaterial} attach="material" />
+      </RoundedBox>
 
-      {/* Экран с информацией о текущем этаже (вверху панели) */}
-      <Box position={[0, 0.32, 0.016]} args={[0.2, 0.03, 0.001]} castShadow>
-        <primitive object={displayMaterial} attach="material" />
-      </Box>
+      {/* Основа панели - утопленная внутрь с мягкими скругленными краями */}
+      <RoundedBox position={[0, 0, 0.005]} args={[0.26, 0.76, 0.01]} radius={0.015} smoothness={4} castShadow>
+        <primitive object={panelMaterial} attach="material" />
+      </RoundedBox>
+
+      {/* Экран с информацией о текущем этаже (вверху панели) - имеет небольшое углубление */}
+      <group position={[0, 0.32, 0]}>
+        {/* Углубление для экрана */}
+        <RoundedBox position={[0, 0, 0.006]} args={[0.22, 0.05, 0.003]} radius={0.01} smoothness={4}>
+          <primitive object={panelBorderMaterial} attach="material" />
+        </RoundedBox>
+        
+        {/* Сам экран */}
+        <RoundedBox position={[0, 0, 0.009]} args={[0.2, 0.03, 0.001]} radius={0.005} smoothness={4}>
+          <primitive object={displayMaterial} attach="material" />
+        </RoundedBox>
+      </group>
 
       {/* Кнопки этажей - используем циклы для создания рядов кнопок */}
       {buttonPositions.map((pos, index) => {
@@ -129,9 +160,19 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         const floorNumber = 24 - index;
         return (
           <group key={`button-group-${index}`}>
+            {/* Углубление для кнопки */}
+            <Cylinder
+              position={[pos[0], pos[1], 0.01]}
+              rotation={[Math.PI / 2, 0, 0]}
+              args={[0.022, 0.022, 0.003, 16]}
+              castShadow
+            >
+              <primitive object={panelBorderMaterial} attach="material" />
+            </Cylinder>
+            
             {/* Кнопка этажа - плоский цилиндр */}
             <Cylinder
-              position={[pos[0], pos[1], 0.02]}
+              position={[pos[0], pos[1], 0.013]}
               rotation={[Math.PI / 2, 0, 0]}
               args={[0.018, 0.018, 0.005, 16]}
               castShadow
@@ -141,7 +182,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
             
             {/* Обводка кнопки */}
             <Cylinder
-              position={[pos[0], pos[1], 0.019]}
+              position={[pos[0], pos[1], 0.012]}
               rotation={[Math.PI / 2, 0, 0]}
               args={[0.021, 0.021, 0.001, 16]}
               castShadow
@@ -151,7 +192,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
             {/* Номер этажа */}
             <Html
-              position={[pos[0], pos[1], 0.023]}
+              position={[pos[0], pos[1], 0.016]}
               center
               style={textStyle}
             >
@@ -163,9 +204,19 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
       {/* Кнопки открытия/закрытия дверей (внизу панели) */}
       <group position={[0, -0.25, 0]}>
+        {/* Углубление для кнопки открытия дверей */}
+        <Cylinder
+          position={[-0.05, 0, 0.01]}
+          rotation={[Math.PI / 2, 0, 0]}
+          args={[0.022, 0.022, 0.003, 16]}
+          castShadow
+        >
+          <primitive object={panelBorderMaterial} attach="material" />
+        </Cylinder>
+        
         {/* Кнопка открытия дверей */}
         <Cylinder
-          position={[-0.05, 0, 0.02]}
+          position={[-0.05, 0, 0.013]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[0.018, 0.018, 0.005, 16]}
           castShadow
@@ -175,7 +226,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         
         {/* Обводка кнопки открытия дверей */}
         <Cylinder
-          position={[-0.05, 0, 0.019]}
+          position={[-0.05, 0, 0.012]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[0.021, 0.021, 0.001, 16]}
           castShadow
@@ -185,16 +236,26 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
         {/* Символ открытия дверей */}
         <Html
-          position={[-0.05, 0, 0.023]}
+          position={[-0.05, 0, 0.016]}
           center
           style={textStyle}
         >
           ◄►
         </Html>
 
+        {/* Углубление для кнопки закрытия дверей */}
+        <Cylinder
+          position={[0.05, 0, 0.01]}
+          rotation={[Math.PI / 2, 0, 0]}
+          args={[0.022, 0.022, 0.003, 16]}
+          castShadow
+        >
+          <primitive object={panelBorderMaterial} attach="material" />
+        </Cylinder>
+        
         {/* Кнопка закрытия дверей */}
         <Cylinder
-          position={[0.05, 0, 0.02]}
+          position={[0.05, 0, 0.013]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[0.018, 0.018, 0.005, 16]}
           castShadow
@@ -204,7 +265,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         
         {/* Обводка кнопки закрытия дверей */}
         <Cylinder
-          position={[0.05, 0, 0.019]}
+          position={[0.05, 0, 0.012]}
           rotation={[Math.PI / 2, 0, 0]}
           args={[0.021, 0.021, 0.001, 16]}
           castShadow
@@ -214,7 +275,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
         {/* Символ закрытия дверей */}
         <Html
-          position={[0.05, 0, 0.023]}
+          position={[0.05, 0, 0.016]}
           center
           style={textStyle}
         >
@@ -232,9 +293,9 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
       description="Панель с кнопками для управления лифтом"
       material="Металл, пластик"
       dimensions={{
-        width: 0.25,
-        height: 0.75,
-        depth: 0.02
+        width: 0.28,
+        height: 0.78,
+        depth: 0.015
       }}
       additionalInfo={{
         color: colorInfoString,

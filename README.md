@@ -1,4 +1,6 @@
 # AI Elevator - Конфигуратор 3D лифтов
+## Общее
+- https://cardesigner.kone.com/#/new-buildings/global/n-monospace-exp/edit/blank
 
 ## Текстуры и материалы
 
@@ -40,7 +42,7 @@
 
 #### Интеграция новых текстур в UI
 
-После добавления новых текстур в файловую систему, необходимо обновить компонент `TextureControls` в файле `app/src/components/ui/tabs/MaterialsTab.tsx`:
+После добавления новых текстур в файловую систему, необходимо обновить переменную `textureOptions` в файле `app/src/components/ui/textures/textureOptions.ts`:
 
 ```js
 const textureOptions = [
