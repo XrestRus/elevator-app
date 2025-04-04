@@ -75,22 +75,10 @@ const CeilingLights: React.FC<{
     return posArray;
   }, [count, dimensions.width, dimensions.depth]);
 
-  // Рассчитываем размер и интенсивность светового пятна
-  const getSpotSize = (index: number) => {
-    // Базовый размер светового пятна с учетом рассеивания
-    const baseSize = dimensions.height * 0.4;
-    // Добавляем центральному светильнику размер, если их 5
-    const centerMultiplier = (count === 5 && index === 0) ? 1.75 : 1;
-    // Для рассеянного света увеличиваем размер пятна
-    const diffusionMultiplier = 1 + diffusion; // Увеличиваем размер при большем рассеивании
-    
-    return baseSize * centerMultiplier * diffusionMultiplier;
-  };
-
   const getLightIntensity = (index: number) => {
     // Базовая интенсивность с корректировкой на рассеивание
     // При большем рассеивании снижаем воспринимаемую интенсивность
-    const diffusionFactor = 1 - diffusion * 0.4; // Уменьшаем фактор не более чем на 40%
+    const diffusionFactor = 1;
     
     // Для выключенных светильников - 0
     if (!lightsOn) return 0;
@@ -304,60 +292,6 @@ const CeilingLights: React.FC<{
     
   }, [spotTexture, ceilingGlowTexture, highPerformance]);
 
-  // Также параметризуем радиус светового пятна в зависимости от размера лифта
-  const lightSpotRenderer = (index: number) => {
-    if (!lightsOn) return null;
-    
-    // Радиус светового пятна зависит от рассеивания
-    const spotSize = getSpotSize(index);
-    
-    // Фиксированное положение светового пятна на полу
-    const spotPositionY = -(dimensions.height * 0.5);
-    
-    // Для большего рассеивания увеличиваем размер вторичного ореола
-    const secondarySize = spotSize * (1 + diffusion * 0.6);
-    
-    return (
-      <group key={`spotLight_${index}`}>
-        {/* Основное световое пятно */}
-        <Plane
-          scale={[spotSize, spotSize, 1]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, spotPositionY, 0]}
-        >
-          <meshBasicMaterial
-            map={spotTexture}
-            color={color}
-            transparent={true}
-            opacity={getLightIntensity(index) * 0.1}
-            blending={THREE.AdditiveBlending}
-            depthWrite={false}
-            side={THREE.DoubleSide}
-          />
-        </Plane>
-        
-        {/* Вторичный ореол - более широкий и слабый, для рассеянного света */}
-        {diffusion > 0.3 && (
-          <Plane
-            scale={[secondarySize, secondarySize, 1]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, spotPositionY + 0.01, 0]}
-          >
-            <meshBasicMaterial
-              map={spotTexture}
-              color={color}
-              transparent={true}
-              opacity={getLightIntensity(index) * 0.05 * diffusion}
-              blending={THREE.AdditiveBlending}
-              depthWrite={false}
-              side={THREE.DoubleSide}
-            />
-          </Plane>
-        )}
-      </group>
-    );
-  };
-
   return (
     <group position={[0, dimensions.height / 2 - 0.05, 0]}>
       {/* Используем инстансинг для оптимизации рендеринга однотипных мешей */}
@@ -416,29 +350,16 @@ const CeilingLights: React.FC<{
 
             {/* Сам источник света - с оптимизированными параметрами */}
             <spotLight
-              position={[0, -0.02, 0]}
-              angle={Math.PI / 3}
+              position={[0, 0.01, 0]}
+              angle={1}
               penumbra={0.8} // Увеличено для более мягких краев теней
               intensity={getLightIntensity(index)}
               color={color}
               castShadow={highPerformance}
-              decay={2}
               distance={dimensions.height * 1.5}
               shadow-mapSize-width={highPerformance ? 2048 : 512}
               shadow-mapSize-height={highPerformance ? 2048 : 512}
-              shadow-bias={-0.001}
-              shadow-normalBias={0.05}
-              shadow-focus={0.7}
-              shadow-radius={8}
-              shadow-blurSamples={highPerformance ? 16 : 4}
             />
-
-            {/* Световое пятно на полу - только если свет включен */}
-            {lightsOn && (
-              <group position={[0, -dimensions.height + 0.05, 0]}>
-                {lightSpotRenderer(index)}
-              </group>
-            )}
           </group>
         </MakeHoverable>
       ))}
