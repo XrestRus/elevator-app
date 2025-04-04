@@ -8,6 +8,14 @@ import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
 
 /**
+ * Тип светильника для потолка лифта
+ */
+export enum LightType {
+  SPOTLIGHT = 'spotlight', // Точечный встроенный светильник
+  PLAFOND = 'plafond'     // Светильник-плафон
+}
+
+/**
  * Конфигурация параметров светильника для потолка лифта
  */
 export interface LightConfig {
@@ -17,15 +25,17 @@ export interface LightConfig {
   count: number;
   diffusion: number;
   position: [number, number, number];
+  type: LightType;
 }
 
 /**
- * Размеры светильника в зависимости от их количества
+ * Размеры светильника в зависимости от их количества и типа
  */
 interface LightSize {
   housingRadius: number;
   glassRadius: number;
   glowSize: number;
+  height?: number;
 }
 
 /**
@@ -69,17 +79,19 @@ const createSpotTexture = (
     const rgb = hexToRgb(color);
 
     // Корректируем градиент в зависимости от параметра рассеивания
-    const diffusionOffset = diffusion * 0.2;
-    
+    // Чем выше диффузия, тем более мягкий градиент
+    const diffusionOffset = diffusion * 0.3; // Увеличиваем влияние диффузии
+
     gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1.0)`);
-    const opacity1 = 0.9 - diffusion * 0.3;
+    const opacity1 = Math.max(0, Math.min(1, 0.9 - diffusion * 0.4));
     gradient.addColorStop(0.1 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity1})`);
-    const opacity2 = 0.7 - diffusion * 0.2;
-    gradient.addColorStop(0.2 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity2})`);
-    const opacity3 = 0.5 - diffusion * 0.1;
-    gradient.addColorStop(0.4 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity3})`);
-    gradient.addColorStop(0.6 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
-    gradient.addColorStop(0.8 - diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+    const opacity2 = Math.max(0, Math.min(1, 0.7 - diffusion * 0.3));
+    gradient.addColorStop(0.3 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity2})`);
+    const opacity3 = Math.max(0, Math.min(1, 0.5 - diffusion * 0.2));
+    gradient.addColorStop(0.5 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity3})`);
+    const opacity4 = Math.max(0, Math.min(1, 0.3 - diffusion * 0.1));
+    gradient.addColorStop(0.7 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity4})`);
+    gradient.addColorStop(0.9, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
     gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
 
     context.fillStyle = gradient;
@@ -119,6 +131,7 @@ const createSpotTexture = (
  */
 const createCeilingGlowTexture = (
   color: string,
+  diffusion: number = 0.5,
   highPerformance: boolean
 ): THREE.CanvasTexture => {
   const textureSize = highPerformance ? 256 : 128;
@@ -153,10 +166,11 @@ const createCeilingGlowTexture = (
 
     const rgb = hexToRgb(color);
 
-    // Создаем мягкий ореол вокруг источника света
-    gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
-    gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
-    gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
+    // Создаем мягкий ореол вокруг источника света с учетом рассеивания
+    const diffusionFactor = diffusion * 0.2; // Фактор влияния рассеивания
+    gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.6 - diffusionFactor})`);
+    gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.3 - diffusionFactor})`);
+    gradient.addColorStop(0.6 + diffusionFactor, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
     gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
 
     context.fillStyle = gradient;
@@ -197,34 +211,203 @@ const optimizeTexture = (texture: THREE.Texture | undefined, highPerformance: bo
 };
 
 /**
- * Получает размеры светильников в зависимости от их количества
+ * Получает размеры светильников в зависимости от их количества и типа
  */
-const getLightSize = (lightCount: number): LightSize => {
-  if (lightCount === 1) {
-    return {
-      housingRadius: 0.08,
-      glassRadius: 0.07,
-      glowSize: 0.5,
-    };
-  } else if (lightCount === 2) {
-    return {
-      housingRadius: 0.065,
-      glassRadius: 0.06,
-      glowSize: 0.4,
-    };
-  } else {
-    return {
-      housingRadius: 0.055,
-      glassRadius: 0.05,
-      glowSize: 0.3,
-    };
+const getLightSize = (lightCount: number, type: LightType = LightType.SPOTLIGHT): LightSize => {
+  // Базовые размеры для различных вариантов точечных светильников
+  if (type === LightType.SPOTLIGHT) {
+    if (lightCount === 1) {
+      return {
+        housingRadius: 0.08,
+        glassRadius: 0.07,
+        glowSize: 0.5,
+      };
+    } else if (lightCount === 2) {
+      return {
+        housingRadius: 0.065,
+        glassRadius: 0.06,
+        glowSize: 0.4,
+      };
+    } else {
+      return {
+        housingRadius: 0.055,
+        glassRadius: 0.05,
+        glowSize: 0.3,
+      };
+    }
   }
+  // Размеры для плафонов
+  else if (type === LightType.PLAFOND) {
+    if (lightCount === 1) {
+      return {
+        housingRadius: 0.2,
+        glassRadius: 0.18,
+        glowSize: 0.7,
+        height: 0.05
+      };
+    } else if (lightCount === 2) {
+      return {
+        housingRadius: 0.15,
+        glassRadius: 0.13,
+        glowSize: 0.5,
+        height: 0.04
+      };
+    } else {
+      return {
+        housingRadius: 0.1,
+        glassRadius: 0.09,
+        glowSize: 0.4,
+        height: 0.03
+      };
+    }
+  }
+  
+  // Возвращаем стандартные размеры по умолчанию
+  return {
+    housingRadius: 0.055,
+    glassRadius: 0.05,
+    glowSize: 0.3,
+  };
 };
 
 /**
- * Компонент для отображения одного светильника
+ * Компонент для отображения плафона
  */
-const SingleLight: React.FC<{
+const PlafondLight: React.FC<{
+  position: [number, number, number];
+  config: LightConfig;
+  lightSize: LightSize;
+  glassMaterial: THREE.Material;
+  ceilingGlowMaterial: THREE.Material;
+  index: number;
+  dimensions: { width: number; height: number; depth: number };
+  highPerformance: boolean;
+}> = ({
+  position,
+  config,
+  lightSize,
+  glassMaterial,
+  ceilingGlowMaterial,
+  index,
+  dimensions,
+  highPerformance
+}) => {
+  // Высота плафона
+  const height = lightSize.height || 0.04;
+  
+  // Геометрия для плафона (полусфера)
+  const glassGeometry = useMemo(
+    () => new THREE.SphereGeometry(
+      lightSize.glassRadius, 
+      highPerformance ? 24 : 12, 
+      highPerformance ? 16 : 8, 
+      0, 
+      Math.PI * 2, 
+      0, 
+      Math.PI / 2
+    ),
+    [lightSize.glassRadius, highPerformance]
+  );
+  
+  // Геометрия для обода плафона
+  const housingGeometry = useMemo(
+    () => new THREE.TorusGeometry(
+      lightSize.housingRadius,
+      0.01,
+      highPerformance ? 16 : 8,
+      highPerformance ? 32 : 16
+    ),
+    [lightSize.housingRadius, highPerformance]
+  );
+  
+  // Рассчитываем интенсивность светильника с учетом рассеивания
+  const getLightIntensity = () => {
+    // Для рассеянного света снижаем интенсивность при увеличении диффузии
+    const diffusionFactor = 1 - config.diffusion * 0.2;
+    if (!config.enabled) return 0;
+    
+    const intensityMultiplier = 4 / (config.count || 1);
+    return config.intensity * 0.8 * diffusionFactor * intensityMultiplier;
+  };
+  
+  // Создаем материал для обода плафона
+  const housingMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: "#444444", // Тёмный металлический цвет для обода
+      roughness: 0.3,
+      metalness: 0.8,
+    });
+  }, []);
+
+  return (
+    <MakeHoverable
+      name={`Плафон ${index + 1}`}
+      type="Светотехника"
+      description="Потолочный плафон лифта"
+      material="Металл, матовое стекло"
+      dimensions={{
+        width: lightSize.housingRadius * 2,
+        height: height,
+        depth: lightSize.housingRadius * 2
+      }}
+      additionalInfo={{
+        color: colorUtils.colorToRGBString(config.color),
+        texture: "Матовое стекло, металлический обод",
+        "Интенсивность": getLightIntensity().toFixed(1),
+        "Рассеивание": (config.diffusion * 100).toFixed(0) + "%",
+        "Состояние": config.enabled ? "Включен" : "Выключен",
+        "Тип": "Плафон потолочный"
+      }}
+      requiresDoubleClick={false}
+    >
+      <group position={position}>
+        {/* Обод плафона */}
+        <mesh 
+          position={[0, 0, 0]} 
+          rotation={[Math.PI/2, 0, 0]}
+          geometry={housingGeometry}
+          material={housingMaterial}
+        />
+        
+        {/* Стеклянный плафон */}
+        <mesh
+          position={[0, -height/2, 0]}
+          rotation={[Math.PI, 0, 0]}
+          geometry={glassGeometry}
+          material={glassMaterial}
+          castShadow={highPerformance}
+        />
+
+        {/* Ореол света на потолке */}
+        {config.enabled && (
+          <Plane
+            args={[lightSize.glowSize, lightSize.glowSize]}
+            position={[0, -0.002, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            material={ceilingGlowMaterial}
+          />
+        )}
+
+        {/* Источник света */}
+        <pointLight
+          position={[0, -height/3, 0]}
+          intensity={getLightIntensity()}
+          color={config.color}
+          castShadow={highPerformance}
+          distance={dimensions.height * 1.5}
+          decay={1.5}
+          shadow-mapSize-width={highPerformance ? 1024 : 512}
+          shadow-mapSize-height={highPerformance ? 1024 : 512}
+        />
+      </group>
+    </MakeHoverable>
+  );
+};
+
+/**
+ * Компонент для отображения одного точечного светильника
+ */
+const SpotLight: React.FC<{
   position: [number, number, number];
   config: LightConfig;
   lightSize: LightSize;
@@ -253,14 +436,19 @@ const SingleLight: React.FC<{
     [lightSize.glassRadius, highPerformance]
   );
 
-  // Рассчитываем интенсивность светильника
+  // Рассчитываем интенсивность светильника с учетом рассеивания
   const getLightIntensity = () => {
-    const diffusionFactor = 1;
+    // Для направленного света снижаем интенсивность при увеличении диффузии
+    const diffusionFactor = 1 - config.diffusion * 0.3;
     if (!config.enabled) return 0;
     
     const intensityMultiplier = 4 / (config.count || 1);
     return config.intensity * 0.7 * diffusionFactor * intensityMultiplier;
   };
+
+  // Параметры света в зависимости от рассеивания
+  const penumbraValue = Math.min(1, 0.7 + config.diffusion * 0.3);
+  const angleValue = Math.PI * (0.3 + config.diffusion * 0.2);
 
   return (
     <MakeHoverable
@@ -277,6 +465,7 @@ const SingleLight: React.FC<{
         color: colorUtils.colorToRGBString(config.color),
         texture: "Матовый металл с рассеивателем",
         "Интенсивность": getLightIntensity().toFixed(1),
+        "Рассеивание": (config.diffusion * 100).toFixed(0) + "%",
         "Состояние": config.enabled ? "Включен" : "Выключен",
         "Тип": "Встроенный LED-светильник"
       }}
@@ -288,6 +477,7 @@ const SingleLight: React.FC<{
           position={[0, -0.002, 0]}
           geometry={glassGeometry}
           material={glassMaterial}
+          castShadow={highPerformance}
         />
 
         {/* Ореол света на потолке */}
@@ -303,8 +493,8 @@ const SingleLight: React.FC<{
         {/* Источник света */}
         <spotLight
           position={[0, 0.01, 0]}
-          angle={1}
-          penumbra={0.8}
+          angle={angleValue}
+          penumbra={penumbraValue}
           intensity={getLightIntensity()}
           color={config.color}
           castShadow={highPerformance}
@@ -323,7 +513,8 @@ const SingleLight: React.FC<{
 const CeilingLights: React.FC<{
   color?: string;
   intensity?: number;
-}> = ({ color = "#ffffff", intensity = 5 }) => {
+  type?: LightType;
+}> = ({ color = "#ffffff", intensity = 5, type = LightType.SPOTLIGHT }) => {
   // Получаем состояние из Redux
   const { dimensions } = useSelector((state: RootState) => state.elevator);
   const lightsOn = useSelector(
@@ -337,6 +528,13 @@ const CeilingLights: React.FC<{
   );
   const lightCount = useSelector(
     (state: RootState) => state.elevator.lighting.count ?? 4
+  );
+  const lightType = useSelector(
+    // Если в Redux нет типа, используем параметр из пропсов
+    (state: RootState) => 
+      state.elevator.lighting.type ? 
+      (state.elevator.lighting.type as LightType) : 
+      type
   );
   
   const highPerformance = useMemo(
@@ -358,8 +556,9 @@ const CeilingLights: React.FC<{
     enabled: lightsOn,
     count: lightCount,
     diffusion,
-    position: [0, 0, 0]
-  }), [color, intensity, lightsOn, lightCount, diffusion]);
+    position: [0, 0, 0],
+    type: lightType
+  }), [color, intensity, lightsOn, lightCount, diffusion, lightType]);
 
   // Расположение светильников на потолке
   const positions = useMemo(() => {
@@ -398,32 +597,36 @@ const CeilingLights: React.FC<{
   );
 
   const ceilingGlowTexture = useMemo(
-    () => createCeilingGlowTexture(color, highPerformance),
-    [color, highPerformance]
+    () => createCeilingGlowTexture(color, diffusion, highPerformance),
+    [color, diffusion, highPerformance]
   );
 
-  // Материалы для светильника
+  // Материалы для светильника с учетом типа и рассеивания
   const glassMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: lightsOn ? color : "#e0e0e0",
       transparent: true,
-      opacity: 0.9,
+      opacity: lightType === LightType.PLAFOND ? 0.7 : 0.9,
       emissive: lightsOn ? color : "#333333",
-      emissiveIntensity: lightsOn ? 0.9 : 0,
+      emissiveIntensity: lightsOn ? (lightType === LightType.PLAFOND ? 0.7 : 0.9) : 0,
+      roughness: lightType === LightType.PLAFOND ? 0.4 : 0.2,
     });
-  }, [lightsOn, color]);
+  }, [lightsOn, color, lightType]);
 
   const ceilingGlowMaterial = useMemo(() => {
+    // Корректируем прозрачность материала в зависимости от рассеивания
+    const diffusionOpacity = Math.max(0.2, 0.6 - diffusion * 0.3);
+    
     return new THREE.MeshBasicMaterial({
       color: color,
       transparent: true,
-      opacity: 0.6,
+      opacity: diffusionOpacity,
       map: ceilingGlowTexture,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.DoubleSide,
     });
-  }, [color, ceilingGlowTexture]);
+  }, [color, ceilingGlowTexture, diffusion]);
 
   // Оптимизация текстур
   useEffect(() => {
@@ -436,42 +639,63 @@ const CeilingLights: React.FC<{
   const ceilingPosition = dimensions.height / 2 - ceilingThickness;
 
   // Получаем размеры светильников
-  const lightSize = useMemo(() => getLightSize(lightCount), [lightCount]);
+  const lightSize = useMemo(() => getLightSize(lightCount, lightType), [lightCount, lightType]);
+
+  // Отладочная информация
+  useEffect(() => {
+    console.log(`Light Type: ${lightType}, Diffusion: ${diffusion}`);
+  }, [lightType, diffusion]);
 
   return (
     <group position={[0, ceilingPosition, 0]}>
-      {/* Корпусы светильников через инстансинг */}
-      <Instances range={positions.length} limit={10}>
-        <cylinderGeometry 
-          args={[
-            lightSize.housingRadius, 
-            lightSize.housingRadius, 
-            0.005, 
-            highPerformance ? 16 : 8
-          ]} 
-        />
-        <meshStandardMaterial color={frameLightColor} />
+      {/* Корпусы светильников через инстансинг (только для точечных светильников) */}
+      {lightType === LightType.SPOTLIGHT && (
+        <Instances range={positions.length} limit={10}>
+          <cylinderGeometry 
+            args={[
+              lightSize.housingRadius, 
+              lightSize.housingRadius, 
+              0.005, 
+              highPerformance ? 16 : 8
+            ]} 
+          />
+          <meshStandardMaterial color={frameLightColor} />
 
-        {positions.map((pos, index) => (
-          <group key={index}>
-            <Instance position={pos} />
-          </group>
-        ))}
-      </Instances>
+          {positions.map((pos, index) => (
+            <group key={index}>
+              <Instance position={pos} />
+            </group>
+          ))}
+        </Instances>
+      )}
 
       {/* Отдельные светильники */}
       {positions.map((pos, index) => (
-        <SingleLight
-          key={`light-${index}`}
-          position={pos}
-          config={{...lightConfig, position: pos}}
-          lightSize={lightSize}
-          glassMaterial={glassMaterial}
-          ceilingGlowMaterial={ceilingGlowMaterial}
-          index={index}
-          dimensions={dimensions}
-          highPerformance={highPerformance}
-        />
+        lightType === LightType.SPOTLIGHT ? (
+          <SpotLight
+            key={`light-${index}`}
+            position={pos}
+            config={{...lightConfig, position: pos}}
+            lightSize={lightSize}
+            glassMaterial={glassMaterial}
+            ceilingGlowMaterial={ceilingGlowMaterial}
+            index={index}
+            dimensions={dimensions}
+            highPerformance={highPerformance}
+          />
+        ) : (
+          <PlafondLight
+            key={`plafond-${index}`}
+            position={pos}
+            config={{...lightConfig, position: pos}}
+            lightSize={lightSize}
+            glassMaterial={glassMaterial}
+            ceilingGlowMaterial={ceilingGlowMaterial}
+            index={index}
+            dimensions={dimensions}
+            highPerformance={highPerformance}
+          />
+        )
       ))}
     </group>
   );
