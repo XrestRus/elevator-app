@@ -288,6 +288,20 @@ const DoorLogoControls: React.FC<DoorLogoControlsProps> = ({ elevator }) => {
             leftLabel="-1.0 м"
             rightLabel="1.0 м"
           />
+          
+          <RangeSlider
+            label="Смещение по горизонтали:"
+            min={-0.5}
+            max={0.5}
+            step={0.02}
+            value={elevator.doorLogo?.offsetX ?? 0}
+            onChange={(value) => dispatch(setDoorLogo({ 
+              offsetX: value 
+            }))}
+            centerLabel={(value) => `${value.toFixed(2)} м`}
+            leftLabel="Влево"
+            rightLabel="Вправо"
+          />
         </>
       )}
     </div>

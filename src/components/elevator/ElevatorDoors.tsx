@@ -20,6 +20,7 @@ interface ElevatorDoorsProps {
   showLogo?: boolean; // Флаг для отображения логотипа
   logoScale?: number; // Масштаб логотипа
   logoOffsetY?: number; // Смещение логотипа по вертикали
+  logoOffsetX?: number; // Смещение логотипа по горизонтали
 }
 
 /**
@@ -33,6 +34,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
   showLogo = false,
   logoScale = 1,
   logoOffsetY = 0,
+  logoOffsetX = 0,
 }) => {
   // Оптимизированные настройки анимации для более плавного открытия/закрытия
   const animConfig = {
@@ -181,7 +183,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
         {/* Логотип на левой створке */}
         {showLogo && logoMaterial && (
           <group 
-            position={[0, (logoOffsetY * doorHeight/2), -0.04]} 
+            position={[logoOffsetX, (logoOffsetY * doorHeight/2), -0.04]} 
           >
             <mesh
               scale={[logoFinalScale, logoFinalScale, 1]}
@@ -211,7 +213,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
         {/* Логотип на правой створке */}
         {showLogo && logoMaterial && (
           <group 
-            position={[0, (logoOffsetY * doorHeight/2), -0.04]} 
+            position={[-logoOffsetX, (logoOffsetY * doorHeight/2), -0.04]} 
           >
             <mesh
               scale={[logoFinalScale, logoFinalScale, 1]}

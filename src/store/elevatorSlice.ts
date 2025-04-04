@@ -167,6 +167,7 @@ export interface DoorLogoOptions {
   enabled: boolean;
   scale?: number;
   offsetY?: number;
+  offsetX?: number; // Смещение логотипа по горизонтали
 }
 
 /**
@@ -305,8 +306,9 @@ const initialState: ElevatorState = {
   },
   doorLogo: {
     enabled: true,
-    scale: 0.7,
-    offsetY: 0
+    scale: 1.2,
+    offsetY: 0.25,
+    offsetX: 0.16
   }
 };
 
@@ -498,7 +500,8 @@ const elevatorSlice = createSlice({
         state.doorLogo = {
           enabled: false,
           scale: 1,
-          offsetY: 0
+          offsetY: 0,
+          offsetX: 0
         };
       }
       state.doorLogo = { ...state.doorLogo, ...action.payload };
