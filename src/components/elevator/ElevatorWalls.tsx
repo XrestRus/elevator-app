@@ -26,12 +26,12 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
   dimensions,
   backWallMaterial,
   sideWallMaterial,
-  frontWallMaterial,
+  doorFrameMaterial,
 }) => {
   // Получаем цвета материалов для отображения в тултипе
   const getBackWallColor = () => colorUtils.getMaterialColor(backWallMaterial);
   const getSideWallColor = () => colorUtils.getMaterialColor(sideWallMaterial);
-  const getFrontWallColor = () => colorUtils.getMaterialColor(frontWallMaterial);
+  const getDoorFrameColor = () => colorUtils.getMaterialColor(doorFrameMaterial);
 
   // Создаем компоненты стен с поддержкой наведения
   const BackWall = (
@@ -73,7 +73,7 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       args={[dimensions.width - 0.2, 0.3, 0.07]}
       castShadow
     >
-      <primitive object={frontWallMaterial} attach="material" />
+      <primitive object={doorFrameMaterial} attach="material" />
     </Box>
   );
   
@@ -83,7 +83,7 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       args={[0.4, dimensions.height, 0.07]}
       castShadow
     >
-      <primitive object={frontWallMaterial} attach="material" />
+      <primitive object={doorFrameMaterial} attach="material" />
     </Box>
   );
   
@@ -93,7 +93,7 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       args={[0.4, dimensions.height, 0.07]}
       castShadow
     >
-      <primitive object={frontWallMaterial} attach="material" />
+      <primitive object={doorFrameMaterial} attach="material" />
     </Box>
   );
 
@@ -164,15 +164,15 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
         name="Верхняя перемычка"
         type="Элемент конструкции"
         description="Верхняя часть дверного проема"
-        material="Материал передней стены"
+        material="Материал дверной рамки"
         dimensions={{
           width: dimensions.width - 0.2,
           height: 0.3,
           depth: 0.07
         }}
         additionalInfo={{
-          color: getFrontWallColor(),
-          texture: "Матовая поверхность"
+          color: getDoorFrameColor(),
+          texture: "Металлическая поверхность"
         }}
         requiresDoubleClick={false}
       >
@@ -184,15 +184,15 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
         name="Левая панель передней стены"
         type="Элемент конструкции"
         description="Боковая часть дверного проема"
-        material="Материал передней стены"
+        material="Материал дверной рамки"
         dimensions={{
           width: 0.4,
           height: dimensions.height,
           depth: 0.07
         }}
         additionalInfo={{
-          color: getFrontWallColor(),
-          texture: "Матовая поверхность"
+          color: getDoorFrameColor(),
+          texture: "Металлическая поверхность"
         }}
         requiresDoubleClick={false}
       >
@@ -204,15 +204,15 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
         name="Правая панель передней стены"
         type="Элемент конструкции"
         description="Боковая часть дверного проема"
-        material="Материал передней стены"
+        material="Материал дверной рамки"
         dimensions={{
           width: 0.4,
           height: dimensions.height,
           depth: 0.07
         }}
         additionalInfo={{
-          color: getFrontWallColor(),
-          texture: "Матовая поверхность"
+          color: getDoorFrameColor(),
+          texture: "Металлическая поверхность"
         }}
         requiresDoubleClick={false}
       >
