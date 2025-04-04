@@ -48,7 +48,6 @@ const BasicElevator: React.FC = () => {
     sideWallMaterial: baseSideWallMaterial,
     backWallMaterial: baseBackWallMaterial,
     handrailMaterial,
-    doorFrameMaterial,
     decorationStripesMaterial,
     jointStripeMaterial
   } = useMaterialsManager(materials, elevator);
@@ -97,7 +96,6 @@ const BasicElevator: React.FC = () => {
         backWallMaterial={backWallMaterial}
         sideWallMaterial={sideWallMaterial}
         frontWallMaterial={actualFrontWallMaterial}
-        doorFrameMaterial={doorFrameMaterial}
       />
       
       {/* Зеркало - с оптимизацией */}

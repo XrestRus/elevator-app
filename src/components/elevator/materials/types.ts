@@ -59,7 +59,6 @@ export interface MaterialsManagerResult {
   sideWallMaterial: THREE.Material;
   backWallMaterial: THREE.Material;
   handrailMaterial: THREE.Material;
-  doorFrameMaterial: THREE.Material;
   decorationStripesMaterial: THREE.Material | null;
   jointStripeMaterial: THREE.Material | null;
 }

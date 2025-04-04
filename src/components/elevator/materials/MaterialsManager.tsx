@@ -374,21 +374,6 @@ export const useMaterialsManager = (
     [materials.handrails] // Зависимость только от цвета поручней
   );
 
-  // Материал для рамки вокруг дверей (металлический)
-  const doorFrameMaterial = useMemo(
-    () => {
-      const color = new THREE.Color(materials.walls);
-      // Делаем цвет немного светлее для контраста
-      color.multiplyScalar(1.1);
-      return new THREE.MeshStandardMaterial({
-        color: color,
-        metalness: 0.8,
-        roughness: 0.2,
-      });
-    },
-    [materials.walls]
-  );
-
   // Материал для декоративных полос
   const decorationStripesMaterial = useMemo(() => {
     if (!elevator.decorationStripes?.enabled) return null;
@@ -481,7 +466,6 @@ export const useMaterialsManager = (
     sideWallMaterial,
     backWallMaterial,
     handrailMaterial,
-    doorFrameMaterial,
     decorationStripesMaterial,
     jointStripeMaterial
   };
