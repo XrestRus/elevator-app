@@ -19,6 +19,7 @@ import {
   createTexturePaths,
   createPBRMaterial,
 } from "./ElevatorMaterialsUtils.tsx";
+import CeilingLights from "./CeilingLights.tsx";
 
 /**
  * Компонент, представляющий базовую геометрию лифта с анимированными дверьми и оптимизированным рендерингом
@@ -906,11 +907,19 @@ const BasicElevator: React.FC = () => {
         floorMaterial={actualFloorMaterial}
       />
       
-      {/* Потолок - с оптимизацией */}
+      {/* Потолок - с оптимизацией и зазором по краям */}
       <ElevatorCeiling 
         dimensions={dimensions} 
         ceilingMaterial={actualCeilingMaterial}
       />
+      
+      {/* Встроенные светильники - конфигурация 2x2 */}
+      {elevator.visibility.lights && (
+        <CeilingLights 
+          color={elevator.lighting.color} 
+          intensity={elevator.lighting.intensity} 
+        />
+      )}
       
       {/* Стены и дверные рамки - с оптимизацией */}
       <ElevatorWalls 

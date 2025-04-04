@@ -116,6 +116,7 @@ export interface VisibilityOptions {
   mirror: boolean;
   emergencyButton: boolean;
   floorNumber: boolean;
+  lights: boolean;
 }
 
 /**
@@ -262,7 +263,8 @@ const initialState: ElevatorState = {
     floorIndicator: true,
     mirror: true,
     emergencyButton: true,
-    floorNumber: true
+    floorNumber: true,
+    lights: true
   },
   camera: {
     fov: 90,

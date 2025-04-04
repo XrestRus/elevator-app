@@ -17,7 +17,7 @@ interface ElevatorCeilingProps {
 }
 
 /**
- * Компонент для отображения потолка лифта
+ * Компонент для отображения потолка лифта с зазором по бокам для эффекта 3D
  */
 const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
   dimensions,
@@ -26,15 +26,117 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
   // Получаем цвет материала потолка для отображения в тултипе
   const getCeilingColor = () => colorUtils.getMaterialColor(ceilingMaterial);
   
+  // Рассчитываем размеры потолка с зазором по бокам
+  const gapSize = 0.06; // Размер зазора по краям (6 см)
+  const ceilingWidth = dimensions.width - gapSize * 2;
+  const ceilingDepth = dimensions.depth - gapSize * 2;
+  const ceilingThickness = 0.08; // Увеличиваем толщину потолка для более выраженного эффекта
+  
+  // Создаем материал для верхнего потолка (полностью закрывающий шахту)
+  const topCeilingMaterial = new THREE.MeshStandardMaterial({
+    color: "#F0F0F0", // Чуть светлее основного потолка
+    roughness: 0.3,
+    metalness: 0.1,
+  });
+  
+  // Создаем материал для черных боковых элементов
+  const blackSideMaterial = new THREE.MeshStandardMaterial({
+    color: "#7b7b7b", 
+  });
+  
   // Компонент потолка
   const Ceiling = (
-    <Box
-      position={[0, dimensions.height / 2, 0]}
-      args={[dimensions.width, 0.05, dimensions.depth]}
-      receiveShadow
-    >
-      <primitive object={ceilingMaterial} attach="material" />
-    </Box>
+    <>
+      {/* Основной подвесной потолок */}
+      <Box
+        position={[0, dimensions.height / 2 - ceilingThickness / 2, 0]}
+        args={[ceilingWidth, ceilingThickness, ceilingDepth]}
+        receiveShadow
+      >
+        <primitive object={ceilingMaterial} attach="material" />
+      </Box>
+      
+      {/* Закрывающий верхний потолок */}
+      <Box
+        position={[0, dimensions.height / 2 + 0.02, 0]}
+        args={[dimensions.width, 0.04, dimensions.depth]}
+        receiveShadow
+      >
+        <primitive object={topCeilingMaterial} attach="material" />
+      </Box>
+      
+      {/* Черная вглубленная область по правой стороне */}
+      <Box
+        position={[dimensions.width/2 - gapSize/2, dimensions.height/2 - 0.01, 0]}
+        args={[gapSize, dimensions.height * 0.05, dimensions.depth]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Черная вглубленная область по левой стороне */}
+      <Box
+        position={[-dimensions.width/2 + gapSize/2, dimensions.height/2 - 0.01, 0]}
+        args={[gapSize, dimensions.height * 0.05, dimensions.depth]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Черная вглубленная область по передней стороне */}
+      <Box
+        position={[0, dimensions.height/2 - 0.01, dimensions.depth/2 - gapSize/2]}
+        args={[dimensions.width, dimensions.height * 0.05, gapSize]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Черная вглубленная область по задней стороне */}
+      <Box
+        position={[0, dimensions.height/2 - 0.01, -dimensions.depth/2 + gapSize/2]}
+        args={[dimensions.width, dimensions.height * 0.05, gapSize]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Темные вставки в углах - фронт-правый */}
+      <Box
+        position={[dimensions.width/2 - gapSize/2, dimensions.height/2 - 0.01, dimensions.depth/2 - gapSize/2]}
+        args={[gapSize, dimensions.height * 0.05, gapSize]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Темные вставки в углах - фронт-левый */}
+      <Box
+        position={[-dimensions.width/2 + gapSize/2, dimensions.height/2 - 0.01, dimensions.depth/2 - gapSize/2]}
+        args={[gapSize, dimensions.height * 0.05, gapSize]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Темные вставки в углах - тыл-правый */}
+      <Box
+        position={[dimensions.width/2 - gapSize/2, dimensions.height/2 - 0.01, -dimensions.depth/2 + gapSize/2]}
+        args={[gapSize, dimensions.height * 0.05, gapSize]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+      
+      {/* Темные вставки в углах - тыл-левый */}
+      <Box
+        position={[-dimensions.width/2 + gapSize/2, dimensions.height/2 - 0.01, -dimensions.depth/2 + gapSize/2]}
+        args={[gapSize, dimensions.height * 0.05, gapSize]}
+        receiveShadow
+      >
+        <primitive object={blackSideMaterial} attach="material" />
+      </Box>
+    </>
   );
   
   return (
@@ -44,13 +146,14 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
       description="Верхняя поверхность лифта, на которой расположены светильники"
       material="Материал потолка"
       dimensions={{
-        width: dimensions.width,
-        height: 0.05,
-        depth: dimensions.depth
+        width: ceilingWidth,
+        height: ceilingThickness,
+        depth: ceilingDepth
       }}
       additionalInfo={{
         color: getCeilingColor(),
-        texture: "Матовая поверхность со встроенным освещением"
+        texture: "Матовая поверхность со встроенным освещением",
+        "Особенность": "Подвесной потолок с зазором по периметру"
       }}
       requiresDoubleClick={false}
     >

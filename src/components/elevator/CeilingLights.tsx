@@ -8,13 +8,12 @@ import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
 
 /**
- * Компонент для отображения точечных светильников на потолке лифта с оптимизацией
+ * Компонент для отображения точечных встроенных светильников на потолке лифта с оптимизацией
  */
 const CeilingLights: React.FC<{
-  count?: number;
   color?: string;
   intensity?: number;
-}> = ({ count = 5, color = "#ffffff", intensity = 5 }) => {
+}> = ({ color = "#ffffff", intensity = 5 }) => {
   // Получаем состояние света из Redux
   const { dimensions } = useSelector((state: RootState) => state.elevator);
   const lightsOn = useSelector(
@@ -42,40 +41,29 @@ const CeilingLights: React.FC<{
   const positions = useMemo(() => {
     const posArray: [number, number, number][] = [];
 
-    // Создание массива позиций светильников (равномерно распределенных)
-    if (count === 5) {
-      // Центральный светильник
-      posArray.push([0, 0, 0]);
-
-      // Четыре светильника по углам
-      const offsetX = dimensions.width * 0.35;
-      const offsetZ = dimensions.depth * 0.35;
-      posArray.push(
-        [-offsetX, 0, -offsetZ],
-        [offsetX, 0, -offsetZ],
-        [-offsetX, 0, offsetZ],
-        [offsetX, 0, offsetZ]
-      );
-    } else if (count === 4) {
-      const offsetX = dimensions.width * 0.3;
-      const offsetZ = dimensions.depth * 0.3;
-      posArray.push(
-        [-offsetX, 0, -offsetZ],
-        [offsetX, 0, -offsetZ],
-        [-offsetX, 0, offsetZ],
-        [offsetX, 0, offsetZ]
-      );
-    } else if (count === 2) {
-      const offsetZ = dimensions.depth * 0.3;
-      posArray.push([0, 0, -offsetZ], [0, 0, offsetZ]);
-    } else {
-      posArray.push([0, 0, 0]);
-    }
+    // Создание симметричного массива позиций светильников 2x2
+    // Получаем размер потолка с учетом зазора (как в ElevatorCeiling)
+    const gapSize = 0.06;
+    const ceilingWidth = dimensions.width - gapSize * 2;
+    const ceilingDepth = dimensions.depth - gapSize * 2;
+    
+    // Расстояние от центра до светильников (около 1/3 размера)
+    // Немного уменьшаем расстояние от центра для лучшего размещения на подвесном потолке
+    const offsetX = ceilingWidth * 0.28;
+    const offsetZ = ceilingDepth * 0.28;
+    
+    // 4 светильника в конфигурации 2x2
+    posArray.push(
+      [-offsetX, 0, -offsetZ],
+      [offsetX, 0, -offsetZ],
+      [-offsetX, 0, offsetZ],
+      [offsetX, 0, offsetZ]
+    );
 
     return posArray;
-  }, [count, dimensions.width, dimensions.depth]);
+  }, [dimensions.width, dimensions.depth]);
 
-  const getLightIntensity = (index: number) => {
+  const getLightIntensity = () => {
     // Базовая интенсивность с корректировкой на рассеивание
     // При большем рассеивании снижаем воспринимаемую интенсивность
     const diffusionFactor = 1;
@@ -83,10 +71,8 @@ const CeilingLights: React.FC<{
     // Для выключенных светильников - 0
     if (!lightsOn) return 0;
     
-    // Центральный светильник ярче
-    const centerBoost = (count === 5 && index === 0) ? 1.1 : 0.7;
-    
-    return intensity * centerBoost * diffusionFactor;
+    // Все светильники с одинаковой яркостью
+    return intensity * 0.7 * diffusionFactor;
   };
 
   // Создаем текстуру для светового пятна с оптимизацией
@@ -204,9 +190,9 @@ const CeilingLights: React.FC<{
       const rgb = hexToRgb(color);
 
       // Создаем мягкий ореол вокруг источника света
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
-      gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
-      gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
+      gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
+      gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
       gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
 
       context.fillStyle = gradient;
@@ -227,7 +213,7 @@ const CeilingLights: React.FC<{
   // Геометрия для плафона светильника - создаем один раз
   const glassGeometry = useMemo(
     () =>
-      new THREE.CylinderGeometry(0.07, 0.07, 0.005, highPerformance ? 16 : 8),
+      new THREE.CylinderGeometry(0.05, 0.05, 0.004, highPerformance ? 16 : 8),
     [highPerformance]
   );
 
@@ -238,7 +224,7 @@ const CeilingLights: React.FC<{
       transparent: true,
       opacity: 0.9,
       emissive: lightsOn ? color : "#333333",
-      emissiveIntensity: lightsOn ? 1 : 0,
+      emissiveIntensity: lightsOn ? 0.9 : 0,
     });
   }, [lightsOn, color]);
 
@@ -292,11 +278,15 @@ const CeilingLights: React.FC<{
     
   }, [spotTexture, ceilingGlowTexture, highPerformance]);
 
+  // Получаем высоту потолка с учетом его толщины
+  const ceilingThickness = 0.08;
+  const ceilingPosition = dimensions.height / 2 - ceilingThickness;
+
   return (
-    <group position={[0, dimensions.height / 2 - 0.05, 0]}>
+    <group position={[0, ceilingPosition, 0]}>
       {/* Используем инстансинг для оптимизации рендеринга однотипных мешей */}
       <Instances range={positions.length} limit={10}>
-        <cylinderGeometry args={[0.0, 0.076, 0.01, highPerformance ? 16 : 8]} />
+        <cylinderGeometry args={[0.055, 0.055, 0.005, highPerformance ? 16 : 8]} />
         <meshStandardMaterial color={frameLightColor} />
 
         {positions.map((pos, index) => (
@@ -310,21 +300,19 @@ const CeilingLights: React.FC<{
       {positions.map((pos, index) => (
         <MakeHoverable
           key={`light-${index}`}
-          name={count === 5 && index === 0 ? "Центральный светильник" : `Светильник ${index + 1}`}
+          name={`Светильник ${index + 1}`}
           type="Светотехника"
-          description={count === 5 && index === 0 
-            ? "Основной потолочный светильник лифта"
-            : "Вспомогательный потолочный светильник лифта"}
+          description="Встроенный потолочный светильник лифта"
           material="Металл, матовый рассеиватель"
           dimensions={{
             width: 0.1,
-            height: 0.03,
+            height: 0.015,
             depth: 0.1
           }}
           additionalInfo={{
             color: getColorString(color),
             texture: "Матовый металл с рассеивателем",
-            "Интенсивность": getLightIntensity(index).toFixed(1),
+            "Интенсивность": getLightIntensity().toFixed(1),
             "Состояние": lightsOn ? "Включен" : "Выключен",
             "Тип": "Встроенный LED-светильник"
           }}
@@ -333,7 +321,7 @@ const CeilingLights: React.FC<{
           <group position={pos}>
             {/* Стеклянный плафон */}
             <mesh
-              position={[0, -0.01, 0]}
+              position={[0, -0.002, 0]}
               geometry={glassGeometry}
               material={glassMaterial}
             />
@@ -341,8 +329,8 @@ const CeilingLights: React.FC<{
             {/* Ореол света на потолке */}
             {lightsOn && (
               <Plane
-                args={[0.4, 0.4]}
-                position={[0, 0.01, 0]}
+                args={[0.3, 0.3]}
+                position={[0, -0.002, 0]}
                 rotation={[-Math.PI / 2, 0, 0]}
                 material={ceilingGlowMaterial}
               />
@@ -353,7 +341,7 @@ const CeilingLights: React.FC<{
               position={[0, 0.01, 0]}
               angle={1}
               penumbra={0.8} // Увеличено для более мягких краев теней
-              intensity={getLightIntensity(index)}
+              intensity={getLightIntensity()}
               color={color}
               castShadow={highPerformance}
               distance={dimensions.height * 1.5}
