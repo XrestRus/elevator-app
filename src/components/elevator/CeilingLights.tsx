@@ -25,6 +25,10 @@ const CeilingLights: React.FC<{
   const diffusion = useSelector(
     (state: RootState) => state.elevator.lighting.diffusion ?? 0.5
   );
+  // Получаем количество светильников из Redux
+  const lightCount = useSelector(
+    (state: RootState) => state.elevator.lighting.count ?? 4
+  );
   const highPerformance = useMemo(
     () => PerformanceOptimizer.isHighPerformanceDevice(),
     []
@@ -41,27 +45,38 @@ const CeilingLights: React.FC<{
   const positions = useMemo(() => {
     const posArray: [number, number, number][] = [];
 
-    // Создание симметричного массива позиций светильников 2x2
+    // Создание массива позиций светильников в зависимости от их количества
     // Получаем размер потолка с учетом зазора (как в ElevatorCeiling)
     const gapSize = 0.06;
     const ceilingWidth = dimensions.width - gapSize * 2;
     const ceilingDepth = dimensions.depth - gapSize * 2;
     
     // Расстояние от центра до светильников (около 1/3 размера)
-    // Немного уменьшаем расстояние от центра для лучшего размещения на подвесном потолке
     const offsetX = ceilingWidth * 0.28;
     const offsetZ = ceilingDepth * 0.28;
     
-    // 4 светильника в конфигурации 2x2
-    posArray.push(
-      [-offsetX, 0, -offsetZ],
-      [offsetX, 0, -offsetZ],
-      [-offsetX, 0, offsetZ],
-      [offsetX, 0, offsetZ]
-    );
+    // В зависимости от выбранного количества светильников создаем разные конфигурации
+    if (lightCount === 1) {
+      // 1 светильник (центральный)
+      posArray.push([0, 0, 0]);
+    } else if (lightCount === 2) {
+      // 2 светильника (спереди и сзади)
+      posArray.push(
+        [0, 0, -offsetZ],
+        [0, 0, offsetZ]
+      );
+    } else {
+      // 4 светильника в конфигурации 2x2 (по умолчанию)
+      posArray.push(
+        [-offsetX, 0, -offsetZ],
+        [offsetX, 0, -offsetZ],
+        [-offsetX, 0, offsetZ],
+        [offsetX, 0, offsetZ]
+      );
+    }
 
     return posArray;
-  }, [dimensions.width, dimensions.depth]);
+  }, [dimensions.width, dimensions.depth, lightCount]);
 
   const getLightIntensity = () => {
     // Базовая интенсивность с корректировкой на рассеивание
@@ -72,7 +87,9 @@ const CeilingLights: React.FC<{
     if (!lightsOn) return 0;
     
     // Все светильники с одинаковой яркостью
-    return intensity * 0.7 * diffusionFactor;
+    // Но с поправкой на их количество, чтобы общая освещенность была примерно одинаковой
+    const intensityMultiplier = 4 / (lightCount || 1); // Усиливаем яркость при меньшем количестве светильников
+    return intensity * 0.7 * diffusionFactor * intensityMultiplier;
   };
 
   // Создаем текстуру для светового пятна с оптимизацией
@@ -210,13 +227,6 @@ const CeilingLights: React.FC<{
     return texture;
   }, [color, highPerformance]);
 
-  // Геометрия для плафона светильника - создаем один раз
-  const glassGeometry = useMemo(
-    () =>
-      new THREE.CylinderGeometry(0.05, 0.05, 0.004, highPerformance ? 16 : 8),
-    [highPerformance]
-  );
-
   // Материалы для плафона светильника - оптимизируем с помощью мемоизации
   const glassMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
@@ -282,11 +292,40 @@ const CeilingLights: React.FC<{
   const ceilingThickness = 0.08;
   const ceilingPosition = dimensions.height / 2 - ceilingThickness;
 
+  // Рассчитываем размеры светильников в зависимости от их количества
+  const getLightSize = useMemo(() => {
+    if (lightCount === 1) {
+      return {
+        housingRadius: 0.08, // Больший радиус для одиночного светильника
+        glassRadius: 0.07,
+        glowSize: 0.5, // Больший ореол для одиночного светильника
+      };
+    } else if (lightCount === 2) {
+      return {
+        housingRadius: 0.065,
+        glassRadius: 0.06,
+        glowSize: 0.4,
+      };
+    } else {
+      return {
+        housingRadius: 0.055, // Стандартный размер для 4 светильников
+        glassRadius: 0.05,
+        glowSize: 0.3,
+      };
+    }
+  }, [lightCount]);
+
+  // Геометрия для плафона светильника - создаем один раз в зависимости от размера
+  const glassGeometry = useMemo(
+    () => new THREE.CylinderGeometry(getLightSize.glassRadius, getLightSize.glassRadius, 0.004, highPerformance ? 16 : 8),
+    [getLightSize.glassRadius, highPerformance]
+  );
+
   return (
     <group position={[0, ceilingPosition, 0]}>
       {/* Используем инстансинг для оптимизации рендеринга однотипных мешей */}
       <Instances range={positions.length} limit={10}>
-        <cylinderGeometry args={[0.055, 0.055, 0.005, highPerformance ? 16 : 8]} />
+        <cylinderGeometry args={[getLightSize.housingRadius, getLightSize.housingRadius, 0.005, highPerformance ? 16 : 8]} />
         <meshStandardMaterial color={frameLightColor} />
 
         {positions.map((pos, index) => (
@@ -305,9 +344,9 @@ const CeilingLights: React.FC<{
           description="Встроенный потолочный светильник лифта"
           material="Металл, матовый рассеиватель"
           dimensions={{
-            width: 0.1,
+            width: getLightSize.housingRadius * 2,
             height: 0.015,
-            depth: 0.1
+            depth: getLightSize.housingRadius * 2
           }}
           additionalInfo={{
             color: getColorString(color),
@@ -329,7 +368,7 @@ const CeilingLights: React.FC<{
             {/* Ореол света на потолке */}
             {lightsOn && (
               <Plane
-                args={[0.3, 0.3]}
+                args={[getLightSize.glowSize, getLightSize.glowSize]}
                 position={[0, -0.002, 0]}
                 rotation={[-Math.PI / 2, 0, 0]}
                 material={ceilingGlowMaterial}
