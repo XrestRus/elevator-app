@@ -214,14 +214,7 @@ interface JointControlsProps {
 
 const JointControls: React.FC<JointControlsProps> = ({ elevator }) => {
   const dispatch = useDispatch();
-  
-  // Опции для выбора материала стыков
-  const materialOptions = [
-    { value: 'metal', label: 'Металл' },
-    { value: 'glossy', label: 'Глянцевый' },
-    { value: 'wood', label: 'Дерево' }
-  ];
-  
+
   return (
     <div style={{ marginBottom: '16px' }}>
       <h4>Стыки между стенами</h4>
@@ -234,75 +227,6 @@ const JointControls: React.FC<JointControlsProps> = ({ elevator }) => {
           enabled: checked
         }))}
       />
-      
-      {(elevator.joints?.enabled ?? false) && (
-        <>
-          <ColorPicker
-            label="Цвет стыков:"
-            value={elevator.joints?.color ?? '#888888'}
-            onChange={(value) => dispatch(setJoints({ 
-              color: value 
-            }))}
-          />
-          
-          <SelectInput
-            label="Материал стыков:"
-            value={elevator.joints?.material ?? 'metal'}
-            onChange={(value) => {
-              if (value === 'metal' || value === 'glossy' || value === 'wood') {
-                dispatch(setJoints({ material: value }));
-              }
-            }}
-            options={materialOptions}
-          />
-          
-          <RangeSlider
-            label="Ширина стыка (мм):"
-            min={1}
-            max={20}
-            step={0.5}
-            value={elevator.joints?.width ?? 2.5}
-            onChange={(value) => dispatch(setJoints({ 
-              width: value 
-            }))}
-            centerLabel={(value) => `${value.toFixed(1)} мм`}
-            leftLabel="1 мм"
-            rightLabel="20 мм"
-          />
-          
-          {elevator.joints?.selectedJoint && (
-            <div style={{ 
-              margin: '10px 0',
-              padding: '8px 12px',
-              backgroundColor: '#f0f0f0',
-              borderRadius: '4px',
-              border: '1px solid #ddd' 
-            }}>
-              <h5 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
-                Выбранный стык:
-              </h5>
-              <div style={{ fontSize: '13px' }}>
-                {elevator.joints.selectedJoint}
-              </div>
-              
-              <button 
-                onClick={() => dispatch(setJoints({ selectedJoint: undefined }))}
-                style={{
-                  marginTop: '8px',
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  background: '#e0e0e0',
-                  border: '1px solid #ccc',
-                  borderRadius: '3px',
-                  cursor: 'pointer'
-                }}
-              >
-                Сбросить выбор
-              </button>
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 };

@@ -39,11 +39,6 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
     metalness: 0.1,
   });
   
-  // Создаем материал для черных боковых элементов
-  const blackSideMaterial = new THREE.MeshStandardMaterial({
-    color: "#7b7b7b", 
-  });
-  
   // Компонент потолка
   const Ceiling = (
     <>
@@ -61,81 +56,25 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
         position={[0, dimensions.height / 2 + 0.02, 0]}
         args={[dimensions.width, 0.04, dimensions.depth]}
         receiveShadow
+        castShadow
       >
         <primitive object={topCeilingMaterial} attach="material" />
       </Box>
       
-      {/* Черная вглубленная область по правой стороне */}
-      <Box
-        position={[dimensions.width/2 - gapSize/2, dimensions.height/2 - 0.01, 0]}
-        args={[gapSize, dimensions.height * 0.05, dimensions.depth]}
+      {/* Тень от закрывающего верхнего потолка */}
+      <mesh 
+        position={[0, dimensions.height / 2 - ceilingThickness + 0.001, 0]} 
+        rotation={[Math.PI / 2, 0, 0]}
         receiveShadow
       >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Черная вглубленная область по левой стороне */}
-      <Box
-        position={[-dimensions.width/2 + gapSize/2, dimensions.height/2 - 0.01, 0]}
-        args={[gapSize, dimensions.height * 0.05, dimensions.depth]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Черная вглубленная область по передней стороне */}
-      <Box
-        position={[0, dimensions.height/2 - 0.01, dimensions.depth/2 - gapSize/2]}
-        args={[dimensions.width, dimensions.height * 0.05, gapSize]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Черная вглубленная область по задней стороне */}
-      <Box
-        position={[0, dimensions.height/2 - 0.01, -dimensions.depth/2 + gapSize/2]}
-        args={[dimensions.width, dimensions.height * 0.05, gapSize]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Темные вставки в углах - фронт-правый */}
-      <Box
-        position={[dimensions.width/2 - gapSize/2, dimensions.height/2 - 0.01, dimensions.depth/2 - gapSize/2]}
-        args={[gapSize, dimensions.height * 0.05, gapSize]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Темные вставки в углах - фронт-левый */}
-      <Box
-        position={[-dimensions.width/2 + gapSize/2, dimensions.height/2 - 0.01, dimensions.depth/2 - gapSize/2]}
-        args={[gapSize, dimensions.height * 0.05, gapSize]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Темные вставки в углах - тыл-правый */}
-      <Box
-        position={[dimensions.width/2 - gapSize/2, dimensions.height/2 - 0.01, -dimensions.depth/2 + gapSize/2]}
-        args={[gapSize, dimensions.height * 0.05, gapSize]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
-      
-      {/* Темные вставки в углах - тыл-левый */}
-      <Box
-        position={[-dimensions.width/2 + gapSize/2, dimensions.height/2 - 0.01, -dimensions.depth/2 + gapSize/2]}
-        args={[gapSize, dimensions.height * 0.05, gapSize]}
-        receiveShadow
-      >
-        <primitive object={blackSideMaterial} attach="material" />
-      </Box>
+        <planeGeometry args={[ceilingWidth * 1.05, ceilingDepth * 1.05]} />
+        <meshBasicMaterial 
+          color="black" 
+          transparent={true} 
+          opacity={0.03} 
+          depthWrite={false}
+        />
+      </mesh>
     </>
   );
   

@@ -275,8 +275,8 @@ const initialState: ElevatorState = {
     enabled: true,
     count: 4,
     width: 0.01,
-    material: 'metal',
-    color: '#C0C0C0',
+    material: 'glossy',
+    color: '#ffffff',
     orientation: 'vertical',
     spacing: 30,
     skipMirrorWall: true,
@@ -286,11 +286,11 @@ const initialState: ElevatorState = {
   },
   joints: {
     enabled: true,
-    width: 2.42,
-    color: '#888888', 
-    material: 'metal',
+    width: 2.4,
+    color: '#ffffff', 
+    material: 'glossy',
     protrusion: 0,
-    qualityFactor: 1.0
+    qualityFactor: .9
   }
 };
 
@@ -480,10 +480,11 @@ const elevatorSlice = createSlice({
       if (!state.joints) {
         state.joints = {
           enabled: false,
-          width: 2.5,
-          color: '#888888',
-          material: 'metal',
-          protrusion: 0
+          width: 2.4,
+          color: '#ffffff', 
+          material: 'glossy',
+          protrusion: 0,
+          qualityFactor: .9
         };
       }
       state.joints = { ...state.joints, ...action.payload };
