@@ -69,6 +69,36 @@ export interface Materials {
     ceiling: number;
     doors: number;
   };
+  emission: {
+    walls: number;
+    floor: number;
+    ceiling: number;
+    doors: number;
+    color: string;
+    enabled: boolean;
+  };
+  transparency: {
+    walls: number;
+    floor: number;
+    ceiling: number;
+    doors: number;
+    enabled: boolean;
+  };
+  refraction: {
+    walls: number;
+    floor: number;
+    ceiling: number;
+    doors: number;
+    enabled: boolean;
+  };
+  anisotropy: {
+    walls: number;
+    floor: number;
+    ceiling: number;
+    doors: number;
+    direction: number;
+    enabled: boolean;
+  };
 }
 
 /**
@@ -181,6 +211,36 @@ const initialState: ElevatorState = {
       floor: 0.1,
       ceiling: 0.1,
       doors: 0.3
+    },
+    emission: {
+      walls: 0,
+      floor: 0,
+      ceiling: 0,
+      doors: 0,
+      color: '#ffffff',
+      enabled: false
+    },
+    transparency: {
+      walls: 0,
+      floor: 0,
+      ceiling: 0,
+      doors: 0,
+      enabled: false
+    },
+    refraction: {
+      walls: 1.5,
+      floor: 1.5,
+      ceiling: 1.5,
+      doors: 1.5,
+      enabled: false
+    },
+    anisotropy: {
+      walls: 0,
+      floor: 0,
+      ceiling: 0,
+      doors: 0,
+      direction: 0,
+      enabled: false
     }
   },
   lighting: {
@@ -207,7 +267,7 @@ const initialState: ElevatorState = {
   decorationStripes: {
     enabled: true,
     count: 4,
-    width: 0.2,
+    width: 0.01,
     material: 'metal',
     color: '#C0C0C0',
     orientation: 'vertical',
@@ -219,7 +279,7 @@ const initialState: ElevatorState = {
   },
   joints: {
     enabled: true,
-    width: 2.5,
+    width: 2.42,
     color: '#888888', 
     material: 'metal',
     protrusion: 0,
@@ -282,6 +342,66 @@ const elevatorSlice = createSlice({
     setMetalness: (state, action: PayloadAction<{ part: keyof Materials['metalness'], value: number }>) => {
       const { part, value } = action.payload;
       state.materials.metalness[part] = value;
+    },
+    
+    // Обновление эмиссии (свечения поверхности)
+    setEmission: (state, action: PayloadAction<{ part?: keyof Omit<Materials['emission'], 'color' | 'enabled'>, value?: number, color?: string, enabled?: boolean }>) => {
+      const { part, value, color, enabled } = action.payload;
+      
+      if (part && typeof value === 'number') {
+        state.materials.emission[part] = value;
+      }
+      
+      if (color !== undefined) {
+        state.materials.emission.color = color;
+      }
+      
+      if (enabled !== undefined) {
+        state.materials.emission.enabled = enabled;
+      }
+    },
+    
+    // Обновление прозрачности
+    setTransparency: (state, action: PayloadAction<{ part?: keyof Omit<Materials['transparency'], 'enabled'>, value?: number, enabled?: boolean }>) => {
+      const { part, value, enabled } = action.payload;
+      
+      if (part && typeof value === 'number') {
+        state.materials.transparency[part] = value;
+      }
+      
+      if (enabled !== undefined) {
+        state.materials.transparency.enabled = enabled;
+      }
+    },
+    
+    // Обновление преломления
+    setRefraction: (state, action: PayloadAction<{ part?: keyof Omit<Materials['refraction'], 'enabled'>, value?: number, enabled?: boolean }>) => {
+      const { part, value, enabled } = action.payload;
+      
+      if (part && typeof value === 'number') {
+        state.materials.refraction[part] = value;
+      }
+      
+      if (enabled !== undefined) {
+        state.materials.refraction.enabled = enabled;
+      }
+    },
+    
+    // Обновление анизотропности
+    setAnisotropy: (state, action: PayloadAction<{ part?: keyof Omit<Materials['anisotropy'], 'direction' | 'enabled'>, value?: number, direction?: number, enabled?: boolean }>) => {
+      const { part, value, direction, enabled } = action.payload;
+      
+      if (part && typeof value === 'number') {
+        state.materials.anisotropy[part] = value;
+      }
+      
+      if (direction !== undefined) {
+        state.materials.anisotropy.direction = direction;
+      }
+      
+      if (enabled !== undefined) {
+        state.materials.anisotropy.enabled = enabled;
+      }
     },
     
     // Обновление настроек освещения
@@ -365,6 +485,10 @@ export const {
   setTexture,
   setRoughness,
   setMetalness,
+  setEmission,
+  setTransparency,
+  setRefraction,
+  setAnisotropy,
   setLighting,
   setVisibility,
   setCamera,

@@ -171,27 +171,6 @@ const ObjectInfoPanel: React.FC = () => {
             ))}
           </div>
         )}
-        
-        <div className="object-info-panel-section">
-          <h3>Положение</h3>
-          {selectedObject.position ? (
-            <>
-              <div className="object-info-panel-detail">
-                <strong>X:</strong> {selectedObject.position.x.toFixed(2)}
-              </div>
-              <div className="object-info-panel-detail">
-                <strong>Y:</strong> {selectedObject.position.y.toFixed(2)}
-              </div>
-              <div className="object-info-panel-detail">
-                <strong>Z:</strong> {selectedObject.position.z.toFixed(2)}
-              </div>
-            </>
-          ) : (
-            <div className="object-info-panel-detail">
-              Положение не определено
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

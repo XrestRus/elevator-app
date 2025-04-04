@@ -185,6 +185,10 @@ export const createTexturePaths = (
  * @param color Цвет материала для окрашивания текстуры
  * @param customRoughness Пользовательское значение шероховатости (0-1)
  * @param customMetalness Пользовательское значение металличности (0-1)
+ * @param customEmission Настройки эмиссии (свечения) материала
+ * @param customTransparency Настройки прозрачности материала
+ * @param customRefraction Настройки преломления материала
+ * @param customAnisotropy Настройки анизотропности материала
  * @returns Новый материал с настроенными текстурами
  */
 export const createPBRMaterial = (
@@ -192,7 +196,11 @@ export const createPBRMaterial = (
   textureType: string | null,
   color?: string | THREE.Color,
   customRoughness?: number,
-  customMetalness?: number
+  customMetalness?: number,
+  customEmission?: { value: number, color: string, enabled: boolean },
+  customTransparency?: { value: number, enabled: boolean },
+  customRefraction?: { value: number, enabled: boolean },
+  customAnisotropy?: { value: number, direction: number, enabled: boolean }
 ) => {
   if (!textureType) return null;
 
@@ -207,7 +215,15 @@ export const createPBRMaterial = (
   });
 
   // Настраиваем свойства материала в зависимости от типа текстуры
-  const materialProperties: THREE.MeshStandardMaterialParameters = {
+  const materialProperties: THREE.MeshStandardMaterialParameters & { 
+    anisotropy?: number; 
+    anisotropyRotation?: number;
+    transmission?: number;
+    refractionRatio?: number;
+    ior?: number; // Индекс преломления
+    emissive?: THREE.Color;
+    emissiveIntensity?: number;
+  } = {
     ...textures,
     envMapIntensity: 1.0,
   };
@@ -257,5 +273,64 @@ export const createPBRMaterial = (
     delete materialProperties.metalnessMap; // Убираем карту, чтобы использовать только числовое значение
   }
   
-  return new THREE.MeshStandardMaterial(materialProperties);
+  // Применяем свойство эмиссии (свечения)
+  if (customEmission && customEmission.enabled) {
+    materialProperties.emissive = new THREE.Color(customEmission.color);
+    materialProperties.emissiveIntensity = customEmission.value;
+    
+    console.log(`Применяем свечение: ${customEmission.color}, интенсивность: ${customEmission.value}`);
+    
+    // Отключаем карту эмиссии, если она есть
+    if ('emissiveMap' in materialProperties) {
+      delete materialProperties.emissiveMap;
+    }
+  }
+  
+  // Применяем свойство прозрачности
+  if (customTransparency && customTransparency.enabled) {
+    // Если значение прозрачности больше 0, настраиваем материал для прозрачности
+    if (customTransparency.value > 0) {
+      materialProperties.transparent = true;
+      materialProperties.opacity = 1 - customTransparency.value; // Инвертируем, так как opacity=1 это непрозрачный
+      
+      // Настраиваем порядок рендеринга для правильного отображения прозрачности
+      materialProperties.depthWrite = customTransparency.value < 0.95;
+      
+      console.log(`Применяем прозрачность: ${customTransparency.value}, opacity: ${materialProperties.opacity}`);
+    }
+  }
+  
+  // Применяем свойство преломления
+  if (customRefraction && customRefraction.enabled) {
+    // Используем transmission для эффекта преломления (поддерживается в MeshPhysicalMaterial)
+    materialProperties.transmission = customTransparency?.enabled 
+      ? customTransparency.value  // Если включена прозрачность, используем ее значение
+      : 0.5;                      // Иначе используем среднее значение
+      
+    materialProperties.ior = customRefraction.value; // Индекс преломления материала
+    
+    console.log(`Применяем преломление, коэффициент: ${customRefraction.value}`);
+    
+    // Обратите внимание, что для полноценного преломления нужно использовать MeshPhysicalMaterial вместо MeshStandardMaterial
+  }
+  
+  // Применяем свойство анизотропности
+  if (customAnisotropy && customAnisotropy.enabled && customAnisotropy.value > 0) {
+    materialProperties.anisotropy = customAnisotropy.value;
+    materialProperties.anisotropyRotation = customAnisotropy.direction;
+    
+    console.log(`Применяем анизотропность: ${customAnisotropy.value}, направление: ${customAnisotropy.direction}`);
+    
+    // Обратите внимание, что для полноценной анизотропии нужно использовать MeshPhysicalMaterial вместо MeshStandardMaterial
+  }
+  
+  // Возвращаем материал с нужным типом в зависимости от включенных свойств
+  if ((customRefraction && customRefraction.enabled) || 
+      (customAnisotropy && customAnisotropy.enabled && customAnisotropy.value > 0)) {
+    // Для преломления и анизотропии нужен MeshPhysicalMaterial
+    return new THREE.MeshPhysicalMaterial(materialProperties);
+  } else {
+    // Для остальных случаев достаточно MeshStandardMaterial
+    return new THREE.MeshStandardMaterial(materialProperties);
+  }
 }; 

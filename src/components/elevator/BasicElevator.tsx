@@ -36,43 +36,295 @@ const BasicElevator: React.FC = () => {
 
   // Статичные материалы с мемоизацией для стен, пола, потолка и дверей
   const basicWallMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+    () => {
+      // Начинаем с стандартного материала
+      const materialProps: THREE.MeshStandardMaterialParameters & { 
+        anisotropy?: number; 
+        anisotropyRotation?: number;
+        transmission?: number;
+        refractionRatio?: number;
+        ior?: number;
+        emissive?: THREE.Color;
+        emissiveIntensity?: number;
+      } = {
         color: materials.walls,
         metalness: materials.metalness.walls,
         roughness: materials.roughness.walls,
-      }),
-    [materials.walls, materials.metalness.walls, materials.roughness.walls]
+      };
+      
+      // Добавляем свойство эмиссии (свечения)
+      if (materials.emission.enabled) {
+        materialProps.emissive = new THREE.Color(materials.emission.color);
+        materialProps.emissiveIntensity = materials.emission.walls;
+      }
+      
+      // Добавляем свойство прозрачности
+      if (materials.transparency.enabled && materials.transparency.walls > 0) {
+        materialProps.transparent = true;
+        materialProps.opacity = 1 - materials.transparency.walls;
+        materialProps.depthWrite = materials.transparency.walls < 0.95;
+      }
+      
+      // Создаем материал определенного типа в зависимости от включенных свойств
+      if ((materials.refraction.enabled) || 
+          (materials.anisotropy.enabled && materials.anisotropy.walls > 0)) {
+        // Для преломления и анизотропии нужен MeshPhysicalMaterial
+        const physicalMaterial = new THREE.MeshPhysicalMaterial(materialProps);
+        
+        // Применяем свойство преломления
+        if (materials.refraction.enabled) {
+          physicalMaterial.transmission = materials.transparency.enabled 
+            ? materials.transparency.walls
+            : 0.5;
+          physicalMaterial.ior = materials.refraction.walls;
+        }
+        
+        // Применяем свойство анизотропности
+        if (materials.anisotropy.enabled && materials.anisotropy.walls > 0) {
+          physicalMaterial.anisotropy = materials.anisotropy.walls;
+          physicalMaterial.anisotropyRotation = materials.anisotropy.direction;
+        }
+        
+        return physicalMaterial;
+      } else {
+        // Для остальных случаев достаточно MeshStandardMaterial
+        return new THREE.MeshStandardMaterial(materialProps);
+      }
+    },
+    [
+      materials.walls, 
+      materials.metalness.walls, 
+      materials.roughness.walls,
+      materials.emission.walls,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.walls,
+      materials.transparency.enabled,
+      materials.refraction.walls,
+      materials.refraction.enabled,
+      materials.anisotropy.walls,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   const basicFloorMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+    () => {
+      // Начинаем с стандартного материала
+      const materialProps: THREE.MeshStandardMaterialParameters & { 
+        anisotropy?: number; 
+        anisotropyRotation?: number;
+        transmission?: number;
+        refractionRatio?: number;
+        ior?: number;
+        emissive?: THREE.Color;
+        emissiveIntensity?: number;
+      } = {
         color: materials.floor,
         metalness: materials.metalness.floor,
         roughness: materials.roughness.floor,
-      }),
-    [materials.floor, materials.metalness.floor, materials.roughness.floor]
+      };
+      
+      // Добавляем свойство эмиссии (свечения)
+      if (materials.emission.enabled) {
+        materialProps.emissive = new THREE.Color(materials.emission.color);
+        materialProps.emissiveIntensity = materials.emission.floor;
+      }
+      
+      // Добавляем свойство прозрачности
+      if (materials.transparency.enabled && materials.transparency.floor > 0) {
+        materialProps.transparent = true;
+        materialProps.opacity = 1 - materials.transparency.floor;
+        materialProps.depthWrite = materials.transparency.floor < 0.95;
+      }
+      
+      // Создаем материал определенного типа в зависимости от включенных свойств
+      if ((materials.refraction.enabled) || 
+          (materials.anisotropy.enabled && materials.anisotropy.floor > 0)) {
+        // Для преломления и анизотропии нужен MeshPhysicalMaterial
+        const physicalMaterial = new THREE.MeshPhysicalMaterial(materialProps);
+        
+        // Применяем свойство преломления
+        if (materials.refraction.enabled) {
+          physicalMaterial.transmission = materials.transparency.enabled 
+            ? materials.transparency.floor
+            : 0.5;
+          physicalMaterial.ior = materials.refraction.floor;
+        }
+        
+        // Применяем свойство анизотропности
+        if (materials.anisotropy.enabled && materials.anisotropy.floor > 0) {
+          physicalMaterial.anisotropy = materials.anisotropy.floor;
+          physicalMaterial.anisotropyRotation = materials.anisotropy.direction;
+        }
+        
+        return physicalMaterial;
+      } else {
+        // Для остальных случаев достаточно MeshStandardMaterial
+        return new THREE.MeshStandardMaterial(materialProps);
+      }
+    },
+    [
+      materials.floor, 
+      materials.metalness.floor, 
+      materials.roughness.floor,
+      materials.emission.floor,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.floor,
+      materials.transparency.enabled,
+      materials.refraction.floor,
+      materials.refraction.enabled,
+      materials.anisotropy.floor,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   const basicCeilingMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+    () => {
+      // Начинаем с стандартного материала
+      const materialProps: THREE.MeshStandardMaterialParameters & { 
+        anisotropy?: number; 
+        anisotropyRotation?: number;
+        transmission?: number;
+        refractionRatio?: number;
+        ior?: number;
+        emissive?: THREE.Color;
+        emissiveIntensity?: number;
+      } = {
         color: materials.ceiling,
         metalness: materials.metalness.ceiling,
         roughness: materials.roughness.ceiling,
-      }),
-    [materials.ceiling, materials.metalness.ceiling, materials.roughness.ceiling]
+      };
+      
+      // Добавляем свойство эмиссии (свечения)
+      if (materials.emission.enabled) {
+        materialProps.emissive = new THREE.Color(materials.emission.color);
+        materialProps.emissiveIntensity = materials.emission.ceiling;
+      }
+      
+      // Добавляем свойство прозрачности
+      if (materials.transparency.enabled && materials.transparency.ceiling > 0) {
+        materialProps.transparent = true;
+        materialProps.opacity = 1 - materials.transparency.ceiling;
+        materialProps.depthWrite = materials.transparency.ceiling < 0.95;
+      }
+      
+      // Создаем материал определенного типа в зависимости от включенных свойств
+      if ((materials.refraction.enabled) || 
+          (materials.anisotropy.enabled && materials.anisotropy.ceiling > 0)) {
+        // Для преломления и анизотропии нужен MeshPhysicalMaterial
+        const physicalMaterial = new THREE.MeshPhysicalMaterial(materialProps);
+        
+        // Применяем свойство преломления
+        if (materials.refraction.enabled) {
+          physicalMaterial.transmission = materials.transparency.enabled 
+            ? materials.transparency.ceiling
+            : 0.5;
+          physicalMaterial.ior = materials.refraction.ceiling;
+        }
+        
+        // Применяем свойство анизотропности
+        if (materials.anisotropy.enabled && materials.anisotropy.ceiling > 0) {
+          physicalMaterial.anisotropy = materials.anisotropy.ceiling;
+          physicalMaterial.anisotropyRotation = materials.anisotropy.direction;
+        }
+        
+        return physicalMaterial;
+      } else {
+        // Для остальных случаев достаточно MeshStandardMaterial
+        return new THREE.MeshStandardMaterial(materialProps);
+      }
+    },
+    [
+      materials.ceiling, 
+      materials.metalness.ceiling, 
+      materials.roughness.ceiling,
+      materials.emission.ceiling,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.ceiling,
+      materials.transparency.enabled,
+      materials.refraction.ceiling,
+      materials.refraction.enabled,
+      materials.anisotropy.ceiling,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   const doorMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+    () => {
+      // Начинаем с стандартного материала
+      const materialProps: THREE.MeshStandardMaterialParameters & { 
+        anisotropy?: number; 
+        anisotropyRotation?: number;
+        transmission?: number;
+        refractionRatio?: number;
+        ior?: number;
+        emissive?: THREE.Color;
+        emissiveIntensity?: number;
+      } = {
         color: materials.doors,
         metalness: materials.metalness.doors,
         roughness: materials.roughness.doors,
-      }),
-    [materials.doors, materials.metalness.doors, materials.roughness.doors]
+      };
+      
+      // Добавляем свойство эмиссии (свечения)
+      if (materials.emission.enabled) {
+        materialProps.emissive = new THREE.Color(materials.emission.color);
+        materialProps.emissiveIntensity = materials.emission.doors;
+      }
+      
+      // Добавляем свойство прозрачности
+      if (materials.transparency.enabled && materials.transparency.doors > 0) {
+        materialProps.transparent = true;
+        materialProps.opacity = 1 - materials.transparency.doors;
+        materialProps.depthWrite = materials.transparency.doors < 0.95;
+      }
+      
+      // Создаем материал определенного типа в зависимости от включенных свойств
+      if ((materials.refraction.enabled) || 
+          (materials.anisotropy.enabled && materials.anisotropy.doors > 0)) {
+        // Для преломления и анизотропии нужен MeshPhysicalMaterial
+        const physicalMaterial = new THREE.MeshPhysicalMaterial(materialProps);
+        
+        // Применяем свойство преломления
+        if (materials.refraction.enabled) {
+          physicalMaterial.transmission = materials.transparency.enabled 
+            ? materials.transparency.doors
+            : 0.5;
+          physicalMaterial.ior = materials.refraction.doors;
+        }
+        
+        // Применяем свойство анизотропности
+        if (materials.anisotropy.enabled && materials.anisotropy.doors > 0) {
+          physicalMaterial.anisotropy = materials.anisotropy.doors;
+          physicalMaterial.anisotropyRotation = materials.anisotropy.direction;
+        }
+        
+        return physicalMaterial;
+      } else {
+        // Для остальных случаев достаточно MeshStandardMaterial
+        return new THREE.MeshStandardMaterial(materialProps);
+      }
+    },
+    [
+      materials.doors, 
+      materials.metalness.doors, 
+      materials.roughness.doors,
+      materials.emission.doors,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.doors,
+      materials.transparency.enabled,
+      materials.refraction.doors,
+      materials.refraction.enabled,
+      materials.anisotropy.doors,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   // Кэширование путей к текстурам
@@ -212,9 +464,44 @@ const BasicElevator: React.FC = () => {
       wallPBRPaths.textureType, 
       materials.walls, 
       materials.roughness.walls, 
-      materials.metalness.walls
+      materials.metalness.walls,
+      // Новые свойства материалов
+      materials.emission.enabled ? {
+        value: materials.emission.walls,
+        color: materials.emission.color,
+        enabled: materials.emission.enabled
+      } : undefined,
+      materials.transparency.enabled ? {
+        value: materials.transparency.walls,
+        enabled: materials.transparency.enabled
+      } : undefined,
+      materials.refraction.enabled ? {
+        value: materials.refraction.walls,
+        enabled: materials.refraction.enabled
+      } : undefined,
+      materials.anisotropy.enabled ? {
+        value: materials.anisotropy.walls,
+        direction: materials.anisotropy.direction,
+        enabled: materials.anisotropy.enabled
+      } : undefined
     ),
-    [wallTextures, wallPBRPaths, materials.walls, materials.roughness.walls, materials.metalness.walls]
+    [
+      wallTextures, 
+      wallPBRPaths, 
+      materials.walls, 
+      materials.roughness.walls, 
+      materials.metalness.walls,
+      materials.emission.walls,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.walls,
+      materials.transparency.enabled,
+      materials.refraction.walls,
+      materials.refraction.enabled,
+      materials.anisotropy.walls,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   // Создаем PBR материал для пола с мемоизацией
@@ -224,9 +511,44 @@ const BasicElevator: React.FC = () => {
       floorPBRPaths.textureType, 
       materials.floor, 
       materials.roughness.floor, 
-      materials.metalness.floor
+      materials.metalness.floor,
+      // Новые свойства материалов
+      materials.emission.enabled ? {
+        value: materials.emission.floor,
+        color: materials.emission.color,
+        enabled: materials.emission.enabled
+      } : undefined,
+      materials.transparency.enabled ? {
+        value: materials.transparency.floor,
+        enabled: materials.transparency.enabled
+      } : undefined,
+      materials.refraction.enabled ? {
+        value: materials.refraction.floor,
+        enabled: materials.refraction.enabled
+      } : undefined,
+      materials.anisotropy.enabled ? {
+        value: materials.anisotropy.floor,
+        direction: materials.anisotropy.direction,
+        enabled: materials.anisotropy.enabled
+      } : undefined
     ),
-    [floorTextures, floorPBRPaths, materials.floor, materials.roughness.floor, materials.metalness.floor]
+    [
+      floorTextures, 
+      floorPBRPaths, 
+      materials.floor, 
+      materials.roughness.floor, 
+      materials.metalness.floor,
+      materials.emission.floor,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.floor,
+      materials.transparency.enabled,
+      materials.refraction.floor,
+      materials.refraction.enabled,
+      materials.anisotropy.floor,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   // Создаем PBR материал для потолка с мемоизацией
@@ -236,9 +558,44 @@ const BasicElevator: React.FC = () => {
       ceilingPBRPaths.textureType, 
       materials.ceiling, 
       materials.roughness.ceiling, 
-      materials.metalness.ceiling
+      materials.metalness.ceiling,
+      // Новые свойства материалов
+      materials.emission.enabled ? {
+        value: materials.emission.ceiling,
+        color: materials.emission.color,
+        enabled: materials.emission.enabled
+      } : undefined,
+      materials.transparency.enabled ? {
+        value: materials.transparency.ceiling,
+        enabled: materials.transparency.enabled
+      } : undefined,
+      materials.refraction.enabled ? {
+        value: materials.refraction.ceiling,
+        enabled: materials.refraction.enabled
+      } : undefined,
+      materials.anisotropy.enabled ? {
+        value: materials.anisotropy.ceiling,
+        direction: materials.anisotropy.direction,
+        enabled: materials.anisotropy.enabled
+      } : undefined
     ),
-    [ceilingTextures, ceilingPBRPaths, materials.ceiling, materials.roughness.ceiling, materials.metalness.ceiling]
+    [
+      ceilingTextures, 
+      ceilingPBRPaths, 
+      materials.ceiling, 
+      materials.roughness.ceiling, 
+      materials.metalness.ceiling,
+      materials.emission.ceiling,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.ceiling,
+      materials.transparency.enabled,
+      materials.refraction.ceiling,
+      materials.refraction.enabled,
+      materials.anisotropy.ceiling,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   // Создаем PBR материал для дверей с мемоизацией
@@ -248,9 +605,44 @@ const BasicElevator: React.FC = () => {
       doorsPBRPaths.textureType, 
       materials.doors, 
       materials.roughness.doors, 
-      materials.metalness.doors
+      materials.metalness.doors,
+      // Новые свойства материалов
+      materials.emission.enabled ? {
+        value: materials.emission.doors,
+        color: materials.emission.color,
+        enabled: materials.emission.enabled
+      } : undefined,
+      materials.transparency.enabled ? {
+        value: materials.transparency.doors,
+        enabled: materials.transparency.enabled
+      } : undefined,
+      materials.refraction.enabled ? {
+        value: materials.refraction.doors,
+        enabled: materials.refraction.enabled
+      } : undefined,
+      materials.anisotropy.enabled ? {
+        value: materials.anisotropy.doors,
+        direction: materials.anisotropy.direction,
+        enabled: materials.anisotropy.enabled
+      } : undefined
     ),
-    [doorsTextures, doorsPBRPaths, materials.doors, materials.roughness.doors, materials.metalness.doors]
+    [
+      doorsTextures, 
+      doorsPBRPaths, 
+      materials.doors, 
+      materials.roughness.doors, 
+      materials.metalness.doors,
+      materials.emission.doors,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.doors,
+      materials.transparency.enabled,
+      materials.refraction.doors,
+      materials.refraction.enabled,
+      materials.anisotropy.doors,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   // Создаем PBR материал для передней стены с мемоизацией
@@ -260,20 +652,118 @@ const BasicElevator: React.FC = () => {
       frontWallPBRPaths.textureType, 
       materials.walls, 
       materials.roughness.walls, 
-      materials.metalness.walls
+      materials.metalness.walls,
+      // Новые свойства материалов
+      materials.emission.enabled ? {
+        value: materials.emission.walls,
+        color: materials.emission.color,
+        enabled: materials.emission.enabled
+      } : undefined,
+      materials.transparency.enabled ? {
+        value: materials.transparency.walls,
+        enabled: materials.transparency.enabled
+      } : undefined,
+      materials.refraction.enabled ? {
+        value: materials.refraction.walls,
+        enabled: materials.refraction.enabled
+      } : undefined,
+      materials.anisotropy.enabled ? {
+        value: materials.anisotropy.walls,
+        direction: materials.anisotropy.direction,
+        enabled: materials.anisotropy.enabled
+      } : undefined
     ),
-    [frontWallTextures, frontWallPBRPaths, materials.walls, materials.roughness.walls, materials.metalness.walls]
+    [
+      frontWallTextures, 
+      frontWallPBRPaths, 
+      materials.walls, 
+      materials.roughness.walls, 
+      materials.metalness.walls,
+      materials.emission.walls,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.walls,
+      materials.transparency.enabled,
+      materials.refraction.walls,
+      materials.refraction.enabled,
+      materials.anisotropy.walls,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
-  // Создаем материал для стены с дверью без текстуры (мемоизация)
+  // Создаем материал для передней стены без текстуры (мемоизация)
   const frontWallMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+    () => {
+      // Начинаем с стандартного материала
+      const materialProps: THREE.MeshStandardMaterialParameters & { 
+        anisotropy?: number; 
+        anisotropyRotation?: number;
+        transmission?: number;
+        refractionRatio?: number;
+        ior?: number;
+        emissive?: THREE.Color;
+        emissiveIntensity?: number;
+      } = {
         color: materials.walls,
         metalness: materials.metalness.walls,
         roughness: materials.roughness.walls,
-      }),
-    [materials.walls, materials.metalness.walls, materials.roughness.walls]
+      };
+      
+      // Добавляем свойство эмиссии (свечения)
+      if (materials.emission.enabled) {
+        materialProps.emissive = new THREE.Color(materials.emission.color);
+        materialProps.emissiveIntensity = materials.emission.walls;
+      }
+      
+      // Добавляем свойство прозрачности
+      if (materials.transparency.enabled && materials.transparency.walls > 0) {
+        materialProps.transparent = true;
+        materialProps.opacity = 1 - materials.transparency.walls;
+        materialProps.depthWrite = materials.transparency.walls < 0.95;
+      }
+      
+      // Создаем материал определенного типа в зависимости от включенных свойств
+      if ((materials.refraction.enabled) || 
+          (materials.anisotropy.enabled && materials.anisotropy.walls > 0)) {
+        // Для преломления и анизотропии нужен MeshPhysicalMaterial
+        const physicalMaterial = new THREE.MeshPhysicalMaterial(materialProps);
+        
+        // Применяем свойство преломления
+        if (materials.refraction.enabled) {
+          physicalMaterial.transmission = materials.transparency.enabled 
+            ? materials.transparency.walls
+            : 0.5;
+          physicalMaterial.ior = materials.refraction.walls;
+        }
+        
+        // Применяем свойство анизотропности
+        if (materials.anisotropy.enabled && materials.anisotropy.walls > 0) {
+          physicalMaterial.anisotropy = materials.anisotropy.walls;
+          physicalMaterial.anisotropyRotation = materials.anisotropy.direction;
+        }
+        
+        return physicalMaterial;
+      } else {
+        // Для остальных случаев достаточно MeshStandardMaterial
+        return new THREE.MeshStandardMaterial(materialProps);
+      }
+    },
+    [
+      materials.walls, 
+      materials.metalness.walls, 
+      materials.roughness.walls,
+      materials.emission.walls,
+      materials.emission.color,
+      materials.emission.enabled,
+      materials.transparency.walls,
+      materials.transparency.enabled,
+      materials.refraction.walls,
+      materials.refraction.enabled,
+      materials.anisotropy.walls,
+      materials.anisotropy.direction,
+      materials.anisotropy.enabled
+    ]
   );
 
   // Определяем, какой материал использовать: PBR или обычный
