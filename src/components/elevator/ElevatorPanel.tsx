@@ -207,9 +207,10 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
             </Cylinder>
             
             {/* Кнопка этажа - плоский цилиндр */}
+            {/* ai не менять rotation */}
             <Cylinder
               position={[pos[0], pos[1], 0.013]}
-              rotation={[Math.PI / 2, 0, 0]}
+              rotation={[Math.PI / 2, 1.5, 0]}
               args={[0.018, 0.018, 0.005, 16]}
               castShadow
             >
@@ -270,7 +271,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
               {/* Кнопка открытия дверей */}
               <Cylinder
                 position={[-0.05, 0, 0.013]}
-                rotation={[Math.PI / 2, 0, 0]}
+                rotation={[Math.PI / 2, 1.5, 0]}
                 args={[0.018, 0.018, 0.005, 16]}
                 castShadow
               >
@@ -300,7 +301,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
               {/* Кнопка закрытия дверей */}
               <Cylinder
                 position={[0.05, 0, 0.013]}
-                rotation={[Math.PI / 2, 0, 0]}
+                rotation={[Math.PI / 2, 1.5, 0]}
                 args={[0.018, 0.018, 0.005, 16]}
                 castShadow
               >
