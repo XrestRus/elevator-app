@@ -124,12 +124,12 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     
     // Первый столбец (12, 11, 10, 9, ..., 1)
     for (let i = 0; i < 12; i++) {
-      positions.push([-0.06, 0.25 - i * 0.06]);
+      positions.push([-0.06, 0.32 - i * 0.06]);
     }
     
     // Второй столбец (24, 23, 22, ..., 13)
     for (let i = 0; i < 12; i++) {
-      positions.push([0.06, 0.25 - i * 0.06]);
+      positions.push([0.06, 0.32 - i * 0.06]);
     }
     
     return positions;
@@ -156,17 +156,17 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const panelContent = (
     <group position={new THREE.Vector3(...position)} rotation={[0, 3.2, 0]}>
       {/* Внешняя рамка с углублением */}
-      <RoundedBox args={[0.32, 0.95, 0.015]} radius={0.02} smoothness={4} castShadow>
+      <RoundedBox args={[0.32, 1, 0.015]} radius={0.02} smoothness={4} castShadow>
         <primitive object={panelBorderMaterial} attach="material" />
       </RoundedBox>
 
       {/* Основа панели - утопленная внутрь с мягкими скругленными краями */}
-      <RoundedBox position={[0, 0, 0.005]} args={[0.30, 0.93, 0.01]} radius={0.015} smoothness={4} castShadow>
+      <RoundedBox position={[0, 0, 0.005]} args={[0.30, 0.98, 0.01]} radius={0.015} smoothness={4} castShadow>
         <primitive object={panelMaterial} attach="material" />
       </RoundedBox>
 
       {/* Экран с информацией о текущем этаже (вверху панели) - имеет небольшое углубление */}
-      <group position={[0, 0.32, 0]}>
+      <group position={[0, 0.4, 0]}>
         {/* Углубление для экрана */}
         <RoundedBox position={[0, 0, 0.006]} args={[0.22, 0.05, 0.003]} radius={0.01} smoothness={4}>
           <primitive object={panelBorderMaterial} attach="material" />
@@ -231,14 +231,14 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
       })}
 
       {/* Кнопки открытия/закрытия дверей (внизу панели) */}
-      <group position={[0, -0.35, 0]}>
+      <group position={[0, -0.42, 0]}>
         {/* Создаем материалы для кнопок дверей с соответствующими символами */}
         {(() => {
           const openButtonMaterial = new THREE.MeshStandardMaterial({
             color: panelColor,
             metalness: 0.8,
             roughness: 0.2,
-            emissive: panelColor,
+            emissive: 'black',
             emissiveIntensity: lightsOn ? 0.5 : 0.0,
             map: openDoorsTexture,
             transparent: true,
@@ -249,7 +249,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
             color: panelColor,
             metalness: 0.8,
             roughness: 0.2,
-            emissive: panelColor,
+            emissive: 'black',
             emissiveIntensity: lightsOn ? 0.5 : 0.0,
             map: closeDoorsTexture,
             transparent: true,
