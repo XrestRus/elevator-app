@@ -8,13 +8,323 @@ import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
 
 /**
+ * Конфигурация параметров светильника для потолка лифта
+ */
+export interface LightConfig {
+  color: string;
+  intensity: number;
+  enabled: boolean;
+  count: number;
+  diffusion: number;
+  position: [number, number, number];
+}
+
+/**
+ * Размеры светильника в зависимости от их количества
+ */
+interface LightSize {
+  housingRadius: number;
+  glassRadius: number;
+  glowSize: number;
+}
+
+/**
+ * Создает оптимизированную текстуру для светового пятна
+ */
+const createSpotTexture = (
+  color: string,
+  diffusion: number,
+  highPerformance: boolean
+): THREE.CanvasTexture => {
+  const textureSize = highPerformance ? 512 : 256;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = textureSize;
+  canvas.height = textureSize;
+  const context = canvas.getContext("2d");
+  
+  if (context) {
+    const center = textureSize / 2;
+    const gradient = context.createRadialGradient(
+      center,
+      center,
+      0,
+      center,
+      center,
+      center
+    );
+
+    // Преобразуем hex-цвет в RGB формат для использования в градиенте
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result
+        ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16),
+          }
+        : { r: 255, g: 255, b: 255 };
+    };
+
+    const rgb = hexToRgb(color);
+
+    // Корректируем градиент в зависимости от параметра рассеивания
+    const diffusionOffset = diffusion * 0.2;
+    
+    gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1.0)`);
+    const opacity1 = 0.9 - diffusion * 0.3;
+    gradient.addColorStop(0.1 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity1})`);
+    const opacity2 = 0.7 - diffusion * 0.2;
+    gradient.addColorStop(0.2 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity2})`);
+    const opacity3 = 0.5 - diffusion * 0.1;
+    gradient.addColorStop(0.4 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity3})`);
+    gradient.addColorStop(0.6 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+    gradient.addColorStop(0.8 - diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+    gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
+
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, textureSize, textureSize);
+
+    // Добавляем небольшой внутренний ореол
+    const innerGlow = context.createRadialGradient(
+      center,
+      center,
+      center * 0.1,
+      center,
+      center,
+      center * 0.3
+    );
+
+    innerGlow.addColorStop(0, `rgba(255, 255, 255, 0.6)`);
+    innerGlow.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+    context.globalCompositeOperation = "lighter";
+    context.fillStyle = innerGlow;
+    context.fillRect(0, 0, textureSize, textureSize);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+
+  // Оптимизация фильтрации текстур
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  return texture;
+};
+
+/**
+ * Создает оптимизированную текстуру для ореола на потолке
+ */
+const createCeilingGlowTexture = (
+  color: string,
+  highPerformance: boolean
+): THREE.CanvasTexture => {
+  const textureSize = highPerformance ? 256 : 128;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = textureSize;
+  canvas.height = textureSize;
+  const context = canvas.getContext("2d");
+  
+  if (context) {
+    const center = textureSize / 2;
+    const gradient = context.createRadialGradient(
+      center,
+      center,
+      0,
+      center,
+      center,
+      center
+    );
+
+    // Преобразуем hex-цвет в RGB формат
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result
+        ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16),
+          }
+        : { r: 255, g: 255, b: 255 };
+    };
+
+    const rgb = hexToRgb(color);
+
+    // Создаем мягкий ореол вокруг источника света
+    gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
+    gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
+    gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
+    gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
+
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, textureSize, textureSize);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  return texture;
+};
+
+/**
+ * Оптимизирует текстуру в зависимости от мощности устройства
+ */
+const optimizeTexture = (texture: THREE.Texture | undefined, highPerformance: boolean) => {
+  if (!texture) return;
+  
+  if (!highPerformance) {
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    texture.anisotropy = 1;
+  } else {
+    texture.anisotropy = 4;
+  }
+  
+  texture.dispose = function() {
+    if (this.image instanceof HTMLImageElement) {
+      this.image.onload = null;
+    }
+    THREE.Texture.prototype.dispose.call(this);
+  };
+};
+
+/**
+ * Получает размеры светильников в зависимости от их количества
+ */
+const getLightSize = (lightCount: number): LightSize => {
+  if (lightCount === 1) {
+    return {
+      housingRadius: 0.08,
+      glassRadius: 0.07,
+      glowSize: 0.5,
+    };
+  } else if (lightCount === 2) {
+    return {
+      housingRadius: 0.065,
+      glassRadius: 0.06,
+      glowSize: 0.4,
+    };
+  } else {
+    return {
+      housingRadius: 0.055,
+      glassRadius: 0.05,
+      glowSize: 0.3,
+    };
+  }
+};
+
+/**
+ * Компонент для отображения одного светильника
+ */
+const SingleLight: React.FC<{
+  position: [number, number, number];
+  config: LightConfig;
+  lightSize: LightSize;
+  glassMaterial: THREE.Material;
+  ceilingGlowMaterial: THREE.Material;
+  index: number;
+  dimensions: { width: number; height: number; depth: number };
+  highPerformance: boolean;
+}> = ({
+  position,
+  config,
+  lightSize,
+  glassMaterial,
+  ceilingGlowMaterial,
+  index,
+  dimensions,
+  highPerformance
+}) => {
+  const glassGeometry = useMemo(
+    () => new THREE.CylinderGeometry(
+      lightSize.glassRadius, 
+      lightSize.glassRadius, 
+      0.004, 
+      highPerformance ? 16 : 8
+    ),
+    [lightSize.glassRadius, highPerformance]
+  );
+
+  // Рассчитываем интенсивность светильника
+  const getLightIntensity = () => {
+    const diffusionFactor = 1;
+    if (!config.enabled) return 0;
+    
+    const intensityMultiplier = 4 / (config.count || 1);
+    return config.intensity * 0.7 * diffusionFactor * intensityMultiplier;
+  };
+
+  return (
+    <MakeHoverable
+      name={`Светильник ${index + 1}`}
+      type="Светотехника"
+      description="Встроенный потолочный светильник лифта"
+      material="Металл, матовый рассеиватель"
+      dimensions={{
+        width: lightSize.housingRadius * 2,
+        height: 0.015,
+        depth: lightSize.housingRadius * 2
+      }}
+      additionalInfo={{
+        color: colorUtils.colorToRGBString(config.color),
+        texture: "Матовый металл с рассеивателем",
+        "Интенсивность": getLightIntensity().toFixed(1),
+        "Состояние": config.enabled ? "Включен" : "Выключен",
+        "Тип": "Встроенный LED-светильник"
+      }}
+      requiresDoubleClick={false}
+    >
+      <group position={position}>
+        {/* Стеклянный плафон */}
+        <mesh
+          position={[0, -0.002, 0]}
+          geometry={glassGeometry}
+          material={glassMaterial}
+        />
+
+        {/* Ореол света на потолке */}
+        {config.enabled && (
+          <Plane
+            args={[lightSize.glowSize, lightSize.glowSize]}
+            position={[0, -0.002, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            material={ceilingGlowMaterial}
+          />
+        )}
+
+        {/* Источник света */}
+        <spotLight
+          position={[0, 0.01, 0]}
+          angle={1}
+          penumbra={0.8}
+          intensity={getLightIntensity()}
+          color={config.color}
+          castShadow={highPerformance}
+          distance={dimensions.height * 1.5}
+          shadow-mapSize-width={highPerformance ? 2048 : 512}
+          shadow-mapSize-height={highPerformance ? 2048 : 512}
+        />
+      </group>
+    </MakeHoverable>
+  );
+};
+
+/**
  * Компонент для отображения точечных встроенных светильников на потолке лифта с оптимизацией
  */
 const CeilingLights: React.FC<{
   color?: string;
   intensity?: number;
 }> = ({ color = "#ffffff", intensity = 5 }) => {
-  // Получаем состояние света из Redux
+  // Получаем состояние из Redux
   const { dimensions } = useSelector((state: RootState) => state.elevator);
   const lightsOn = useSelector(
     (state: RootState) => state.elevator.lighting.enabled ?? true
@@ -25,10 +335,10 @@ const CeilingLights: React.FC<{
   const diffusion = useSelector(
     (state: RootState) => state.elevator.lighting.diffusion ?? 0.5
   );
-  // Получаем количество светильников из Redux
   const lightCount = useSelector(
     (state: RootState) => state.elevator.lighting.count ?? 4
   );
+  
   const highPerformance = useMemo(
     () => PerformanceOptimizer.isHighPerformanceDevice(),
     []
@@ -37,36 +347,39 @@ const CeilingLights: React.FC<{
   // Создаем цвет корпуса светильника на основе цвета стен
   const frameLightColor = useMemo(() => {
     const color = new THREE.Color(wallColor);
-    color.multiplyScalar(0.8); // Делаем цвет немного темнее стен
+    color.multiplyScalar(0.8);
     return color;
   }, [wallColor]);
 
-  // Расположение светильников на потолке - мемоизируем для предотвращения повторных вычислений
+  // Создаем конфигурацию светильника
+  const lightConfig: LightConfig = useMemo(() => ({
+    color,
+    intensity,
+    enabled: lightsOn,
+    count: lightCount,
+    diffusion,
+    position: [0, 0, 0]
+  }), [color, intensity, lightsOn, lightCount, diffusion]);
+
+  // Расположение светильников на потолке
   const positions = useMemo(() => {
     const posArray: [number, number, number][] = [];
-
-    // Создание массива позиций светильников в зависимости от их количества
-    // Получаем размер потолка с учетом зазора (как в ElevatorCeiling)
+    
     const gapSize = 0.06;
     const ceilingWidth = dimensions.width - gapSize * 2;
     const ceilingDepth = dimensions.depth - gapSize * 2;
     
-    // Расстояние от центра до светильников (около 1/3 размера)
     const offsetX = ceilingWidth * 0.28;
     const offsetZ = ceilingDepth * 0.28;
     
-    // В зависимости от выбранного количества светильников создаем разные конфигурации
     if (lightCount === 1) {
-      // 1 светильник (центральный)
       posArray.push([0, 0, 0]);
     } else if (lightCount === 2) {
-      // 2 светильника (спереди и сзади)
       posArray.push(
         [0, 0, -offsetZ],
         [0, 0, offsetZ]
       );
     } else {
-      // 4 светильника в конфигурации 2x2 (по умолчанию)
       posArray.push(
         [-offsetX, 0, -offsetZ],
         [offsetX, 0, -offsetZ],
@@ -78,156 +391,18 @@ const CeilingLights: React.FC<{
     return posArray;
   }, [dimensions.width, dimensions.depth, lightCount]);
 
-  const getLightIntensity = () => {
-    // Базовая интенсивность с корректировкой на рассеивание
-    // При большем рассеивании снижаем воспринимаемую интенсивность
-    const diffusionFactor = 1;
-    
-    // Для выключенных светильников - 0
-    if (!lightsOn) return 0;
-    
-    // Все светильники с одинаковой яркостью
-    // Но с поправкой на их количество, чтобы общая освещенность была примерно одинаковой
-    const intensityMultiplier = 4 / (lightCount || 1); // Усиливаем яркость при меньшем количестве светильников
-    return intensity * 0.7 * diffusionFactor * intensityMultiplier;
-  };
+  // Создаем текстуры с оптимизацией
+  const spotTexture = useMemo(
+    () => createSpotTexture(color, diffusion, highPerformance),
+    [color, diffusion, highPerformance]
+  );
 
-  // Создаем текстуру для светового пятна с оптимизацией
-  const spotTexture = useMemo(() => {
-    // Определяем размер текстуры в зависимости от производительности устройства
-    const textureSize = highPerformance ? 512 : 256;
+  const ceilingGlowTexture = useMemo(
+    () => createCeilingGlowTexture(color, highPerformance),
+    [color, highPerformance]
+  );
 
-    const canvas = document.createElement("canvas");
-    canvas.width = textureSize;
-    canvas.height = textureSize;
-    const context = canvas.getContext("2d");
-    if (context) {
-      // Создаем градиент от центра к краям с более реалистичным затуханием
-      const center = textureSize / 2;
-      const gradient = context.createRadialGradient(
-        center,
-        center,
-        0,
-        center,
-        center,
-        center
-      );
-
-      // Преобразуем hex-цвет в RGB формат для использования в градиенте
-      const hexToRgb = (hex: string) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result
-          ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
-            }
-          : { r: 255, g: 255, b: 255 };
-      };
-
-      const rgb = hexToRgb(color);
-
-      // Корректируем градиент в зависимости от параметра рассеивания
-      // Чем выше рассеивание, тем менее выражен центр и более плавные переходы
-      const diffusionOffset = diffusion * 0.2; // Сдвиг для границ градиента
-      
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1.0)`); // Яркий центр
-      gradient.addColorStop(0.1 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.9 - diffusion * 0.3})`);
-      gradient.addColorStop(0.2 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.7 - diffusion * 0.2})`);
-      gradient.addColorStop(0.4 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.5 - diffusion * 0.1})`);
-      gradient.addColorStop(0.6 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
-      gradient.addColorStop(0.8 - diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
-      gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)"); // Полное затухание на краях
-
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, textureSize, textureSize);
-
-      // Добавляем небольшой внутренний ореол
-      const innerGlow = context.createRadialGradient(
-        center,
-        center,
-        center * 0.1,
-        center,
-        center,
-        center * 0.3
-      );
-
-      innerGlow.addColorStop(0, `rgba(255, 255, 255, 0.6)`);
-      innerGlow.addColorStop(1, `rgba(255, 255, 255, 0)`);
-
-      context.globalCompositeOperation = "lighter";
-      context.fillStyle = innerGlow;
-      context.fillRect(0, 0, textureSize, textureSize);
-    }
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-
-    // Оптимизация фильтрации текстур
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
-
-    return texture;
-  }, [color, highPerformance, diffusion]); // Добавляем зависимость от diffusion, angle не влияет на текстуру, только на размер
-
-  // Новая текстура для ореола на потолке
-  const ceilingGlowTexture = useMemo(() => {
-    // Определяем размер текстуры в зависимости от производительности устройства
-    const textureSize = highPerformance ? 256 : 128;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = textureSize;
-    canvas.height = textureSize;
-    const context = canvas.getContext("2d");
-    if (context) {
-      // Создаем градиент для ореола на потолке
-      const center = textureSize / 2;
-      const gradient = context.createRadialGradient(
-        center,
-        center,
-        0,
-        center,
-        center,
-        center
-      );
-
-      // Преобразуем hex-цвет в RGB формат
-      const hexToRgb = (hex: string) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result
-          ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
-            }
-          : { r: 255, g: 255, b: 255 };
-      };
-
-      const rgb = hexToRgb(color);
-
-      // Создаем мягкий ореол вокруг источника света
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
-      gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
-      gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
-      gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
-
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, textureSize, textureSize);
-    }
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-
-    // Оптимизация фильтрации текстур
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.generateMipmaps = false;
-
-    return texture;
-  }, [color, highPerformance]);
-
-  // Материалы для плафона светильника - оптимизируем с помощью мемоизации
+  // Материалы для светильника
   const glassMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: lightsOn ? color : "#e0e0e0",
@@ -250,82 +425,31 @@ const CeilingLights: React.FC<{
     });
   }, [color, ceilingGlowTexture]);
 
-  // Преобразуем цвет в строковый формат для тултипа
-  const getColorString = (colorValue: string | THREE.Color) => {
-    return colorUtils.colorToRGBString(colorValue);
-  };
-
-  // Оптимизация текстур в зависимости от цвета и рассеивания
+  // Оптимизация текстур
   useEffect(() => {
-    // Применяем оптимизацию к загруженным текстурам
-    const optimizeTexture = (texture: THREE.Texture | undefined) => {
-      if (!texture) return;
-      
-      // Если устройство не мощное, используем менее качественные настройки текстур
-      if (!highPerformance) {
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.generateMipmaps = false; // Отключаем миппинг для экономии памяти
-        texture.anisotropy = 1; // Минимальная анизотропная фильтрация
-      } else {
-        // Для мощных устройств используем более качественные настройки
-        texture.anisotropy = 4; // Повышаем качество текстур на мощных устройствах
-      }
-      
-      // Освобождаем память GPU, если текстура больше не используется
-      texture.dispose = function() {
-        if (this.image instanceof HTMLImageElement) {
-          this.image.onload = null;
-        }
-        // Вызываем стандартный dispose
-        THREE.Texture.prototype.dispose.call(this);
-      };
-    };
-    
-    // Оптимизируем текстуры
-    optimizeTexture(spotTexture);
-    optimizeTexture(ceilingGlowTexture);
-    
+    optimizeTexture(spotTexture, highPerformance);
+    optimizeTexture(ceilingGlowTexture, highPerformance);
   }, [spotTexture, ceilingGlowTexture, highPerformance]);
 
   // Получаем высоту потолка с учетом его толщины
   const ceilingThickness = 0.08;
   const ceilingPosition = dimensions.height / 2 - ceilingThickness;
 
-  // Рассчитываем размеры светильников в зависимости от их количества
-  const getLightSize = useMemo(() => {
-    if (lightCount === 1) {
-      return {
-        housingRadius: 0.08, // Больший радиус для одиночного светильника
-        glassRadius: 0.07,
-        glowSize: 0.5, // Больший ореол для одиночного светильника
-      };
-    } else if (lightCount === 2) {
-      return {
-        housingRadius: 0.065,
-        glassRadius: 0.06,
-        glowSize: 0.4,
-      };
-    } else {
-      return {
-        housingRadius: 0.055, // Стандартный размер для 4 светильников
-        glassRadius: 0.05,
-        glowSize: 0.3,
-      };
-    }
-  }, [lightCount]);
-
-  // Геометрия для плафона светильника - создаем один раз в зависимости от размера
-  const glassGeometry = useMemo(
-    () => new THREE.CylinderGeometry(getLightSize.glassRadius, getLightSize.glassRadius, 0.004, highPerformance ? 16 : 8),
-    [getLightSize.glassRadius, highPerformance]
-  );
+  // Получаем размеры светильников
+  const lightSize = useMemo(() => getLightSize(lightCount), [lightCount]);
 
   return (
     <group position={[0, ceilingPosition, 0]}>
-      {/* Используем инстансинг для оптимизации рендеринга однотипных мешей */}
+      {/* Корпусы светильников через инстансинг */}
       <Instances range={positions.length} limit={10}>
-        <cylinderGeometry args={[getLightSize.housingRadius, getLightSize.housingRadius, 0.005, highPerformance ? 16 : 8]} />
+        <cylinderGeometry 
+          args={[
+            lightSize.housingRadius, 
+            lightSize.housingRadius, 
+            0.005, 
+            highPerformance ? 16 : 8
+          ]} 
+        />
         <meshStandardMaterial color={frameLightColor} />
 
         {positions.map((pos, index) => (
@@ -335,60 +459,19 @@ const CeilingLights: React.FC<{
         ))}
       </Instances>
 
-      {/* Оптимизированная отрисовка плафонов и света */}
+      {/* Отдельные светильники */}
       {positions.map((pos, index) => (
-        <MakeHoverable
+        <SingleLight
           key={`light-${index}`}
-          name={`Светильник ${index + 1}`}
-          type="Светотехника"
-          description="Встроенный потолочный светильник лифта"
-          material="Металл, матовый рассеиватель"
-          dimensions={{
-            width: getLightSize.housingRadius * 2,
-            height: 0.015,
-            depth: getLightSize.housingRadius * 2
-          }}
-          additionalInfo={{
-            color: getColorString(color),
-            texture: "Матовый металл с рассеивателем",
-            "Интенсивность": getLightIntensity().toFixed(1),
-            "Состояние": lightsOn ? "Включен" : "Выключен",
-            "Тип": "Встроенный LED-светильник"
-          }}
-          requiresDoubleClick={false}
-        >
-          <group position={pos}>
-            {/* Стеклянный плафон */}
-            <mesh
-              position={[0, -0.002, 0]}
-              geometry={glassGeometry}
-              material={glassMaterial}
-            />
-
-            {/* Ореол света на потолке */}
-            {lightsOn && (
-              <Plane
-                args={[getLightSize.glowSize, getLightSize.glowSize]}
-                position={[0, -0.002, 0]}
-                rotation={[-Math.PI / 2, 0, 0]}
-                material={ceilingGlowMaterial}
-              />
-            )}
-
-            {/* Сам источник света - с оптимизированными параметрами */}
-            <spotLight
-              position={[0, 0.01, 0]}
-              angle={1}
-              penumbra={0.8} // Увеличено для более мягких краев теней
-              intensity={getLightIntensity()}
-              color={color}
-              castShadow={highPerformance}
-              distance={dimensions.height * 1.5}
-              shadow-mapSize-width={highPerformance ? 2048 : 512}
-              shadow-mapSize-height={highPerformance ? 2048 : 512}
-            />
-          </group>
-        </MakeHoverable>
+          position={pos}
+          config={{...lightConfig, position: pos}}
+          lightSize={lightSize}
+          glassMaterial={glassMaterial}
+          ceilingGlowMaterial={ceilingGlowMaterial}
+          index={index}
+          dimensions={dimensions}
+          highPerformance={highPerformance}
+        />
       ))}
     </group>
   );
