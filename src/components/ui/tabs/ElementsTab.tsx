@@ -158,7 +158,7 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
           <RangeSlider
             label="Ширина полосы (см):"
             min={0.1}
-            max={30}
+            max={120}
             step={0.1}
             value={elevator.decorationStripes?.width ?? 5}
             onChange={(value) => dispatch(setDecorationStripes({ 
@@ -166,7 +166,7 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             }))}
             centerLabel={(value) => `${value.toFixed(1)} см`}
             leftLabel="0.1 см"
-            rightLabel="30 см"
+            rightLabel="120 см"
           />
           
           <RangeSlider
