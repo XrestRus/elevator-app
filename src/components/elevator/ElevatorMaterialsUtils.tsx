@@ -84,6 +84,8 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
    * - wood (дерево)
    * - metal (металл)
    * - fabric (ткань)
+   * - ground (поверхность)
+   * - tiles (плитка)
    */
   let textureType = null;
   if (fixedBasePath.includes("wood")) {
@@ -92,6 +94,10 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
     textureType = "metal";
   } else if (fixedBasePath.includes("fabric")) {
     textureType = "fabrics";
+  } else if (fixedBasePath.includes("ground")) {
+    textureType = "ground";
+  } else if (fixedBasePath.includes("tiles")) {
+    textureType = "tiles";
   }
 
   if (!textureType) {
@@ -124,7 +130,15 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
 
   // Формируем пути к файлам текстур в стандартизированном формате
   const colorMapPath = `${fixedBasePath}/${texturePrefix}_color_1k.jpg`;
-  const normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_directx_1k.png`;
+  
+  // Выбираем путь к карте нормалей - предпочитаем OpenGL формат для новых текстур
+  let normalMapPath;
+  if (textureType === "ground" || textureType === "tiles") {
+    normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_opengl_1k.png`;
+  } else {
+    normalMapPath = `${fixedBasePath}/${texturePrefix}_normal_directx_1k.png`;
+  }
+  
   const roughnessMapPath = `${fixedBasePath}/${texturePrefix}_roughness_1k.jpg`;
   const aoMapPath = `${fixedBasePath}/${texturePrefix}_ao_1k.jpg`;
   const metalnessMapPath =
