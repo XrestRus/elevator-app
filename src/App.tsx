@@ -1,7 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import './styles/App.css';
 import './styles/ObjectInfoPanel.css';
-import './styles/Tooltip.css';
 import './styles/UIPanel.css';
 import { Suspense, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
