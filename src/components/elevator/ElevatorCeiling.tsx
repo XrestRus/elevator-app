@@ -14,6 +14,7 @@ interface ElevatorCeilingProps {
     depth: number;
   };
   ceilingMaterial: THREE.Material;
+  wallsColor?: string; // Добавляем опциональный параметр цвета стен
 }
 
 /**
@@ -22,6 +23,7 @@ interface ElevatorCeilingProps {
 const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
   dimensions,
   ceilingMaterial,
+  wallsColor = "#CCCCCC", // Значение по умолчанию для цвета стен
 }) => {
   // Получаем цвет материала потолка для отображения в тултипе
   const getCeilingColor = () => colorUtils.getMaterialColor(ceilingMaterial);
@@ -39,6 +41,19 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
     metalness: 0.1,
   });
   
+  // Создаем материал для полос по краям, используя цвет стен
+  const trimMaterial = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(wallsColor),
+    metalness: 0.9,
+    roughness: 0.1,
+    envMapIntensity: 1.5,
+    clearcoat: 0.3, // Добавляем легкое покрытие лаком для глянца
+    clearcoatRoughness: 0.1, // Делаем покрытие гладким
+  });
+  
+  // Размер полосы (4 см)
+  const trimSize = 0.04;
+  
   // Компонент потолка
   const Ceiling = (
     <>
@@ -49,6 +64,42 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
         receiveShadow
       >
         <primitive object={ceilingMaterial} attach="material" />
+      </Box>
+      
+      {/* Полоса спереди */}
+      <Box
+        position={[0, dimensions.height / 2 - ceilingThickness, 0 + ceilingDepth/2 - trimSize/2]}
+        args={[ceilingWidth, 0.01, trimSize]}
+        receiveShadow
+      >
+        <primitive object={trimMaterial} attach="material" />
+      </Box>
+      
+      {/* Полоса сзади */}
+      <Box
+        position={[0, dimensions.height / 2 - ceilingThickness, 0 - ceilingDepth/2 + trimSize/2]}
+        args={[ceilingWidth, 0.01, trimSize]}
+        receiveShadow
+      >
+        <primitive object={trimMaterial} attach="material" />
+      </Box>
+      
+      {/* Полоса слева */}
+      <Box
+        position={[0 - ceilingWidth/2 + trimSize/2, dimensions.height / 2 - ceilingThickness, 0]}
+        args={[trimSize, 0.01, ceilingDepth - trimSize*2]}
+        receiveShadow
+      >
+        <primitive object={trimMaterial} attach="material" />
+      </Box>
+      
+      {/* Полоса справа */}
+      <Box
+        position={[0 + ceilingWidth/2 - trimSize/2, dimensions.height / 2 - ceilingThickness, 0]}
+        args={[trimSize, 0.01, ceilingDepth - trimSize*2]}
+        receiveShadow
+      >
+        <primitive object={trimMaterial} attach="material" />
       </Box>
       
       {/* Закрывающий верхний потолок */}
@@ -78,6 +129,9 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
     </>
   );
   
+  // Получаем цвет материала полос для отображения в тултипе
+  const getTrimColor = () => colorUtils.getMaterialColor(trimMaterial);
+  
   return (
     <MakeHoverable
       name="Потолок лифта"
@@ -91,8 +145,9 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
       }}
       additionalInfo={{
         color: getCeilingColor(),
+        "Цвет полос": getTrimColor(),
         texture: "Матовая поверхность со встроенным освещением",
-        "Особенность": "Подвесной потолок с зазором по периметру"
+        "Особенность": "Подвесной потолок с металлическими полосами по периметру"
       }}
       requiresDoubleClick={false}
     >

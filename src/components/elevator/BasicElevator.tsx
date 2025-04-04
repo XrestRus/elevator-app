@@ -911,6 +911,7 @@ const BasicElevator: React.FC = () => {
       <ElevatorCeiling 
         dimensions={dimensions} 
         ceilingMaterial={actualCeilingMaterial}
+        wallsColor={materials.walls}
       />
       
       {/* Встроенные светильники - конфигурация 2x2 */}

@@ -5,6 +5,30 @@ import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
 
 /**
+ * Создает текстуру с числом для кнопки лифта
+ * @param text Текст для отображения на кнопке
+ * @returns Текстура с числом для кнопки лифта
+ */
+function createNumberTexture(text: string): THREE.Texture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const context = canvas.getContext('2d');
+  if (!context) return new THREE.Texture();
+  
+  // Используем белый текст для лучшего контраста
+  context.fillStyle = '#FFFFFF';
+  context.font = 'bold 40px Arial';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(text, 32, 32);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/**
  * Компонент панели управления лифтом с кнопками, индикаторами и экраном
  */
 interface ElevatorPanelProps {
@@ -14,95 +38,68 @@ interface ElevatorPanelProps {
 }
 
 /**
- * Создает текстуру с числом или символом для кнопки
+ * Компонент панели управления лифтом с кнопками и экраном
  */
-const createNumberTexture = (text: string): THREE.Texture => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d');
-  
-  if (context) {
-    // Настройка текста
-    context.fillStyle = 'black';
-    context.font = 'bold 65px Arial';
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    
-    // Сохраняем текущее состояние контекста
-    context.save();
-    
-    // Перемещаем к центру холста
-    context.translate(canvas.width / 2, canvas.height / 2);
-    
-    // Поворачиваем на -90 градусов (против часовой)
-    context.rotate(-Math.PI / 2);
-    
-    // Рисуем текст
-    context.fillText(text, 0, 0);
-    
-    // Восстанавливаем состояние контекста
-    context.restore();
-  }
-  
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
-};
-
 const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor }) => {
-  // Создаем цвет панели значительно светлее цвета стен для лучшего контраста
-  const panelColor = useMemo(() => {
-    return colorUtils.lightenColor(wallColor, 1.25);
-  }, [wallColor]);
-
-  // Создаем цвет рамки панели темнее цвета панели
-  const panelBorderColor = useMemo(() => {
-    return colorUtils.darkenColor(panelColor, 0.8);
-  }, [panelColor]);
+  // Создаем материал основы панели, чтобы она наследовала цвет стен
+  const panelMaterial = useMemo(
+    () => new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(wallColor),
+      metalness: 0.9,
+      roughness: 0.1,
+      envMapIntensity: 1.5,
+      clearcoat: 0.3, // Добавляем легкое покрытие лаком для глянца
+      clearcoatRoughness: 0.1, // Делаем покрытие гладким
+    }),
+    [wallColor]
+  );
+  
+  // Создаем материал для внутренней части панели (слегка светлее основного цвета)
+  const panelInnerMaterial = useMemo(
+    () => {
+      const innerColor = colorUtils.lightenColor(wallColor, 1.2);
+      return new THREE.MeshStandardMaterial({
+        color: innerColor,
+        metalness: 0.5,
+        roughness: 0.2,
+        emissive: lightsOn ? innerColor : "#000000",
+        emissiveIntensity: lightsOn ? 0.08 : 0,
+      });
+    },
+    [wallColor, lightsOn]
+  );
 
   // Создаем цвет кнопок еще светлее цвета стен
   const buttonColor = useMemo(() => {
     return colorUtils.lightenColor(wallColor, 1.35);
   }, [wallColor]);
 
-  // Материал для основной панели (светлый)
-  const panelMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: panelColor,
-        metalness: 0.5,
-        roughness: 0.2,
-        emissive: lightsOn ? panelColor : "#000000",
-        emissiveIntensity: lightsOn ? 0.08 : 0,
-      }),
-    [panelColor, lightsOn]
-  );
-
   // Материал для рамки/углубления панели (темнее)
   const panelBorderMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: panelBorderColor,
+    () => {
+      const borderColor = colorUtils.darkenColor(wallColor, 0.8);
+      return new THREE.MeshStandardMaterial({
+        color: borderColor,
         metalness: 0.5,
         roughness: 0.3,
-        emissive: lightsOn ? panelBorderColor : "#000000",
+        emissive: lightsOn ? borderColor : "#000000",
         emissiveIntensity: lightsOn ? 0.02 : 0,
-      }),
-    [panelBorderColor, lightsOn]
+      });
+    },
+    [wallColor, lightsOn]
   );
 
   // Материал для экрана
   const displayMaterial = useMemo(
     () => {
-      const rimColor = colorUtils.lightenColor(panelColor, 1.3); // Делаем обводку ещё светлее для лучшего контраста
+      const displayColor = colorUtils.lightenColor(wallColor, 1.3); // Делаем обводку ещё светлее для лучшего контраста
       return new THREE.MeshStandardMaterial({
-        color: rimColor,
-        emissive: lightsOn ? panelColor : "#000000",
+        color: displayColor,
+        emissive: lightsOn ? displayColor : "#000000",
         emissiveIntensity: lightsOn ? 0.5 : 0.0,
-      })
+      });
     },
-    [panelColor, lightsOn]
+    [wallColor, lightsOn]
   );
 
   // Материал для обводки кнопок (еще светлее основного цвета кнопок)
@@ -152,19 +149,19 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
   // Получаем цветовую информацию для тултипа
   const colorInfoString = useMemo(() => {
-    return colorUtils.colorToRGBString(panelColor);
-  }, [panelColor]);
+    return colorUtils.colorToRGBString(panelMaterial.color);
+  }, [panelMaterial]);
 
   const panelContent = (
     <group position={new THREE.Vector3(...position)} rotation={[0, 3.2, 0]}>
       {/* Внешняя рамка с углублением */}
       <RoundedBox args={[0.32, 1, 0.015]} radius={0.02} smoothness={4} castShadow>
-        <primitive object={panelBorderMaterial} attach="material" />
+        <primitive object={panelMaterial} attach="material" />
       </RoundedBox>
 
       {/* Основа панели - утопленная внутрь с мягкими скругленными краями */}
       <RoundedBox position={[0, 0, 0.005]} args={[0.30, 0.98, 0.01]} radius={0.015} smoothness={4} castShadow>
-        <primitive object={panelMaterial} attach="material" />
+        <primitive object={panelInnerMaterial} attach="material" />
       </RoundedBox>
 
       {/* Экран с информацией о текущем этаже (вверху панели) - имеет небольшое углубление */}

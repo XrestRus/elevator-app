@@ -100,8 +100,8 @@ const FreeCameraController: React.FC = () => {
   
   return (
     <FlyControls 
-      movementSpeed={1.5}
-      rollSpeed={2.0}
+      movementSpeed={1.0}
+      rollSpeed={1.0}
       dragToLook={true}
       autoForward={false}
     />
