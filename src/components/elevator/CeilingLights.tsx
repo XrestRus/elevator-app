@@ -641,11 +641,6 @@ const CeilingLights: React.FC<{
   // Получаем размеры светильников
   const lightSize = useMemo(() => getLightSize(lightCount, lightType), [lightCount, lightType]);
 
-  // Отладочная информация
-  useEffect(() => {
-    console.log(`Light Type: ${lightType}, Diffusion: ${diffusion}`);
-  }, [lightType, diffusion]);
-
   return (
     <group position={[0, ceilingPosition, 0]}>
       {/* Корпусы светильников через инстансинг (только для точечных светильников) */}

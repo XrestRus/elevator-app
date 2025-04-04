@@ -1,8 +1,8 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import './styles/App.css';
 import './styles/ObjectInfoPanel.css';
 import './styles/UIPanel.css';
-import { Suspense, useState, useMemo } from 'react';
+import { Suspense, useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import * as THREE from 'three';
 import UIPanel from './components/ui/UIPanel.tsx';
@@ -23,6 +23,22 @@ import ObjectHoverHandler from './components/ui/ObjectHoverHandler';
 import ObjectInfoPanel from './components/ui/ObjectInfoPanel';
 
 /**
+ * Компонент для получения ссылки на текущую сцену
+ */
+const SceneGrabber: React.FC<{
+  onSceneReady: (scene: THREE.Scene) => void;
+}> = ({ onSceneReady }) => {
+  const { scene } = useThree();
+  
+  // Вызываем колбэк при монтировании компонента
+  useMemo(() => {
+    onSceneReady(scene);
+  }, [scene, onSceneReady]);
+  
+  return null;
+};
+
+/**
  * Главный компонент приложения для конструктора лифта
  */
 function App() {
@@ -41,6 +57,24 @@ function App() {
     showAxes: false,
     showGizmo: true
   });
+  
+  // Состояние для хранения импортированной сцены
+  const [importedScene, setImportedScene] = useState<THREE.Scene | null>(null);
+  
+  // Ссылка на текущую сцену
+  const [currentScene, setCurrentScene] = useState<THREE.Scene | null>(null);
+  
+  // Обработчик получения сцены
+  const handleSceneReady = useCallback((scene: THREE.Scene) => {
+    setCurrentScene(scene);
+  }, []);
+  
+  // Обработчик импорта сцены
+  const handleImportScene = useCallback((scene: THREE.Scene) => {
+    // Устанавливаем импортированную сцену
+    setImportedScene(scene);
+    console.log('Сцена импортирована:', scene);
+  }, []);
   
   // Оптимизированные настройки для рендерера
   const glSettings = useMemo(() => ({
@@ -83,6 +117,9 @@ function App() {
           }}
           tabIndex={0} // Делаем Canvas фокусируемым для обработки клавиатурных событий
         >
+          {/* Компонент для получения ссылки на сцену */}
+          <SceneGrabber onSceneReady={handleSceneReady} />
+          
           <CameraController />
         
           {/* Добавляем компонент для анимации дверей */}
@@ -115,13 +152,20 @@ function App() {
           />
           
           <Suspense fallback={null}>
-            <BasicElevator />
-            
-            {/* Добавляем светильники */}
-            <CeilingLights 
-              color={lighting.color} 
-              intensity={lighting.intensity} 
-            />
+            {/* Если есть импортированная сцена, отображаем её, иначе - базовый лифт */}
+            {importedScene ? (
+              <primitive object={importedScene} />
+            ) : (
+              <>
+                <BasicElevator />
+                
+                {/* Добавляем светильники */}
+                <CeilingLights 
+                  color={lighting.color} 
+                  intensity={lighting.intensity} 
+                />
+              </>
+            )}
             
             {/* Добавляем отладочные инструменты */}
             <DebugStats 
@@ -146,6 +190,8 @@ function App() {
         onToggleWireframe={(show) => setDebugSettings({...debugSettings, showWireframe: show})}
         onToggleAxes={(show) => setDebugSettings({...debugSettings, showAxes: show})}
         onToggleGizmo={(show) => setDebugSettings({...debugSettings, showGizmo: show})}
+        onImportScene={handleImportScene}
+        currentScene={currentScene}
       />
     </div>
   );

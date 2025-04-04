@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setDecorationStripes, setJoints } from '../../store/elevatorSlice';
 import type { RootState } from '../../store/store';
+import { SceneImporter } from '../../utils/sceneImporter';
+import * as THREE from 'three';
 
 /**
  * Компонент панели управления отладочными функциями и оптимизацией
@@ -11,11 +13,15 @@ const DebugPanel: React.FC<{
   onToggleWireframe: (show: boolean) => void;
   onToggleAxes: (show: boolean) => void;
   onToggleGizmo: (show: boolean) => void;
+  onImportScene?: (scene: THREE.Scene) => void;
+  currentScene?: THREE.Scene | null;
 }> = ({ 
   onToggleFps, 
   onToggleWireframe, 
   onToggleAxes,
-  onToggleGizmo
+  onToggleGizmo,
+  onImportScene,
+  currentScene
 }) => {
   const dispatch = useDispatch();
   const decorationStripes = useSelector((state: RootState) => state.elevator.decorationStripes);
@@ -29,6 +35,9 @@ const DebugPanel: React.FC<{
     gizmo: true,
     highQuality: true // Высокое качество по умолчанию
   });
+  
+  // Ref для скрытого input file
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const toggleExpand = () => setExpanded(!expanded);
   
@@ -64,6 +73,64 @@ const DebugPanel: React.FC<{
           dispatch(setJoints({ qualityFactor }));
         }
         break;
+      }
+    }
+  };
+  
+  // Обработчик клика на кнопку импорта сцены
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  // Обработчик клика на кнопку экспорта сцены
+  const handleExportClick = () => {
+    if (!currentScene) {
+      alert('Не удалось экспортировать сцену - сцена не доступна');
+      return;
+    }
+    
+    try {
+      // Сохраняем сцену в файл
+      SceneImporter.saveSceneToFile(currentScene, 'elevator-scene');
+    } catch (error: unknown) {
+      console.error('Ошибка при экспорте сцены:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      alert(`Ошибка при экспорте сцены: ${errorMessage}`);
+    }
+  };
+  
+  // Обработчик изменения файла
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      // Читаем файл как текст
+      const text = await file.text();
+      
+      // Проверяем формат
+      if (!SceneImporter.isValidSceneFormat(text)) {
+        alert('Неверный формат файла. Загрузите файл сцены Three.js JSON.');
+        return;
+      }
+      
+      // Импортируем сцену
+      const scene = await SceneImporter.importScene(text);
+      
+      // Вызываем callback с импортированной сценой
+      if (onImportScene) {
+        onImportScene(scene);
+      }
+    } catch (error: unknown) {
+      console.error('Ошибка при импорте сцены:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      alert(`Ошибка при импорте сцены: ${errorMessage}`);
+    } finally {
+      // Сбрасываем input file для возможности повторной загрузки того же файла
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     }
   };
@@ -148,6 +215,53 @@ const DebugPanel: React.FC<{
                 />
                 3D-указатель
               </label>
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: '10px', borderBottom: '1px solid #666', paddingBottom: '5px' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Импорт/Экспорт</div>
+            
+            <div style={{ marginBottom: '5px' }}>
+              <button
+                onClick={handleImportClick}
+                style={{
+                  width: '100%',
+                  padding: '5px',
+                  backgroundColor: '#2a2a2a',
+                  color: 'white',
+                  border: '1px solid #444',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  marginBottom: '5px'
+                }}
+              >
+                Импортировать сцену
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                style={{ display: 'none' }}
+                accept=".json"
+                onChange={handleFileChange}
+              />
+              
+              <button
+                onClick={handleExportClick}
+                style={{
+                  width: '100%',
+                  padding: '5px',
+                  backgroundColor: '#2a2a2a',
+                  color: 'white',
+                  border: '1px solid #444',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+                disabled={!currentScene}
+              >
+                Экспортировать сцену
+              </button>
             </div>
           </div>
           
