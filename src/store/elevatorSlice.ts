@@ -45,6 +45,7 @@ export interface Materials {
   walls: string;
   doors: string;
   handrails: string;
+  controlPanel: string; // Цвет панели управления
   isMirror: {
     walls: boolean;
   };
@@ -60,24 +61,28 @@ export interface Materials {
     ceiling: string | null;
     doors: string | null;
     frontWall: string | null;
+    controlPanel: string | null;
   };
   roughness: {
     walls: number;
     floor: number;
     ceiling: number;
     doors: number;
+    controlPanel: number;
   };
   metalness: {
     walls: number;
     floor: number;
     ceiling: number;
     doors: number;
+    controlPanel: number;
   };
   emission: {
     walls: number;
     floor: number;
     ceiling: number;
     doors: number;
+    controlPanel: number;
     color: string;
     enabled: boolean;
   };
@@ -86,6 +91,7 @@ export interface Materials {
     floor: number;
     ceiling: number;
     doors: number;
+    controlPanel: number;
     enabled: boolean;
   };
   refraction: {
@@ -93,6 +99,7 @@ export interface Materials {
     floor: number;
     ceiling: number;
     doors: number;
+    controlPanel: number;
     enabled: boolean;
   };
   anisotropy: {
@@ -100,6 +107,7 @@ export interface Materials {
     floor: number;
     ceiling: number;
     doors: number;
+    controlPanel: number;
     direction: number;
     enabled: boolean;
   };
@@ -202,6 +210,7 @@ const initialState: ElevatorState = {
     walls: '#E8E8E8',
     doors: '#A9A9A9',
     handrails: '#808080',
+    controlPanel: '#A9A9A9', // Цвет панели управления (по умолчанию как у дверей)
     isMirror: {
       walls: false
     },
@@ -216,25 +225,29 @@ const initialState: ElevatorState = {
       floor: null,
       ceiling: null,
       doors: null,
-      frontWall: null
+      frontWall: null,
+      controlPanel: null
     },
     roughness: {
       walls: 0.4,
       floor: 0.7,
       ceiling: 0.2,
-      doors: 0.3
+      doors: 0.3,
+      controlPanel: 0.1
     },
     metalness: {
       walls: 0.1,
       floor: 0.1,
       ceiling: 0.1,
-      doors: 0.3
+      doors: 0.3,
+      controlPanel: 0.3
     },
     emission: {
       walls: 0,
       floor: 0,
       ceiling: 0,
       doors: 0,
+      controlPanel: 0,
       color: '#ffffff',
       enabled: false
     },
@@ -243,6 +256,7 @@ const initialState: ElevatorState = {
       floor: 0,
       ceiling: 0,
       doors: 0,
+      controlPanel: 0,
       enabled: false
     },
     refraction: {
@@ -250,6 +264,7 @@ const initialState: ElevatorState = {
       floor: 1.5,
       ceiling: 1.5,
       doors: 1.5,
+      controlPanel: 1.5,
       enabled: false
     },
     anisotropy: {
@@ -257,6 +272,7 @@ const initialState: ElevatorState = {
       floor: 0,
       ceiling: 0,
       doors: 0,
+      controlPanel: 0,
       direction: 0,
       enabled: false
     }
@@ -332,7 +348,7 @@ const elevatorSlice = createSlice({
     },
     
     // Изменение материала
-    setMaterial: (state, action: PayloadAction<{ part: 'floor' | 'ceiling' | 'walls' | 'doors' | 'handrails', color: string }>) => {
+    setMaterial: (state, action: PayloadAction<{ part: 'floor' | 'ceiling' | 'walls' | 'doors' | 'handrails' | 'controlPanel', color: string }>) => {
       const { part, color } = action.payload;
       state.materials[part] = color;
       
@@ -356,7 +372,7 @@ const elevatorSlice = createSlice({
       const { part, value } = action.payload;
       
       // Текущий цвет для этой части лифта (будет применен к текстуре)
-      const currentColor = state.materials[part as keyof Pick<Materials, 'walls' | 'floor' | 'ceiling' | 'doors'>];
+      const currentColor = state.materials[part as keyof Pick<Materials, 'walls' | 'floor' | 'ceiling' | 'doors' | 'controlPanel'>];
       
       console.log(`Устанавливаю текстуру для ${part}:`, value, `(текущий цвет: ${currentColor})`);
       

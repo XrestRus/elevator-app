@@ -84,13 +84,13 @@ const createSpotTexture = (
 
     gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1.0)`);
     const opacity1 = Math.max(0, Math.min(1, 0.9 - diffusion * 0.4));
-    gradient.addColorStop(0.1 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity1})`);
+    gradient.addColorStop(Math.min(1, 0.1 + diffusionOffset), `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity1})`);
     const opacity2 = Math.max(0, Math.min(1, 0.7 - diffusion * 0.3));
-    gradient.addColorStop(0.3 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity2})`);
+    gradient.addColorStop(Math.min(1, 0.3 + diffusionOffset), `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity2})`);
     const opacity3 = Math.max(0, Math.min(1, 0.5 - diffusion * 0.2));
-    gradient.addColorStop(0.5 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity3})`);
+    gradient.addColorStop(Math.min(1, 0.5 + diffusionOffset), `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity3})`);
     const opacity4 = Math.max(0, Math.min(1, 0.3 - diffusion * 0.1));
-    gradient.addColorStop(0.7 + diffusionOffset, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity4})`);
+    gradient.addColorStop(Math.min(1, 0.7 + diffusionOffset), `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity4})`);
     gradient.addColorStop(0.9, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
     gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
 
@@ -170,7 +170,7 @@ const createCeilingGlowTexture = (
     const diffusionFactor = diffusion * 0.2; // Фактор влияния рассеивания
     gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.6 - diffusionFactor})`);
     gradient.addColorStop(0.3, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.3 - diffusionFactor})`);
-    gradient.addColorStop(0.6 + diffusionFactor, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
+    gradient.addColorStop(Math.min(1, 0.6 + diffusionFactor), `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`);
     gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
 
     context.fillStyle = gradient;

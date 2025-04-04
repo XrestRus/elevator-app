@@ -94,6 +94,17 @@ const InteriorElements: React.FC<InteriorElementsProps> = ({ elevator }) => {
           visible: checked 
         }))}
       />
+      
+      {/* Настройка цвета панели управления - отображается только если панель включена */}
+      {elevator.visibility.controlPanel && (
+        <div style={{ marginLeft: '20px', marginTop: '8px', marginBottom: '12px' }}>
+          <ColorPicker
+            label="Цвет панели управления:"
+            value={elevator.materials.controlPanel}
+            onChange={(value) => dispatch(setMaterial({ part: 'controlPanel', color: value }))}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -115,6 +115,7 @@ const BasicElevator: React.FC = () => {
           position={[-dimensions.width / 2.6, -0.2, dimensions.depth / 2.1]} 
           lightsOn={lightsOn}
           wallColor={materials.walls}
+          panelColor={materials.controlPanel}
         />
       )}
 

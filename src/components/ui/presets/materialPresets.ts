@@ -35,18 +35,21 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setMaterial({ part: 'floor', color: '#F5F5F5' }));
   dispatch(setMaterial({ part: 'doors', color: '#A9A9A9' }));
   dispatch(setMaterial({ part: 'handrails', color: '#808080' }));
+  dispatch(setMaterial({ part: 'controlPanel', color: '#A9A9A9' }));
   
   // Сбрасываем металличность
   dispatch(setMetalness({ part: 'walls', value: 0.1 }));
   dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
   dispatch(setMetalness({ part: 'doors', value: 0.3 }));
   dispatch(setMetalness({ part: 'floor', value: 0.1 }));
+  dispatch(setMetalness({ part: 'controlPanel', value: 0.1 }));
   
   // Сбрасываем шероховатость
   dispatch(setRoughness({ part: 'walls', value: 0.4 }));
   dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
   dispatch(setRoughness({ part: 'doors', value: 0.3 }));
   dispatch(setRoughness({ part: 'floor', value: 0.7 }));
+  dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
   
   // Сбрасываем текстуры
   dispatch(setTexture({ part: 'walls', value: null }));
@@ -54,6 +57,7 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setTexture({ part: 'floor', value: null }));
   dispatch(setTexture({ part: 'doors', value: null }));
   dispatch(setTexture({ part: 'frontWall', value: null }));
+  dispatch(setTexture({ part: 'controlPanel', value: null }));
   
   // Сбрасываем свечение
   dispatch(setEmission({ enabled: false, color: '#ffffff' }));
@@ -61,6 +65,7 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setEmission({ part: 'ceiling', value: 0 }));
   dispatch(setEmission({ part: 'doors', value: 0 }));
   dispatch(setEmission({ part: 'floor', value: 0 }));
+  dispatch(setEmission({ part: 'controlPanel', value: 0 }));
   
   // Сбрасываем прозрачность
   dispatch(setTransparency({ enabled: false }));
@@ -68,6 +73,7 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setTransparency({ part: 'ceiling', value: 0 }));
   dispatch(setTransparency({ part: 'doors', value: 0 }));
   dispatch(setTransparency({ part: 'floor', value: 0 }));
+  dispatch(setTransparency({ part: 'controlPanel', value: 0 }));
   
   // Сбрасываем преломление
   dispatch(setRefraction({ enabled: false }));
@@ -75,6 +81,7 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setRefraction({ part: 'ceiling', value: 1.5 }));
   dispatch(setRefraction({ part: 'doors', value: 1.5 }));
   dispatch(setRefraction({ part: 'floor', value: 1.5 }));
+  dispatch(setRefraction({ part: 'controlPanel', value: 1.5 }));
   
   // Сбрасываем анизотропию
   dispatch(setAnisotropy({ enabled: false }));
@@ -116,19 +123,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#F5F5F5' }));
       dispatch(setMaterial({ part: 'doors', color: '#A9A9A9' }));
       dispatch(setMaterial({ part: 'handrails', color: '#808080' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#A9A9A9' }));
       dispatch(setMetalness({ part: 'walls', value: 0.1 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
       dispatch(setMetalness({ part: 'doors', value: 0.3 }));
       dispatch(setMetalness({ part: 'floor', value: 0.1 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.1 }));
       dispatch(setRoughness({ part: 'walls', value: 0.4 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
       dispatch(setRoughness({ part: 'doors', value: 0.3 }));
       dispatch(setRoughness({ part: 'floor', value: 0.7 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: null }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
+      dispatch(setTexture({ part: 'controlPanel', value: null }));
       dispatch(setDecorationStripes({ color: '#C0C0C0', material: 'metal' }));
     }
   },
@@ -143,19 +154,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#332211' }));
       dispatch(setMaterial({ part: 'doors', color: '#D4AF37' }));
       dispatch(setMaterial({ part: 'handrails', color: '#FFD700' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#D4AF37' }));
       dispatch(setMetalness({ part: 'walls', value: 0.9 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
       dispatch(setMetalness({ part: 'doors', value: 0.9 }));
       dispatch(setMetalness({ part: 'floor', value: 0.5 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.5 }));
       dispatch(setRoughness({ part: 'walls', value: 0.1 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
       dispatch(setRoughness({ part: 'doors', value: 0.1 }));
       dispatch(setRoughness({ part: 'floor', value: 0.3 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: null }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
+      dispatch(setTexture({ part: 'controlPanel', value: null }));
       dispatch(setDecorationStripes({ color: '#302010', material: 'metal' }));
     }
   },
@@ -170,19 +185,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#303030' }));
       dispatch(setMaterial({ part: 'doors', color: '#C0C0C0' }));
       dispatch(setMaterial({ part: 'handrails', color: '#D3D3D3' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#C0C0C0' }));
       dispatch(setMetalness({ part: 'walls', value: 0.9 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
       dispatch(setMetalness({ part: 'doors', value: 0.9 }));
       dispatch(setMetalness({ part: 'floor', value: 0.7 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.7 }));
       dispatch(setRoughness({ part: 'walls', value: 0.1 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
       dispatch(setRoughness({ part: 'doors', value: 0.1 }));
       dispatch(setRoughness({ part: 'floor', value: 0.2 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: null }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
+      dispatch(setTexture({ part: 'controlPanel', value: null }));
       dispatch(setDecorationStripes({ color: '#1A1A1A', material: 'metal' }));
     }
   },
@@ -197,19 +216,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#2D2D2D' }));
       dispatch(setMaterial({ part: 'doors', color: '#B87333' }));
       dispatch(setMaterial({ part: 'handrails', color: '#CC8844' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#B87333' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
       dispatch(setMetalness({ part: 'doors', value: 0.8 }));
       dispatch(setMetalness({ part: 'floor', value: 0.6 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.8 }));
       dispatch(setRoughness({ part: 'walls', value: 0.2 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
       dispatch(setRoughness({ part: 'doors', value: 0.2 }));
       dispatch(setRoughness({ part: 'floor', value: 0.3 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.2 }));
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: null }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
+      dispatch(setTexture({ part: 'controlPanel', value: null }));
       dispatch(setDecorationStripes({ color: '#FFCA80', material: 'metal' }));
     }
   },
@@ -224,19 +247,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#333333' }));
       dispatch(setMaterial({ part: 'doors', color: '#E0E0E0' }));
       dispatch(setMaterial({ part: 'handrails', color: '#A9A9A9' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#E0E0E0' }));
       dispatch(setMetalness({ part: 'walls', value: 0.1 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.0 }));
       dispatch(setMetalness({ part: 'doors', value: 0.3 }));
       dispatch(setMetalness({ part: 'floor', value: 0.2 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.3 }));
       dispatch(setRoughness({ part: 'walls', value: 0.7 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.8 }));
       dispatch(setRoughness({ part: 'doors', value: 0.4 }));
       dispatch(setRoughness({ part: 'floor', value: 0.5 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.4 }));
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: null }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
+      dispatch(setTexture({ part: 'controlPanel', value: null }));
       dispatch(setDecorationStripes({ color: '#000000', material: 'glossy' }));
     }
   },
@@ -253,19 +280,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#5D3A1A' }));
       dispatch(setMaterial({ part: 'doors', color: '#8B6640' }));
       dispatch(setMaterial({ part: 'handrails', color: '#8B4513' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#8B6640' }));
       dispatch(setMetalness({ part: 'walls', value: 0.1 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
       dispatch(setMetalness({ part: 'doors', value: 0.2 }));
       dispatch(setMetalness({ part: 'floor', value: 0.2 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.2 }));
       dispatch(setRoughness({ part: 'walls', value: 0.7 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.6 }));
       dispatch(setRoughness({ part: 'doors', value: 0.5 }));
       dispatch(setRoughness({ part: 'floor', value: 0.5 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.5 }));
       dispatch(setTexture({ part: 'walls', value: woodTexture }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: woodTexture }));
       dispatch(setTexture({ part: 'doors', value: woodTexture }));
       dispatch(setTexture({ part: 'frontWall', value: woodTexture }));
+      dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
       dispatch(setDecorationStripes({ color: '#4F3824', material: 'wood' }));
     }
   },
@@ -281,19 +312,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#2C2C2C' }));
       dispatch(setMaterial({ part: 'doors', color: '#A0A0A0' }));
       dispatch(setMaterial({ part: 'handrails', color: '#B0B0B0' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#A0A0A0' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.7 }));
       dispatch(setMetalness({ part: 'doors', value: 0.9 }));
       dispatch(setMetalness({ part: 'floor', value: 0.9 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.9 }));
       dispatch(setRoughness({ part: 'walls', value: 0.3 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
       dispatch(setRoughness({ part: 'doors', value: 0.2 }));
       dispatch(setRoughness({ part: 'floor', value: 0.1 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       dispatch(setTexture({ part: 'walls', value: metalTexture }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: "/textures/example/metal_0044_1k_QzepB1" }));
       dispatch(setTexture({ part: 'doors', value: metalTexture }));
       dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
+      dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
       dispatch(setDecorationStripes({ color: '#1E90FF', material: 'glossy' }));
     }
   },
@@ -309,19 +344,23 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#181818' }));
       dispatch(setMaterial({ part: 'doors', color: '#404040' }));
       dispatch(setMaterial({ part: 'handrails', color: '#333333' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#404040' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
       dispatch(setMetalness({ part: 'doors', value: 0.7 }));
       dispatch(setMetalness({ part: 'floor', value: 0.8 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.7 }));
       dispatch(setRoughness({ part: 'walls', value: 0.3 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
       dispatch(setRoughness({ part: 'doors', value: 0.3 }));
       dispatch(setRoughness({ part: 'floor', value: 0.2 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.3 }));
       dispatch(setTexture({ part: 'walls', value: metalTexture }));
       dispatch(setTexture({ part: 'ceiling', value: metalTexture }));
       dispatch(setTexture({ part: 'floor', value: "/textures/example/metal_0082_1k_je0RXH" }));
       dispatch(setTexture({ part: 'doors', value: metalTexture }));
       dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
+      dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
       dispatch(setDecorationStripes({ color: '#C0C0C0', material: 'metal' }));
       dispatch(setLighting({ count: 6, color: '#FFF8E0', intensity: 34, diffusion: 1, enabled: true, type: 'spotlight' }));
     }
@@ -337,14 +376,17 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#D0E0F0' }));
       dispatch(setMaterial({ part: 'doors', color: '#C0D8FF' }));
       dispatch(setMaterial({ part: 'handrails', color: '#B0C4DE' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#C0D8FF' }));
       dispatch(setMetalness({ part: 'walls', value: 0.9 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
       dispatch(setMetalness({ part: 'doors', value: 0.8 }));
       dispatch(setMetalness({ part: 'floor', value: 0.9 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.8 }));
       dispatch(setRoughness({ part: 'walls', value: 0.1 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
       dispatch(setRoughness({ part: 'doors', value: 0.15 }));
       dispatch(setRoughness({ part: 'floor', value: 0.2 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.15 }));
       
       // Добавляем ледяную текстуру для передней стены
       const iceTexture = "/textures/example/metal_0016_1k_bN2ZC3";
@@ -353,6 +395,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'floor', value: null }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: iceTexture }));
+      dispatch(setTexture({ part: 'controlPanel', value: iceTexture }));
       
       // Настройка освещения
       dispatch(setLighting({ count: 4, color: '#E0F0FF', intensity: 1.0, diffusion: 0.9, enabled: true, type: 'square' }));
@@ -362,6 +405,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setEmission({ part: 'ceiling', value: 0.3 }));
       dispatch(setEmission({ part: 'doors', value: 0.1 }));
       dispatch(setEmission({ part: 'floor', value: 0.05 }));
+      dispatch(setEmission({ part: 'controlPanel', value: 0.05 }));
       
       dispatch(setDecorationStripes({ 
         enabled: true,
@@ -388,14 +432,17 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#421C17' }));
       dispatch(setMaterial({ part: 'doors', color: '#8C001A' }));
       dispatch(setMaterial({ part: 'handrails', color: '#D4AF37' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#8C001A' }));
       dispatch(setMetalness({ part: 'walls', value: 0.3 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
       dispatch(setMetalness({ part: 'doors', value: 0.4 }));
       dispatch(setMetalness({ part: 'floor', value: 0.2 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.4 }));
       dispatch(setRoughness({ part: 'walls', value: 0.3 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.5 }));
       dispatch(setRoughness({ part: 'doors', value: 0.4 }));
       dispatch(setRoughness({ part: 'floor', value: 0.5 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.4 }));
       
       const woodTexture = "/textures/example/wood_0066_1k_HoQeAg";
       dispatch(setTexture({ part: 'walls', value: null }));
@@ -403,6 +450,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'floor', value: woodTexture }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
+      dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
       
       // Настройка освещения
       dispatch(setLighting({ count: 3, color: '#FFEBCD', intensity: 1, diffusion: 0.1, enabled: true, type: 'plafond' }));
@@ -434,14 +482,17 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#3D291B' }));
       dispatch(setMaterial({ part: 'doors', color: '#43594F' }));
       dispatch(setMaterial({ part: 'handrails', color: '#6D4C41' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#43594F' }));
       dispatch(setMetalness({ part: 'walls', value: 0.2 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.0 }));
       dispatch(setMetalness({ part: 'doors', value: 0.3 }));
       dispatch(setMetalness({ part: 'floor', value: 0.1 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.3 }));
       dispatch(setRoughness({ part: 'walls', value: 0.6 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.7 }));
       dispatch(setRoughness({ part: 'doors', value: 0.5 }));
       dispatch(setRoughness({ part: 'floor', value: 0.7 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.5 }));
       
       const woodTexture = "/textures/example/wood_0066_1k_HoQeAg";
       dispatch(setTexture({ part: 'walls', value: null }));
@@ -449,6 +500,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'floor', value: woodTexture }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: woodTexture }));
+      dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
       
       // Настройка освещения
       dispatch(setLighting({ count: 4, color: '#F5F5DC', intensity: 0.7, diffusion: 0.8, enabled: true, type: 'plafond' }));
@@ -480,16 +532,19 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'floor', color: '#101820' }));
       dispatch(setMaterial({ part: 'doors', color: '#121820' }));
       dispatch(setMaterial({ part: 'handrails', color: '#30C5FF' }));
+      dispatch(setMaterial({ part: 'controlPanel', color: '#121820' }));
       
       dispatch(setMetalness({ part: 'walls', value: 0.7 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.7 }));
       dispatch(setMetalness({ part: 'doors', value: 0.8 }));
       dispatch(setMetalness({ part: 'floor', value: 0.8 }));
+      dispatch(setMetalness({ part: 'controlPanel', value: 0.8 }));
       
       dispatch(setRoughness({ part: 'walls', value: 0.2 }));
       dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
       dispatch(setRoughness({ part: 'doors', value: 0.1 }));
       dispatch(setRoughness({ part: 'floor', value: 0.2 }));
+      dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       
       const metalTexture = "/textures/example/metal_0082_1k_je0RXH";
       dispatch(setTexture({ part: 'walls', value: null }));
@@ -497,6 +552,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'floor', value: metalTexture }));
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
+      dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
       
       // Настройка освещения
       dispatch(setLighting({ count: 6, color: '#2080FF', intensity: 0.7, diffusion: 0.9, enabled: true, type: 'spotlight' }));
@@ -507,6 +563,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setEmission({ part: 'ceiling', value: 0.1 }));
       dispatch(setEmission({ part: 'doors', value: 0.4 }));
       dispatch(setEmission({ part: 'floor', value: 0.05 }));
+      dispatch(setEmission({ part: 'controlPanel', value: 0.05 }));
       
       // Зеркальные поверхности
       dispatch(setMirrorSurface({ part: 'walls', value: true }));

@@ -35,29 +35,30 @@ interface ElevatorPanelProps {
   position: [number, number, number];
   lightsOn: boolean;
   wallColor: string;
+  panelColor: string;
 }
 
 /**
  * Компонент панели управления лифтом с кнопками и экраном
  */
-const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor }) => {
-  // Создаем материал основы панели, чтобы она наследовала цвет стен
+const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor, panelColor }) => {
+  // Создаем материал основы панели с использованием собственного цвета панели
   const panelMaterial = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(wallColor),
+      color: new THREE.Color(panelColor),
       metalness: 0.9,
       roughness: 0.1,
       envMapIntensity: 1.5,
       clearcoat: 0.3, // Добавляем легкое покрытие лаком для глянца
       clearcoatRoughness: 0.1, // Делаем покрытие гладким
     }),
-    [wallColor]
+    [panelColor]
   );
   
   // Создаем материал для внутренней части панели (слегка светлее основного цвета)
   const panelInnerMaterial = useMemo(
     () => {
-      const innerColor = colorUtils.lightenColor(wallColor, 1.2);
+      const innerColor = colorUtils.lightenColor(panelColor, 1.2);
       return new THREE.MeshStandardMaterial({
         color: innerColor,
         metalness: 0.5,
@@ -66,18 +67,18 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         emissiveIntensity: lightsOn ? 0.08 : 0,
       });
     },
-    [wallColor, lightsOn]
+    [panelColor, lightsOn]
   );
 
   // Создаем цвет кнопок еще светлее цвета стен
   const buttonColor = useMemo(() => {
-    return colorUtils.lightenColor(wallColor, 1.35);
-  }, [wallColor]);
+    return colorUtils.lightenColor(panelColor, 1.35);
+  }, [panelColor]);
 
   // Материал для рамки/углубления панели (темнее)
   const panelBorderMaterial = useMemo(
     () => {
-      const borderColor = colorUtils.darkenColor(wallColor, 0.8);
+      const borderColor = colorUtils.darkenColor(panelColor, 0.8);
       return new THREE.MeshStandardMaterial({
         color: borderColor,
         metalness: 0.5,
@@ -86,20 +87,20 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         emissiveIntensity: lightsOn ? 0.02 : 0,
       });
     },
-    [wallColor, lightsOn]
+    [panelColor, lightsOn]
   );
 
   // Материал для экрана
   const displayMaterial = useMemo(
     () => {
-      const displayColor = colorUtils.lightenColor(wallColor, 1.3); // Делаем обводку ещё светлее для лучшего контраста
+      const displayColor = colorUtils.lightenColor(panelColor, 1.3); // Делаем обводку ещё светлее для лучшего контраста
       return new THREE.MeshStandardMaterial({
         color: displayColor,
         emissive: lightsOn ? displayColor : "#000000",
         emissiveIntensity: lightsOn ? 0.5 : 0.0,
       });
     },
-    [wallColor, lightsOn]
+    [panelColor, lightsOn]
   );
 
   // Материал для обводки кнопок (еще светлее основного цвета кнопок)
