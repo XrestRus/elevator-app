@@ -5,7 +5,8 @@ import {
   setDecorationStripes,
   setLighting,
   setJoints,
-  setMaterial
+  setMaterial,
+  setDoorLogo
 } from "../../../store/elevatorSlice";
 import {
   RangeSlider,
@@ -13,6 +14,7 @@ import {
   SelectInput,
   CheckboxInput
 } from "../common/UIControls";
+import { LightType } from "../../../components/elevator/CeilingLights";
 
 /**
  * Интерфейс пропсов для компонента ElementsTab
@@ -38,6 +40,9 @@ const ElementsTab: React.FC<ElementsTabProps> = ({ elevator }) => {
       
       {/* Стыки между стенами */}
       <JointControls elevator={elevator} />
+      
+      {/* Логотип на дверях */}
+      <DoorLogoControls elevator={elevator} />
       
       {/* Освещение */}
       <LightingControls elevator={elevator} />
@@ -232,6 +237,64 @@ const JointControls: React.FC<JointControlsProps> = ({ elevator }) => {
 };
 
 /**
+ * Компонент управления логотипом на дверях лифта
+ */
+interface DoorLogoControlsProps {
+  elevator: ElevatorState;
+}
+
+const DoorLogoControls: React.FC<DoorLogoControlsProps> = ({ elevator }) => {
+  const dispatch = useDispatch();
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <h4>Логотип на дверях</h4>
+      
+      <CheckboxInput
+        id="showDoorLogo"
+        label="Показать логотип на дверях"
+        checked={elevator.doorLogo?.enabled ?? false}
+        onChange={(checked) => dispatch(setDoorLogo({ 
+          enabled: checked
+        }))}
+      />
+      
+      {(elevator.doorLogo?.enabled ?? false) && (
+        <>
+          <RangeSlider
+            label="Масштаб логотипа:"
+            min={0.5}
+            max={2}
+            step={0.1}
+            value={elevator.doorLogo?.scale ?? 1}
+            onChange={(value) => dispatch(setDoorLogo({ 
+              scale: value 
+            }))}
+            centerLabel={(value) => `${value.toFixed(1)}x`}
+            leftLabel="0.5x"
+            rightLabel="2.0x"
+          />
+          
+          <RangeSlider
+            label="Смещение по вертикали:"
+            min={-1}
+            max={1}
+            step={0.05}
+            value={elevator.doorLogo?.offsetY ?? 0}
+            onChange={(value) => dispatch(setDoorLogo({ 
+              offsetY: value 
+            }))}
+            centerLabel={(value) => `${value.toFixed(2)} м`}
+            leftLabel="-1.0 м"
+            rightLabel="1.0 м"
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+/**
  * Компонент управления освещением
  */
 interface LightingControlsProps {
@@ -247,10 +310,25 @@ const LightingControls: React.FC<LightingControlsProps> = ({ elevator }) => {
     { value: "2", label: "2 (спереди и сзади)" },
     { value: "4", label: "4 (по углам)" }
   ];
+
+  // Опции для выбора типа светильника
+  const lightTypeOptions = [
+    { value: LightType.SPOTLIGHT, label: "Точечные светильники" },
+    { value: LightType.PLAFOND, label: "Круглые плафоны" }
+  ];
   
   return (
     <div style={{ marginBottom: '16px' }}>
       <h4>Освещение</h4>
+      
+      <SelectInput
+        label="Тип светильника:"
+        value={elevator.lighting.type || LightType.SPOTLIGHT}
+        onChange={(value) => dispatch(setLighting({ 
+          type: value 
+        }))}
+        options={lightTypeOptions}
+      />
       
       <SelectInput
         label="Количество светильников:"

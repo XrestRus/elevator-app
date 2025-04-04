@@ -57,6 +57,28 @@ export const colorUtils = {
     }
     
     return "Неизвестно";
+  },
+
+  /**
+   * Возвращает цвет материала как объект с компонентами RGB
+   * @param material Материал для получения цвета
+   * @returns Объект с компонентами r, g, b или дефолтный цвет если материал не определен
+   */
+  getMaterialColorAsRgb(material: THREE.Material | undefined): { r: number, g: number, b: number } {
+    if (!material) return { r: 0.5, g: 0.5, b: 0.5 }; // Дефолтный серый, если материал не задан
+    
+    if (material instanceof THREE.MeshStandardMaterial ||
+        material instanceof THREE.MeshPhongMaterial ||
+        material instanceof THREE.MeshLambertMaterial ||
+        material instanceof THREE.MeshBasicMaterial) {
+      return { 
+        r: material.color.r, 
+        g: material.color.g, 
+        b: material.color.b 
+      };
+    }
+    
+    return { r: 0.5, g: 0.5, b: 0.5 }; // Дефолтный серый для других типов материалов
   }
 };
 

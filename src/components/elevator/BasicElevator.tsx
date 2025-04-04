@@ -956,6 +956,9 @@ const BasicElevator: React.FC = () => {
         doorHeight={doorHeight}
         dimensions={dimensions}
         doorMaterial={actualDoorMaterial}
+        showLogo={elevator.doorLogo?.enabled}
+        logoScale={elevator.doorLogo?.scale}
+        logoOffsetY={elevator.doorLogo?.offsetY}
       />
 
       {/* Поручни - с оптимизацией */}

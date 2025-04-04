@@ -19,6 +19,7 @@ export interface LightingOptions {
   intensity: number;
   diffusion: number; // Рассеивание света
   enabled: boolean;
+  type?: string; // Тип светильника: spotlight, plafond, square
 }
 
 /**
@@ -160,6 +161,15 @@ export interface MirrorOptions {
 }
 
 /**
+ * Интерфейс настроек логотипа на дверях
+ */
+export interface DoorLogoOptions {
+  enabled: boolean;
+  scale?: number;
+  offsetY?: number;
+}
+
+/**
  * Интерфейс состояния лифта
  */
 export interface ElevatorState {
@@ -171,6 +181,7 @@ export interface ElevatorState {
   camera: CameraOptions;
   decorationStripes?: DecorationStripesOptions;
   joints?: JointOptions;
+  doorLogo?: DoorLogoOptions;
 }
 
 /**
@@ -251,8 +262,8 @@ const initialState: ElevatorState = {
   lighting: {
     count: 4,
     color: '#ffffff',
-    intensity: 6,
-    diffusion: 0.5, // Значение рассеивания по умолчанию
+    intensity: 5,
+    diffusion: 0.1, // Значение рассеивания по умолчанию
     enabled: true
   },
   visibility: {
@@ -291,6 +302,11 @@ const initialState: ElevatorState = {
     material: 'glossy',
     protrusion: 0,
     qualityFactor: .9
+  },
+  doorLogo: {
+    enabled: true,
+    scale: 0.7,
+    offsetY: 0
   }
 };
 
@@ -474,6 +490,18 @@ const elevatorSlice = createSlice({
         };
       }
       state.joints = { ...state.joints, ...action.payload };
+    },
+    
+    // Обновление настроек логотипа на дверях
+    setDoorLogo: (state, action: PayloadAction<Partial<DoorLogoOptions>>) => {
+      if (!state.doorLogo) {
+        state.doorLogo = {
+          enabled: false,
+          scale: 1,
+          offsetY: 0
+        };
+      }
+      state.doorLogo = { ...state.doorLogo, ...action.payload };
     }
   }
 });
@@ -496,7 +524,8 @@ export const {
   setCamera,
   setMirrorOptions,
   setDecorationStripes,
-  setJoints
+  setJoints,
+  setDoorLogo
 } = elevatorSlice.actions;
 
 // Экспорт reducer
