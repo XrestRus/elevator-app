@@ -153,15 +153,15 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       
       {/* Тень на полу от нижнего поручня */}
       <mesh 
-        position={[0, -0.061, 0]} 
+        position={[0, -0.065, 0]} 
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow
       >
         <planeGeometry args={[0.1, dimensions.depth]} />
         <meshBasicMaterial 
-          color="#000000" 
+          color="black" 
           transparent={true} 
-          opacity={0.3} 
+          opacity={0.08} 
           depthWrite={false}
         />
       </mesh>
@@ -184,15 +184,15 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       
       {/* Тень на полу от нижнего поручня */}
       <mesh 
-        position={[0, -0.061, 0]} 
+        position={[0, -0.065, 0]} 
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow
       >
-        <planeGeometry args={[0.1, dimensions.depth]} />
+        <planeGeometry args={[0.1, dimensions.depth * 1.05]} />
         <meshBasicMaterial 
-          color="#000000" 
+          color="black" 
           transparent={true} 
-          opacity={0.3} 
+          opacity={0.08} 
           depthWrite={false}
         />
       </mesh>
@@ -216,15 +216,15 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       
       {/* Тень на полу от нижнего поручня */}
       <mesh 
-        position={[0, -0.061, 0.025]} 
+        position={[0, -0.01, 0.03]} 
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow
       >
-        <planeGeometry args={[dimensions.width, 0.1]} />
+        <planeGeometry args={[dimensions.width * 1.05, 0.15]} />
         <meshBasicMaterial 
-          color="#000000" 
+          color="black" 
           transparent={true} 
-          opacity={0.3} 
+          opacity={0.08} 
           depthWrite={false}
         />
       </mesh>
