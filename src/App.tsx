@@ -100,7 +100,6 @@ function App() {
   const handleImportScene = useCallback((scene: THREE.Scene) => {
     // Устанавливаем импортированную сцену
     setImportedScene(scene);
-    console.log('Сцена импортирована:', scene);
   }, []);
   
   // Обработчик изменения цвета фона

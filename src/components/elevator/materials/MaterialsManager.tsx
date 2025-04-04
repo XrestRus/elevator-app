@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { createWallMaterialWithCustomRepeat } from '../ElevatorMaterialsUtils';
-import type { ElevatorState } from '../../../store/elevatorSlice';
+import type { ElevatorState, Materials } from '../../../store/elevatorSlice';
 import { 
   ExtendedMaterialParameters, 
   MaterialsManagerResult,
@@ -13,7 +13,7 @@ import {
  * Отвечает за создание и конфигурирование всех материалов, используемых в модели лифта
  */
 export const useMaterialsManager = (
-  materials: MaterialsConfig, 
+  materials: MaterialsConfig | Materials, 
   elevator: ElevatorState
 ): MaterialsManagerResult => {
   // Базовый материал для стен

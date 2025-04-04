@@ -70,9 +70,6 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
     };
   }
 
-  // Проверка и логирование пути
-  console.log(`Загружаем текстуры из ${baseTexturePath}`);
-
   // Исправляем путь, чтобы он правильно начинался с /public
   const fixedBasePath = baseTexturePath.startsWith("/")
     ? baseTexturePath
@@ -245,9 +242,6 @@ export const createPBRMaterial = (
   // Если предоставлен цвет, применяем его к текстуре
   if (color) {
     materialProperties.color = new THREE.Color(color);
-    console.log(`Применяем цвет ${color} к текстуре типа ${textureType}`);
-  } else {
-    console.log(`Внимание: цвет не предоставлен для текстуры типа ${textureType}, используется цвет по умолчанию`);
   }
   
   // Определяем базовые значения metalness и roughness в зависимости от типа материала
@@ -278,12 +272,10 @@ export const createPBRMaterial = (
   // Если заданы пользовательские значения и есть карты текстур, отключаем карты
   // для обеспечения точного соответствия пользовательским настройкам
   if (typeof customRoughness === 'number' && materialProperties.roughnessMap) {
-    console.log(`Отключаем карту шероховатости в пользу пользовательского значения: ${customRoughness}`);
     delete materialProperties.roughnessMap; // Убираем карту, чтобы использовать только числовое значение
   }
   
   if (typeof customMetalness === 'number' && materialProperties.metalnessMap) {
-    console.log(`Отключаем карту металличности в пользу пользовательского значения: ${customMetalness}`);
     delete materialProperties.metalnessMap; // Убираем карту, чтобы использовать только числовое значение
   }
   
@@ -291,8 +283,6 @@ export const createPBRMaterial = (
   if (customEmission && customEmission.enabled) {
     materialProperties.emissive = new THREE.Color(customEmission.color);
     materialProperties.emissiveIntensity = customEmission.value;
-    
-    console.log(`Применяем свечение: ${customEmission.color}, интенсивность: ${customEmission.value}`);
     
     // Отключаем карту эмиссии, если она есть
     if ('emissiveMap' in materialProperties) {
@@ -309,8 +299,6 @@ export const createPBRMaterial = (
       
       // Настраиваем порядок рендеринга для правильного отображения прозрачности
       materialProperties.depthWrite = customTransparency.value < 0.95;
-      
-      console.log(`Применяем прозрачность: ${customTransparency.value}, opacity: ${materialProperties.opacity}`);
     }
   }
   
@@ -323,8 +311,6 @@ export const createPBRMaterial = (
       
     materialProperties.ior = customRefraction.value; // Индекс преломления материала
     
-    console.log(`Применяем преломление, коэффициент: ${customRefraction.value}`);
-    
     // Обратите внимание, что для полноценного преломления нужно использовать MeshPhysicalMaterial вместо MeshStandardMaterial
   }
   
@@ -332,8 +318,6 @@ export const createPBRMaterial = (
   if (customAnisotropy && customAnisotropy.enabled && customAnisotropy.value > 0) {
     materialProperties.anisotropy = customAnisotropy.value;
     materialProperties.anisotropyRotation = customAnisotropy.direction;
-    
-    console.log(`Применяем анизотропность: ${customAnisotropy.value}, направление: ${customAnisotropy.direction}`);
     
     // Обратите внимание, что для полноценной анизотропии нужно использовать MeshPhysicalMaterial вместо MeshStandardMaterial
   }

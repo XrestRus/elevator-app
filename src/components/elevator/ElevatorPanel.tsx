@@ -3,45 +3,13 @@ import { Cylinder, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
-
-/**
- * Создает текстуру с числом для кнопки лифта
- * @param text Текст для отображения на кнопке
- * @returns Текстура с числом для кнопки лифта
- */
-function createNumberTexture(text: string): THREE.Texture {
-  const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
-  const context = canvas.getContext('2d');
-  if (!context) return new THREE.Texture();
-  
-  // Используем белый текст для лучшего контраста
-  context.fillStyle = '#FFFFFF';
-  context.font = 'bold 40px Arial';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.fillText(text, 32, 32);
-  
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
-}
-
-/**
- * Компонент панели управления лифтом с кнопками, индикаторами и экраном
- */
-interface ElevatorPanelProps {
-  position: [number, number, number];
-  lightsOn: boolean;
-  wallColor: string;
-  panelColor: string;
-}
+import { ElevatorPanelProps } from "./smartPanel/ElevatorPanel";
+import { createNumberTexture } from "./smartPanel/utilsElevatorPanel";
 
 /**
  * Компонент панели управления лифтом с кнопками и экраном
  */
-const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor, panelColor }) => {
+const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, panelColor }) => {
   // Создаем материал основы панели с использованием собственного цвета панели
   const panelMaterial = useMemo(
     () => new THREE.MeshPhysicalMaterial({

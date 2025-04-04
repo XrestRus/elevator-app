@@ -14,7 +14,7 @@ import {
   SelectInput,
   CheckboxInput
 } from "../common/UIControls";
-import { LightType } from "../../../components/elevator/CeilingLights";
+import { LightType } from "../../elevator/lightTypes.ts";
 
 /**
  * Интерфейс пропсов для компонента ElementsTab

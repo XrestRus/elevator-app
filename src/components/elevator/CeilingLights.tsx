@@ -6,37 +6,7 @@ import * as THREE from "three";
 import PerformanceOptimizer from "../../utils/optimization/PerformanceOptimizer";
 import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
-
-/**
- * Тип светильника для потолка лифта
- */
-export enum LightType {
-  SPOTLIGHT = 'spotlight', // Точечный встроенный светильник
-  PLAFOND = 'plafond'     // Светильник-плафон
-}
-
-/**
- * Конфигурация параметров светильника для потолка лифта
- */
-export interface LightConfig {
-  color: string;
-  intensity: number;
-  enabled: boolean;
-  count: number;
-  diffusion: number;
-  position: [number, number, number];
-  type: LightType;
-}
-
-/**
- * Размеры светильника в зависимости от их количества и типа
- */
-interface LightSize {
-  housingRadius: number;
-  glassRadius: number;
-  glowSize: number;
-  height?: number;
-}
+import { LightType, LightConfig, LightSize } from "./lightTypes";
 
 /**
  * Создает оптимизированную текстуру для светового пятна

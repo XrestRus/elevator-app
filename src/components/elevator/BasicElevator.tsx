@@ -23,20 +23,23 @@ const BasicElevator: React.FC = () => {
   const elevator = useSelector((state: RootState) => state.elevator);
   const { materials, dimensions, doorsOpen } = elevator;
   const lightsOn = elevator.lighting.enabled;
-  
+
   // Проверяем производительность устройства для адаптивной оптимизации
-  const isHighPerformance = useMemo(() => PerformanceOptimizer.isHighPerformanceDevice(), []);
-  
+  const isHighPerformance = useMemo(
+    () => PerformanceOptimizer.isHighPerformanceDevice(),
+    []
+  );
+
   // Константы для дверей
   const doorHeight = dimensions.height - 0.3; // Высота дверного проема
-  
+
   // Загрузка и управление текстурами
   const {
     wallPBRMaterial,
     floorPBRMaterial,
     ceilingPBRMaterial,
     doorsPBRMaterial,
-    frontWallPBRMaterial
+    frontWallPBRMaterial,
   } = useTexturesManager(materials, isHighPerformance);
 
   // Использование менеджера базовых материалов
@@ -49,57 +52,57 @@ const BasicElevator: React.FC = () => {
     backWallMaterial: baseBackWallMaterial,
     handrailMaterial,
     decorationStripesMaterial,
-    jointStripeMaterial
+    jointStripeMaterial,
   } = useMaterialsManager(materials, elevator);
-  
+
   // Определяем, какой материал использовать: PBR или обычный
   const actualFloorMaterial = floorPBRMaterial || baseFloorMaterial;
   const actualCeilingMaterial = ceilingPBRMaterial || baseCeilingMaterial;
   const actualDoorMaterial = doorsPBRMaterial || baseDoorMaterial;
   const actualFrontWallMaterial = frontWallPBRMaterial || baseFrontWallMaterial;
-  
+
   // Применяем текстуры к стенам, если есть PBR материалы
-  const sideWallMaterial = wallPBRMaterial ? 
-    createWallMaterialWithCustomRepeat(wallPBRMaterial, 1, 1) : 
-    baseSideWallMaterial;
-  
-  const backWallMaterial = wallPBRMaterial ? 
-    createWallMaterialWithCustomRepeat(wallPBRMaterial, 1, 1) : 
-    baseBackWallMaterial;
-  
+  const sideWallMaterial = wallPBRMaterial
+    ? createWallMaterialWithCustomRepeat(wallPBRMaterial, 1, 1)
+    : baseSideWallMaterial;
+
+  const backWallMaterial = wallPBRMaterial
+    ? createWallMaterialWithCustomRepeat(wallPBRMaterial, 1, 1)
+    : baseBackWallMaterial;
+
   return (
     <group>
       {/* Пол - с оптимизацией */}
-      <ElevatorFloor 
-        dimensions={dimensions} 
+      <ElevatorFloor
+        dimensions={dimensions}
         floorMaterial={actualFloorMaterial}
       />
-      
+
       {/* Потолок - с оптимизацией и зазором по краям */}
-      <ElevatorCeiling 
-        dimensions={dimensions} 
+      <ElevatorCeiling
+        dimensions={dimensions}
         ceilingMaterial={actualCeilingMaterial}
         wallsColor={materials.walls}
       />
-      
+
       {/* Встроенные светильники - конфигурация 2x2 */}
       {elevator.visibility.lights && (
-        <CeilingLights 
-          color={elevator.lighting.color} 
-          intensity={elevator.lighting.intensity} 
+        <CeilingLights
+          color={elevator.lighting.color}
+          intensity={elevator.lighting.intensity}
         />
       )}
-      
+
       {/* Стены и дверные рамки - с оптимизацией */}
-      <ElevatorWalls 
+      <ElevatorWalls
         dimensions={dimensions}
         backWallMaterial={backWallMaterial}
         sideWallMaterial={sideWallMaterial}
         frontWallMaterial={actualFrontWallMaterial}
       />
-      
+
       {/* Зеркало - с оптимизацией */}
-      <ElevatorMirror 
+      <ElevatorMirror
         dimensions={dimensions}
         materials={materials}
         mirrorConfig={{
@@ -111,8 +114,8 @@ const BasicElevator: React.FC = () => {
 
       {/* Панель управления на передней стене слева от дверей - с оптимизацией */}
       {elevator.visibility.controlPanel && (
-        <ElevatorPanel 
-          position={[-dimensions.width / 2.6, -0.2, dimensions.depth / 2.1]} 
+        <ElevatorPanel
+          position={[-dimensions.width / 2.6, -0.2, dimensions.depth / 2.1]}
           lightsOn={lightsOn}
           wallColor={materials.walls}
           panelColor={materials.controlPanel}

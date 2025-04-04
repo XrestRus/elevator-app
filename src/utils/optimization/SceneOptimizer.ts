@@ -135,7 +135,6 @@ class SceneOptimizer {
       const height = texture.image.height;
       
       if (width > maxSize || height > maxSize) {
-        console.log(`Оптимизация текстуры: ${width}x${height} -> макс. ${maxSize}`);
         // Примечание: в Three.js нет прямого способа изменить размер текстуры
         // В реальной реализации здесь может быть дополнительный код для создания
         // копии текстуры с уменьшенным разрешением
@@ -189,10 +188,7 @@ class SceneOptimizer {
   public optimize(): void {
     if (this.optimizationApplied) return;
     
-    console.log('Применение оптимизаций сцены...');
-    
     const isHighPerformance = PerformanceOptimizer.isHighPerformanceDevice();
-    console.log(`Режим рендеринга: ${isHighPerformance ? 'Высокое качество' : 'Оптимизированный'}`);
     
     // Оптимизируем рендерер
     this.optimizeRenderer();
@@ -227,7 +223,6 @@ class SceneOptimizer {
     // Эти свойства относятся к Three.js WebGLRenderer и его возможностям
     
     this.optimizationApplied = true;
-    console.log('Оптимизация сцены завершена.');
   }
 
   /**

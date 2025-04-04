@@ -3,13 +3,14 @@ import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { loadPBRTextures, createTexturePaths, createPBRMaterial } from '../ElevatorMaterialsUtils';
 import { MaterialsConfig, TexturesManagerResult, EmissionProps, TransparencyProps, RefractionProps, AnisotropyProps } from './types';
+import { Materials } from '../../../store/elevatorSlice';
 
 /**
  * Хук для управления текстурами лифта
  * Отвечает за загрузку и оптимизацию всех текстур, используемых в модели лифта
  */
 export const useTexturesManager = (
-  materials: MaterialsConfig, 
+  materials: MaterialsConfig | Materials, 
   isHighPerformance: boolean
 ): TexturesManagerResult => {
   // Кэширование путей к текстурам

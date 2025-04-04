@@ -118,7 +118,6 @@ class PerformanceOptimizer {
       if (texture.image && texture.image instanceof HTMLImageElement) {
         const maxSize = 512; // Максимальный размер текстуры на слабых устройствах
         if (texture.image.width > maxSize || texture.image.height > maxSize) {
-          console.log(`Уменьшение размера текстуры с ${texture.image.width}x${texture.image.height} до макс. ${maxSize}`);
           texture.image.width = Math.min(texture.image.width, maxSize);
           texture.image.height = Math.min(texture.image.height, maxSize);
           texture.needsUpdate = true;

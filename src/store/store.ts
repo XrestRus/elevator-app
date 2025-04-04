@@ -14,7 +14,7 @@ export interface AppState {
 export const store = configureStore({
   reducer: {
     elevator: elevatorReducer,
-  } as any,
+  },
 });
 
 // Типы для RootState и AppDispatch
