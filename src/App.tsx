@@ -23,6 +23,30 @@ import ObjectHoverHandler from './components/ui/ObjectHoverHandler';
 import ObjectInfoPanel from './components/ui/ObjectInfoPanel';
 
 /**
+ * Компонент для изменения цвета фона сцены
+ */
+const BackgroundColorUpdater: React.FC<{
+  color: string;
+}> = ({ color }) => {
+  const { scene } = useThree();
+  
+  // Обновляем цвет фона при изменении пропса color
+  useMemo(() => {
+    if (scene && scene.background) {
+      if (typeof scene.background === 'object' && 'set' in scene.background) {
+        scene.background.set(color);
+      } else {
+        scene.background = new THREE.Color(color);
+      }
+    } else if (scene) {
+      scene.background = new THREE.Color(color);
+    }
+  }, [scene, color]);
+  
+  return null;
+};
+
+/**
  * Компонент для получения ссылки на текущую сцену
  */
 const SceneGrabber: React.FC<{
@@ -64,6 +88,9 @@ function App() {
   // Ссылка на текущую сцену
   const [currentScene, setCurrentScene] = useState<THREE.Scene | null>(null);
   
+  // Состояние для цвета фона
+  const [backgroundColor, setBackgroundColor] = useState('#000000');
+  
   // Обработчик получения сцены
   const handleSceneReady = useCallback((scene: THREE.Scene) => {
     setCurrentScene(scene);
@@ -74,6 +101,11 @@ function App() {
     // Устанавливаем импортированную сцену
     setImportedScene(scene);
     console.log('Сцена импортирована:', scene);
+  }, []);
+  
+  // Обработчик изменения цвета фона
+  const handleBackgroundColorChange = useCallback((color: string) => {
+    setBackgroundColor(color);
   }, []);
   
   // Оптимизированные настройки для рендерера
@@ -117,6 +149,9 @@ function App() {
           }}
           tabIndex={0} // Делаем Canvas фокусируемым для обработки клавиатурных событий
         >
+          {/* Компонент для обновления цвета фона */}
+          <BackgroundColorUpdater color={backgroundColor} />
+          
           {/* Компонент для получения ссылки на сцену */}
           <SceneGrabber onSceneReady={handleSceneReady} />
           
@@ -191,6 +226,7 @@ function App() {
         onToggleAxes={(show) => setDebugSettings({...debugSettings, showAxes: show})}
         onToggleGizmo={(show) => setDebugSettings({...debugSettings, showGizmo: show})}
         onImportScene={handleImportScene}
+        onChangeBackgroundColor={handleBackgroundColorChange}
         currentScene={currentScene}
       />
     </div>

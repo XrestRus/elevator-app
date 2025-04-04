@@ -14,6 +14,7 @@ const DebugPanel: React.FC<{
   onToggleAxes: (show: boolean) => void;
   onToggleGizmo: (show: boolean) => void;
   onImportScene?: (scene: THREE.Scene) => void;
+  onChangeBackgroundColor?: (color: string) => void;
   currentScene?: THREE.Scene | null;
 }> = ({ 
   onToggleFps, 
@@ -21,6 +22,7 @@ const DebugPanel: React.FC<{
   onToggleAxes,
   onToggleGizmo,
   onImportScene,
+  onChangeBackgroundColor,
   currentScene
 }) => {
   const dispatch = useDispatch();
@@ -35,6 +37,9 @@ const DebugPanel: React.FC<{
     gizmo: true,
     highQuality: true // Высокое качество по умолчанию
   });
+  
+  // Цвет фона
+  const [backgroundColor, setBackgroundColor] = useState('#000000');
   
   // Ref для скрытого input file
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +79,15 @@ const DebugPanel: React.FC<{
         }
         break;
       }
+    }
+  };
+  
+  // Обработчик изменения цвета фона
+  const handleBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const color = e.target.value;
+    setBackgroundColor(color);
+    if (onChangeBackgroundColor) {
+      onChangeBackgroundColor(color);
     }
   };
   
@@ -215,6 +229,26 @@ const DebugPanel: React.FC<{
                 />
                 3D-указатель
               </label>
+            </div>
+            
+            <div style={{ marginBottom: '5px' }}>
+              <div style={{ marginBottom: '3px' }}>Цвет фона сцены:</div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="color"
+                  value={backgroundColor}
+                  onChange={handleBackgroundColorChange}
+                  style={{ 
+                    width: '40px', 
+                    height: '20px', 
+                    border: 'none', 
+                    padding: 0,
+                    background: 'transparent',
+                    cursor: 'pointer'
+                  }}
+                />
+                <span style={{ marginLeft: '8px', fontSize: '10px' }}>{backgroundColor}</span>
+              </div>
             </div>
           </div>
           
