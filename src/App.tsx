@@ -120,7 +120,6 @@ function App() {
             
             {/* Добавляем светильники */}
             <CeilingLights 
-              count={lighting.count} 
               color={lighting.color} 
               intensity={lighting.intensity} 
             />

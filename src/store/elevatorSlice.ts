@@ -457,20 +457,6 @@ const elevatorSlice = createSlice({
         };
       }
       
-      // Валидация spacing - убедимся, что это число и находится в допустимом диапазоне
-      if (action.payload.spacing !== undefined) {
-        const spacing = Number(action.payload.spacing);
-        if (!isNaN(spacing)) {
-          // Ограничиваем значение диапазоном от 1 до 30 см
-          action.payload.spacing = Math.max(1, Math.min(30, spacing));
-          console.log('Validated spacing value:', action.payload.spacing);
-        } else {
-          // Если не число, убираем из payload
-          console.error('Invalid spacing value:', action.payload.spacing);
-          delete action.payload.spacing;
-        }
-      }
-      
       // Обновляем state
       state.decorationStripes = { ...state.decorationStripes, ...action.payload };
     },

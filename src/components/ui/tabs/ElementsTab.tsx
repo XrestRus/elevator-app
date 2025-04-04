@@ -167,7 +167,7 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
           <RangeSlider
             label="Расстояние между полосами (см):"
             min={1}
-            max={30}
+            max={120}
             step={0.5}
             value={elevator.decorationStripes?.spacing ?? 3}
             onChange={(value) => {
@@ -180,7 +180,7 @@ const DecorationStripes: React.FC<DecorationStripesProps> = ({ elevator }) => {
             }}
             centerLabel={(value) => `${value.toFixed(1)} см`}
             leftLabel="1 см"
-            rightLabel="30 см"
+            rightLabel="120 см"
           />
           
           <CheckboxInput
