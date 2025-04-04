@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import { Plane, Instance, Instances } from "@react-three/drei";
 import * as THREE from "three";
-import PerformanceOptimizer from "../../utils/PerformanceOptimizer";
+import PerformanceOptimizer from "../../utils/optimization/PerformanceOptimizer";
 import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
 

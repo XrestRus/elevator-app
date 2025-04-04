@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
-import { Cylinder, Html, RoundedBox } from "@react-three/drei";
+import { Cylinder, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
-import { CSSProperties } from 'react';
 import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
 
@@ -13,6 +12,43 @@ interface ElevatorPanelProps {
   lightsOn: boolean;
   wallColor: string;
 }
+
+/**
+ * Создает текстуру с числом или символом для кнопки
+ */
+const createNumberTexture = (text: string): THREE.Texture => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  
+  if (context) {
+    // Настройка текста
+    context.fillStyle = 'black';
+    context.font = 'bold 65px Arial';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    
+    // Сохраняем текущее состояние контекста
+    context.save();
+    
+    // Перемещаем к центру холста
+    context.translate(canvas.width / 2, canvas.height / 2);
+    
+    // Поворачиваем на -90 градусов (против часовой)
+    context.rotate(-Math.PI / 2);
+    
+    // Рисуем текст
+    context.fillText(text, 0, 0);
+    
+    // Восстанавливаем состояние контекста
+    context.restore();
+  }
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+};
 
 const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor }) => {
   // Создаем цвет панели чуть светлее цвета стен для контраста
@@ -67,19 +103,6 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     [panelColor, lightsOn]
   );
 
-  // Материал для кнопок (наследует цвет стен но слегка светлее)
-  const buttonMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: panelColor,
-        metalness: 0.8,
-        roughness: 0.2,
-        emissive: panelColor,
-        emissiveIntensity: lightsOn ? 0.5 : 0.0,
-      }),
-    [panelColor, lightsOn]
-  );
-
   // Материал для обводки кнопок (еще светлее основного цвета кнопок)
   const buttonRimMaterial = useMemo(
     () => {
@@ -101,28 +124,29 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     
     // Первый столбец (12, 11, 10, 9, ..., 1)
     for (let i = 0; i < 12; i++) {
-      positions.push([-0.05, 0.25 - i * 0.04]);
+      positions.push([-0.06, 0.25 - i * 0.06]);
     }
     
     // Второй столбец (24, 23, 22, ..., 13)
     for (let i = 0; i < 12; i++) {
-      positions.push([0.05, 0.25 - i * 0.04]);
+      positions.push([0.06, 0.25 - i * 0.06]);
     }
     
     return positions;
   }, []);
 
-  // Стили для текста кнопок
-  const textStyle: CSSProperties = {
-    color: lightsOn ? '#ffffff' : '#aaaaaa',
-    fontSize: '8px',
-    fontFamily: 'Arial',
-    userSelect: 'none' as const,
-    textAlign: 'center' as const,
-    pointerEvents: 'none' as const,
-    transform: 'translate(-50%, -50%)',
-    fontWeight: '600',
-  };
+  // Создаем текстуры с числами для этажей
+  const floorTextures = useMemo(() => {
+    const textures: THREE.Texture[] = [];
+    for (let i = 1; i <= 24; i++) {
+      textures.push(createNumberTexture(i.toString()));
+    }
+    return textures;
+  }, []);
+
+  // Создаем текстуры для кнопок открытия/закрытия дверей
+  const openDoorsTexture = useMemo(() => createNumberTexture('◄►'), []);
+  const closeDoorsTexture = useMemo(() => createNumberTexture('►◄'), []);
 
   // Получаем цветовую информацию для тултипа
   const colorInfoString = useMemo(() => {
@@ -132,12 +156,12 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
   const panelContent = (
     <group position={new THREE.Vector3(...position)} rotation={[0, 3.2, 0]}>
       {/* Внешняя рамка с углублением */}
-      <RoundedBox args={[0.28, 0.78, 0.015]} radius={0.02} smoothness={4} castShadow>
+      <RoundedBox args={[0.32, 0.95, 0.015]} radius={0.02} smoothness={4} castShadow>
         <primitive object={panelBorderMaterial} attach="material" />
       </RoundedBox>
 
       {/* Основа панели - утопленная внутрь с мягкими скругленными краями */}
-      <RoundedBox position={[0, 0, 0.005]} args={[0.26, 0.76, 0.01]} radius={0.015} smoothness={4} castShadow>
+      <RoundedBox position={[0, 0, 0.005]} args={[0.30, 0.93, 0.01]} radius={0.015} smoothness={4} castShadow>
         <primitive object={panelMaterial} attach="material" />
       </RoundedBox>
 
@@ -158,6 +182,19 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
       {buttonPositions.map((pos, index) => {
         // Вычисляем номер этажа (начиная с верхнего)
         const floorNumber = 24 - index;
+        
+        // Создаем материал кнопки с нанесенным числом
+        const buttonWithNumberMaterial = new THREE.MeshStandardMaterial({
+          color: 'black',
+          metalness: 0.8,
+          roughness: 0.2,
+          emissive: 'black',
+          emissiveIntensity: lightsOn ? 0.5 : 0.0,
+          map: floorTextures[floorNumber - 1],
+          transparent: true,
+          alphaTest: 0.1
+        });
+        
         return (
           <group key={`button-group-${index}`}>
             {/* Углубление для кнопки */}
@@ -177,7 +214,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
               args={[0.018, 0.018, 0.005, 16]}
               castShadow
             >
-              <primitive object={buttonMaterial} attach="material" />
+              <primitive object={buttonWithNumberMaterial} attach="material" />
             </Cylinder>
             
             {/* Обводка кнопки */}
@@ -189,98 +226,100 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
             >
               <primitive object={buttonRimMaterial} attach="material" />
             </Cylinder>
-
-            {/* Номер этажа */}
-            <Html
-              position={[pos[0], pos[1], 0.016]}
-              center
-              style={textStyle}
-            >
-              {floorNumber}
-            </Html>
           </group>
         );
       })}
 
       {/* Кнопки открытия/закрытия дверей (внизу панели) */}
-      <group position={[0, -0.25, 0]}>
-        {/* Углубление для кнопки открытия дверей */}
-        <Cylinder
-          position={[-0.05, 0, 0.01]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.022, 0.022, 0.003, 16]}
-          castShadow
-        >
-          <primitive object={panelBorderMaterial} attach="material" />
-        </Cylinder>
-        
-        {/* Кнопка открытия дверей */}
-        <Cylinder
-          position={[-0.05, 0, 0.013]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.018, 0.018, 0.005, 16]}
-          castShadow
-        >
-          <primitive object={buttonMaterial} attach="material" />
-        </Cylinder>
-        
-        {/* Обводка кнопки открытия дверей */}
-        <Cylinder
-          position={[-0.05, 0, 0.012]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.021, 0.021, 0.001, 16]}
-          castShadow
-        >
-          <primitive object={buttonRimMaterial} attach="material" />
-        </Cylinder>
+      <group position={[0, -0.35, 0]}>
+        {/* Создаем материалы для кнопок дверей с соответствующими символами */}
+        {(() => {
+          const openButtonMaterial = new THREE.MeshStandardMaterial({
+            color: panelColor,
+            metalness: 0.8,
+            roughness: 0.2,
+            emissive: panelColor,
+            emissiveIntensity: lightsOn ? 0.5 : 0.0,
+            map: openDoorsTexture,
+            transparent: true,
+            alphaTest: 0.1
+          });
+          
+          const closeButtonMaterial = new THREE.MeshStandardMaterial({
+            color: panelColor,
+            metalness: 0.8,
+            roughness: 0.2,
+            emissive: panelColor,
+            emissiveIntensity: lightsOn ? 0.5 : 0.0,
+            map: closeDoorsTexture,
+            transparent: true,
+            alphaTest: 0.1
+          });
+          
+          return (
+            <>
+              {/* Углубление для кнопки открытия дверей */}
+              <Cylinder
+                position={[-0.05, 0, 0.01]}
+                rotation={[Math.PI / 2, 0, 0]}
+                args={[0.022, 0.022, 0.003, 16]}
+                castShadow
+              >
+                <primitive object={panelBorderMaterial} attach="material" />
+              </Cylinder>
+              
+              {/* Кнопка открытия дверей */}
+              <Cylinder
+                position={[-0.05, 0, 0.013]}
+                rotation={[Math.PI / 2, 0, 0]}
+                args={[0.018, 0.018, 0.005, 16]}
+                castShadow
+              >
+                <primitive object={openButtonMaterial} attach="material" />
+              </Cylinder>
+              
+              {/* Обводка кнопки открытия дверей */}
+              <Cylinder
+                position={[-0.05, 0, 0.012]}
+                rotation={[Math.PI / 2, 0, 0]}
+                args={[0.021, 0.021, 0.001, 16]}
+                castShadow
+              >
+                <primitive object={buttonRimMaterial} attach="material" />
+              </Cylinder>
 
-        {/* Символ открытия дверей */}
-        <Html
-          position={[-0.05, 0, 0.016]}
-          center
-          style={textStyle}
-        >
-          ◄►
-        </Html>
-
-        {/* Углубление для кнопки закрытия дверей */}
-        <Cylinder
-          position={[0.05, 0, 0.01]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.022, 0.022, 0.003, 16]}
-          castShadow
-        >
-          <primitive object={panelBorderMaterial} attach="material" />
-        </Cylinder>
-        
-        {/* Кнопка закрытия дверей */}
-        <Cylinder
-          position={[0.05, 0, 0.013]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.018, 0.018, 0.005, 16]}
-          castShadow
-        >
-          <primitive object={buttonMaterial} attach="material" />
-        </Cylinder>
-        
-        {/* Обводка кнопки закрытия дверей */}
-        <Cylinder
-          position={[0.05, 0, 0.012]}
-          rotation={[Math.PI / 2, 0, 0]}
-          args={[0.021, 0.021, 0.001, 16]}
-          castShadow
-        >
-          <primitive object={buttonRimMaterial} attach="material" />
-        </Cylinder>
-
-        {/* Символ закрытия дверей */}
-        <Html
-          position={[0.05, 0, 0.016]}
-          center
-          style={textStyle}
-        >
-          ►◄
-        </Html>
+              {/* Углубление для кнопки закрытия дверей */}
+              <Cylinder
+                position={[0.05, 0, 0.01]}
+                rotation={[Math.PI / 2, 0, 0]}
+                args={[0.022, 0.022, 0.003, 16]}
+                castShadow
+              >
+                <primitive object={panelBorderMaterial} attach="material" />
+              </Cylinder>
+              
+              {/* Кнопка закрытия дверей */}
+              <Cylinder
+                position={[0.05, 0, 0.013]}
+                rotation={[Math.PI / 2, 0, 0]}
+                args={[0.018, 0.018, 0.005, 16]}
+                castShadow
+              >
+                <primitive object={closeButtonMaterial} attach="material" />
+              </Cylinder>
+              
+              {/* Обводка кнопки закрытия дверей */}
+              <Cylinder
+                position={[0.05, 0, 0.012]}
+                rotation={[Math.PI / 2, 0, 0]}
+                args={[0.021, 0.021, 0.001, 16]}
+                castShadow
+              >
+                <primitive object={buttonRimMaterial} attach="material" />
+              </Cylinder>
+            </>
+          );
+        })()}
       </group>
     </group>
   );
@@ -293,8 +332,8 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
       description="Панель с кнопками для управления лифтом"
       material="Металл, пластик"
       dimensions={{
-        width: 0.28,
-        height: 0.78,
+        width: 0.32,
+        height: 0.95,
         depth: 0.015
       }}
       additionalInfo={{

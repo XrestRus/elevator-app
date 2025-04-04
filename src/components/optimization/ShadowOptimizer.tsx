@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber';
 import { useSelector } from 'react-redux';
 import * as THREE from 'three';
 import type { RootState } from '../../store/store';
-import PerformanceOptimizer from '../../utils/PerformanceOptimizer';
+import PerformanceOptimizer from '../../utils/optimization/PerformanceOptimizer';
 
 /**
  * Компонент для оптимизации теней и освещения

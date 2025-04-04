@@ -3,13 +3,9 @@ import {
   ElevatorState,
   setElevatorDimensions,
   toggleDoors,
-  setCamera
+  setCamera,
 } from "../../../store/elevatorSlice";
-import {
-  RangeSlider,
-  PresetButton,
-  CheckboxInput
-} from "../common/UIControls";
+import { RangeSlider, PresetButton, CheckboxInput } from "../common/UIControls";
 
 /**
  * Интерфейс пропсов для компонента FrameTab
@@ -26,13 +22,13 @@ const FrameTab: React.FC<FrameTabProps> = ({ elevator }) => {
   return (
     <div>
       <h3>Настройка каркаса</h3>
-      
+
       {/* Основные размеры */}
       <DimensionsSection elevator={elevator} />
-      
+
       {/* Управление камерой */}
       <CameraSection elevator={elevator} />
-      
+
       {/* Управление дверями */}
       <DoorsSection elevator={elevator} />
     </div>
@@ -48,11 +44,11 @@ interface DimensionsSectionProps {
 
 const DimensionsSection: React.FC<DimensionsSectionProps> = ({ elevator }) => {
   const dispatch = useDispatch();
-  
+
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div style={{ marginBottom: "16px" }}>
       <h4>Основные размеры</h4>
-      
+
       <RangeSlider
         label="Высота (м):"
         min={2.0}
@@ -64,7 +60,7 @@ const DimensionsSection: React.FC<DimensionsSectionProps> = ({ elevator }) => {
         leftLabel="2.0 м"
         rightLabel="3.0 м"
       />
-      
+
       <RangeSlider
         label="Ширина (м):"
         min={1.5}
@@ -76,7 +72,7 @@ const DimensionsSection: React.FC<DimensionsSectionProps> = ({ elevator }) => {
         leftLabel="1.5 м"
         rightLabel="3.0 м"
       />
-      
+
       <RangeSlider
         label="Глубина (м):"
         min={1.5}
@@ -101,11 +97,11 @@ interface CameraSectionProps {
 
 const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
   const dispatch = useDispatch();
-  
+
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div style={{ marginBottom: "16px" }}>
       <h4>Камера и обзор</h4>
-      
+
       <RangeSlider
         label="Угол обзора (FOV):"
         min={50}
@@ -117,7 +113,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
         leftLabel="Узкий (50°)"
         rightLabel="Широкий (100°)"
       />
-      
+
       <RangeSlider
         label="Высота камеры:"
         min={0.1}
@@ -130,42 +126,71 @@ const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
         rightLabel="Высоко"
         disabled={elevator.camera.freeCamera}
       />
-      
+
       <CheckboxInput
         id="freeCameraMode"
         label="Режим свободного полета"
         checked={elevator.camera.freeCamera}
-        onChange={(checked) => dispatch(setCamera({ 
-          freeCamera: checked 
-        }))}
+        onChange={(checked) =>
+          dispatch(
+            setCamera({
+              freeCamera: checked,
+            })
+          )
+        }
       />
-      
+
       {/* Подсказка по управлению в режиме свободного полета */}
       {elevator.camera.freeCamera && (
-        <div style={{ 
-          marginTop: '8px', 
-          padding: '8px', 
-          backgroundColor: '#fffce0', 
-          borderRadius: '4px',
-          border: '1px solid #eee8a9'
-        }}>
-          <p style={{ fontWeight: 'bold', margin: '0 0 4px' }}>Управление:</p>
-          <div style={{ fontSize: '13px' }}>
-            <b>W</b> - вперед, <b>S</b> - назад<br />
-            <b>A</b> - влево, <b>D</b> - вправо<br />
-            <b>Q</b> - вверх, <b>E</b> - вниз<br />
-            <b>Shift</b> - ускорение движения<br />
+        <div
+          style={{
+            marginTop: "8px",
+            padding: "8px",
+            backgroundColor: "#fffce0",
+            borderRadius: "4px",
+            border: "1px solid #eee8a9",
+          }}
+        >
+          <p style={{ fontWeight: "bold", margin: "0 0 4px" }}>Управление:</p>
+          <div style={{ fontSize: "13px" }}>
+            <b>W</b> - вперед,
+            <b>S</b> - назад
+            <br />
+            <b>A</b> - влево,
+            <b>D</b> - вправо
+            <br />
+            <b>Q</b> - наклон влево,
+            <b>E</b> - наклон вправо
+            <br />
+            <b>R</b> - вверх,
+            <b>F</b> - вниз
+            <br />
+            <b>Shift</b> - ускорение движения
+            <br />
             <b>Мышь</b> - поворот камеры
+            <br />
+            <b>Стрелки</b> - вращение камеры
           </div>
         </div>
       )}
-      
+
       {/* Отображение координат камеры */}
-      <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-        <p style={{ fontWeight: 'bold', margin: '0 0 4px' }}>Текущее положение камеры:</p>
-        <div style={{ fontFamily: 'monospace', fontSize: '13px' }}>
-          X: {elevator.camera.position?.x ?? 0}<br />
-          Y: {elevator.camera.position?.y ?? 0}<br />
+      <div
+        style={{
+          marginTop: "8px",
+          padding: "8px",
+          backgroundColor: "#f5f5f5",
+          borderRadius: "4px",
+        }}
+      >
+        <p style={{ fontWeight: "bold", margin: "0 0 4px" }}>
+          Текущее положение камеры:
+        </p>
+        <div style={{ fontFamily: "monospace", fontSize: "13px" }}>
+          X: {elevator.camera.position?.x ?? 0}
+          <br />
+          Y: {elevator.camera.position?.y ?? 0}
+          <br />
           Z: {elevator.camera.position?.z ?? 0}
         </div>
       </div>
@@ -182,18 +207,18 @@ interface DoorsSectionProps {
 
 const DoorsSection: React.FC<DoorsSectionProps> = ({ elevator }) => {
   const dispatch = useDispatch();
-  
+
   return (
-    <div style={{ marginBottom: '16px' }}>
+    <div style={{ marginBottom: "16px" }}>
       <h4>Управление дверями</h4>
-      
-      <PresetButton 
-        label={elevator.doorsOpen ? "Закрыть двери" : "Открыть двери"} 
-        onClick={() => dispatch(toggleDoors())} 
+
+      <PresetButton
+        label={elevator.doorsOpen ? "Закрыть двери" : "Открыть двери"}
+        onClick={() => dispatch(toggleDoors())}
         fullWidth={true}
       />
     </div>
   );
 };
 
-export default FrameTab; 
+export default FrameTab;

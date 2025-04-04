@@ -130,21 +130,6 @@ const MaterialPresets: React.FC = () => {
           options={presetOptions}
         />
       </div>
-      
-      <div style={{ 
-        padding: '8px 12px',
-        marginBottom: '12px',
-        borderRadius: '4px',
-        backgroundColor: '#f0f8ff',
-        border: '1px solid #add8e6',
-        fontSize: '0.9rem'
-      }}>
-        <p style={{ margin: '0' }}>
-          <strong>Совет:</strong> Пресеты с текстурами автоматически применяют подходящие 
-          текстуры и цвета. После применения пресета вы можете дополнительно настроить 
-          отдельные параметры.
-        </p>
-      </div>
     </div>
   );
 };
@@ -400,26 +385,6 @@ const TextureControls: React.FC<TextureControlsProps> = ({ elevator }) => {
   return (
     <div style={{ marginBottom: '16px' }}>
       <h4>Текстуры</h4>
-      
-      <div style={{ 
-        padding: '8px 12px',
-        marginBottom: '12px',
-        borderRadius: '4px',
-        backgroundColor: '#f0f8ff',
-        border: '1px solid #add8e6',
-        fontSize: '0.9rem'
-      }}>
-        <p style={{ margin: '0 0 8px 0' }}>
-          <strong>Совет:</strong> Выбранный цвет материала сохраняется при смене текстуры и 
-          автоматически применяется к новой текстуре, окрашивая её. Сначала выберите текстуру, 
-          затем настройте её цвет в разделе "Цвета".
-        </p>
-        <p style={{ margin: '0' }}>
-          <strong>Важно:</strong> Вы можете изменять металличность и шероховатость текстурированных 
-          поверхностей с помощью настроек ниже. Эти настройки будут переопределять стандартные параметры текстуры.
-        </p>
-      </div>
-      
       <SelectInput
         label="Текстура стен:"
         value={elevator.materials.texture.walls || ""}
