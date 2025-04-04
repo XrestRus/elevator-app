@@ -14,6 +14,7 @@ interface ElevatorHandrailsProps {
   };
   handrailMaterial: THREE.Material;
   isVisible: boolean;
+  showLowerHandrails?: boolean; // Добавлен опциональный параметр для нижних поручней
 }
 
 /**
@@ -23,6 +24,7 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
   dimensions,
   handrailMaterial,
   isVisible,
+  showLowerHandrails = true, // По умолчанию нижние поручни включены
 }) => {
   if (!isVisible) {
     return null;
@@ -33,7 +35,7 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
     return colorUtils.getMaterialColor(handrailMaterial);
   };
   
-  // Создаем обертки для левого и правого поручней
+  // Создаем обертки для левого и правого стандартных поручней
   const leftHandrail = (
     <group position={[-dimensions.width / 2 + 0.06, -0.1, 0]}>
       {/* Основная горизонтальная часть поручня (рукоять) */}
@@ -133,10 +135,105 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       </RoundedBox>
     </group>
   );
+  
+  // Создаем обертки для нижних поручней (ближе к полу)
+  const leftLowerHandrail = (
+    <group position={[-dimensions.width / 2 + 0.025, -1.05, 0]}>
+      {/* Узкая горизонтальная панель нижнего поручня без выступов */}
+      <RoundedBox
+        position={[0, 0, 0]}
+        args={[0.05, 0.12, dimensions.depth]} // Делаем на всю длину стены
+        radius={0.01}
+        smoothness={4}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </RoundedBox>
+      
+      {/* Тень на полу от нижнего поручня */}
+      <mesh 
+        position={[0, -0.061, 0]} 
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[0.1, dimensions.depth]} />
+        <meshBasicMaterial 
+          color="#000000" 
+          transparent={true} 
+          opacity={0.3} 
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  );
+  
+  const rightLowerHandrail = (
+    <group position={[dimensions.width / 2 - 0.025, -1.05, 0]}>
+      {/* Узкая горизонтальная панель нижнего поручня без выступов */}
+      <RoundedBox
+        position={[0, 0, 0]}
+        args={[0.05, 0.12, dimensions.depth]} // Делаем на всю длину стены
+        radius={0.01}
+        smoothness={4}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </RoundedBox>
+      
+      {/* Тень на полу от нижнего поручня */}
+      <mesh 
+        position={[0, -0.061, 0]} 
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[0.1, dimensions.depth]} />
+        <meshBasicMaterial 
+          color="#000000" 
+          transparent={true} 
+          opacity={0.3} 
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  );
+  
+  // Добавляем задний нижний поручень, соединяющий боковые
+  const backLowerHandrail = (
+    <group position={[0, -1.05, -dimensions.depth / 2 + 0.025]}>
+      {/* Узкая горизонтальная панель заднего поручня */}
+      <RoundedBox
+        position={[0, 0, 0]}
+        args={[dimensions.width, 0.12, 0.05]} // Размеры на всю ширину стены
+        radius={0.01}
+        smoothness={4}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </RoundedBox>
+      
+      {/* Тень на полу от нижнего поручня */}
+      <mesh 
+        position={[0, -0.061, 0.025]} 
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[dimensions.width, 0.1]} />
+        <meshBasicMaterial 
+          color="#000000" 
+          transparent={true} 
+          opacity={0.3} 
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  );
 
   return (
     <>
-      {/* Левый поручень с возможностью наведения */}
+      {/* Стандартные поручни с возможностью наведения */}
       <MakeHoverable
         name="Левый поручень"
         type="Элемент безопасности"
@@ -158,7 +255,6 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
         {leftHandrail}
       </MakeHoverable>
       
-      {/* Правый поручень с возможностью наведения */}
       <MakeHoverable
         name="Правый поручень"
         type="Элемент безопасности"
@@ -179,6 +275,74 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       >
         {rightHandrail}
       </MakeHoverable>
+      
+      {/* Нижние поручни (ближе к полу) */}
+      {showLowerHandrails && (
+        <>
+          <MakeHoverable
+            name="Левый нижний поручень"
+            type="Элемент безопасности и декора"
+            description="Узкая защитная панель у основания стены для предотвращения повреждений"
+            material="Нержавеющая сталь"
+            dimensions={{
+              width: 0.05,
+              height: 0.12,
+              depth: dimensions.depth
+            }}
+            additionalInfo={{
+              color: getHandrailColor(),
+              texture: "Металлическая поверхность со скругленными краями",
+              "Расположение": "Левая стена, нижний уровень",
+              "Форма": "Монолитная защитная панель"
+            }}
+            requiresDoubleClick={false}
+          >
+            {leftLowerHandrail}
+          </MakeHoverable>
+          
+          <MakeHoverable
+            name="Правый нижний поручень"
+            type="Элемент безопасности и декора"
+            description="Узкая защитная панель у основания стены для предотвращения повреждений"
+            material="Нержавеющая сталь"
+            dimensions={{
+              width: 0.05,
+              height: 0.12,
+              depth: dimensions.depth
+            }}
+            additionalInfo={{
+              color: getHandrailColor(),
+              texture: "Металлическая поверхность со скругленными краями",
+              "Расположение": "Правая стена, нижний уровень",
+              "Форма": "Монолитная защитная панель"
+            }}
+            requiresDoubleClick={false}
+          >
+            {rightLowerHandrail}
+          </MakeHoverable>
+          
+          <MakeHoverable
+            name="Задний нижний поручень"
+            type="Элемент безопасности и декора"
+            description="Узкая защитная панель у основания задней стены для завершения защитного контура"
+            material="Нержавеющая сталь"
+            dimensions={{
+              width: dimensions.width,
+              height: 0.12,
+              depth: 0.05
+            }}
+            additionalInfo={{
+              color: getHandrailColor(),
+              texture: "Металлическая поверхность со скругленными краями",
+              "Расположение": "Задняя стена, нижний уровень",
+              "Форма": "Монолитная защитная панель"
+            }}
+            requiresDoubleClick={false}
+          >
+            {backLowerHandrail}
+          </MakeHoverable>
+        </>
+      )}
     </>
   );
 };

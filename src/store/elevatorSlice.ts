@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import * as THREE from 'three';
 
 /**
  * Интерфейс для размеров лифта
@@ -42,6 +43,7 @@ export interface Materials {
   ceiling: string;
   walls: string;
   doors: string;
+  handrails: string;
   isMirror: {
     walls: boolean;
   };
@@ -185,6 +187,7 @@ const initialState: ElevatorState = {
     ceiling: '#F5F5F5',
     walls: '#E8E8E8',
     doors: '#A9A9A9',
+    handrails: '#808080',
     isMirror: {
       walls: false
     },
@@ -307,9 +310,17 @@ const elevatorSlice = createSlice({
     },
     
     // Изменение материала
-    setMaterial: (state, action: PayloadAction<{ part: 'floor' | 'ceiling' | 'walls' | 'doors', color: string }>) => {
+    setMaterial: (state, action: PayloadAction<{ part: 'floor' | 'ceiling' | 'walls' | 'doors' | 'handrails', color: string }>) => {
       const { part, color } = action.payload;
       state.materials[part] = color;
+      
+      // Если меняется цвет стен, автоматически обновляем цвет поручней
+      if (part === 'walls') {
+        // Создаем Color из hex строки, делаем его светлее и возвращаем обратно в hex
+        const wallColor = new THREE.Color(color);
+        wallColor.multiplyScalar(1.2); // Делаем светлее на 20%
+        state.materials.handrails = '#' + wallColor.getHexString();
+      }
     },
     
     // Обновление зеркальных поверхностей

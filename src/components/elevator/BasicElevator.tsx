@@ -784,12 +784,10 @@ const BasicElevator: React.FC = () => {
     [actualWallMaterial]
   );
 
-  // Материал для поручней (наследует цвет стен, но делает их светлее)
+  // Материал для поручней (автоматически использует цвет из настроек)
   const handrailMaterial = useMemo(
     () => {
-      // Используем цвет стен, но делаем его светлее
-      const color = new THREE.Color(materials.walls);
-      color.multiplyScalar(1.2); // Делаем светлее для лучшего контраста со стенами
+      const color = new THREE.Color(materials.handrails);
       
       return new THREE.MeshPhysicalMaterial({
         color: color,
@@ -800,7 +798,7 @@ const BasicElevator: React.FC = () => {
         clearcoatRoughness: 0.1, // Делаем покрытие гладким
       });
     },
-    [materials.walls]
+    [materials.handrails] // Зависимость только от цвета поручней
   );
 
   // Материал для рамки вокруг дверей (металлический)
@@ -956,6 +954,7 @@ const BasicElevator: React.FC = () => {
         dimensions={dimensions}
         handrailMaterial={handrailMaterial}
         isVisible={elevator.visibility.handrails}
+        showLowerHandrails={true}
       />
 
       {/* Декоративные полосы на стенах - с оптимизацией */}

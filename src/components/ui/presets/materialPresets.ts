@@ -29,6 +29,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#F5F5F5' }));
       dispatch(setMaterial({ part: 'floor', color: '#F5F5F5' }));
       dispatch(setMaterial({ part: 'doors', color: '#A9A9A9' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#808080' }));
       dispatch(setMetalness({ part: 'walls', value: 0.1 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
       dispatch(setMetalness({ part: 'doors', value: 0.3 }));
@@ -53,6 +54,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#D4AF37' }));
       dispatch(setMaterial({ part: 'floor', color: '#332211' }));
       dispatch(setMaterial({ part: 'doors', color: '#D4AF37' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#FFD700' }));
       dispatch(setMetalness({ part: 'walls', value: 0.9 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
       dispatch(setMetalness({ part: 'doors', value: 0.9 }));
@@ -77,6 +79,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#CD7F32' }));
       dispatch(setMaterial({ part: 'floor', color: '#3D2B1F' }));
       dispatch(setMaterial({ part: 'doors', color: '#CD7F32' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#B87333' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
       dispatch(setMetalness({ part: 'doors', value: 0.8 }));
@@ -101,6 +104,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#C0C0C0' }));
       dispatch(setMaterial({ part: 'floor', color: '#303030' }));
       dispatch(setMaterial({ part: 'doors', color: '#C0C0C0' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#D3D3D3' }));
       dispatch(setMetalness({ part: 'walls', value: 0.9 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
       dispatch(setMetalness({ part: 'doors', value: 0.9 }));
@@ -125,6 +129,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#B87333' }));
       dispatch(setMaterial({ part: 'floor', color: '#2D2D2D' }));
       dispatch(setMaterial({ part: 'doors', color: '#B87333' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#CC8844' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.8 }));
       dispatch(setMetalness({ part: 'doors', value: 0.8 }));
@@ -149,6 +154,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#FFFFFF' }));
       dispatch(setMaterial({ part: 'floor', color: '#333333' }));
       dispatch(setMaterial({ part: 'doors', color: '#E0E0E0' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#A9A9A9' }));
       dispatch(setMetalness({ part: 'walls', value: 0.1 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.0 }));
       dispatch(setMetalness({ part: 'doors', value: 0.3 }));
@@ -173,6 +179,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#1E2D48' }));
       dispatch(setMaterial({ part: 'floor', color: '#0A0A0A' }));
       dispatch(setMaterial({ part: 'doors', color: '#2C3C56' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#4682B4' }));
       dispatch(setMetalness({ part: 'walls', value: 0.6 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.6 }));
       dispatch(setMetalness({ part: 'doors', value: 0.7 }));
@@ -199,6 +206,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#EFE4D5' }));
       dispatch(setMaterial({ part: 'floor', color: '#5D3A1A' }));
       dispatch(setMaterial({ part: 'doors', color: '#8B6640' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#8B4513' }));
       dispatch(setMetalness({ part: 'walls', value: 0.1 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
       dispatch(setMetalness({ part: 'doors', value: 0.2 }));
@@ -224,6 +232,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#CDCDCD' }));
       dispatch(setMaterial({ part: 'floor', color: '#303030' }));
       dispatch(setMaterial({ part: 'doors', color: '#8F8F8F' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#787878' }));
       dispatch(setMetalness({ part: 'walls', value: 0.7 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.7 }));
       dispatch(setMetalness({ part: 'doors', value: 0.8 }));
@@ -249,6 +258,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#E5E5E5' }));
       dispatch(setMaterial({ part: 'floor', color: '#2C2C2C' }));
       dispatch(setMaterial({ part: 'doors', color: '#A0A0A0' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#B0B0B0' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.7 }));
       dispatch(setMetalness({ part: 'doors', value: 0.9 }));
@@ -274,6 +284,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#F5F5F5' }));
       dispatch(setMaterial({ part: 'floor', color: '#2D1B0E' }));
       dispatch(setMaterial({ part: 'doors', color: '#FFD700' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#FFA500' }));
       dispatch(setMetalness({ part: 'walls', value: 1.0 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.2 }));
       dispatch(setMetalness({ part: 'doors', value: 1.0 }));
@@ -299,6 +310,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setMaterial({ part: 'ceiling', color: '#121212' }));
       dispatch(setMaterial({ part: 'floor', color: '#181818' }));
       dispatch(setMaterial({ part: 'doors', color: '#404040' }));
+      dispatch(setMaterial({ part: 'handrails', color: '#333333' }));
       dispatch(setMetalness({ part: 'walls', value: 0.8 }));
       dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
       dispatch(setMetalness({ part: 'doors', value: 0.7 }));

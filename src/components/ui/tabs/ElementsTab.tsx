@@ -4,7 +4,8 @@ import {
   setVisibility,
   setDecorationStripes,
   setLighting,
-  setJoints
+  setJoints,
+  setMaterial
 } from "../../../store/elevatorSlice";
 import {
   RangeSlider,
@@ -67,6 +68,17 @@ const InteriorElements: React.FC<InteriorElementsProps> = ({ elevator }) => {
           visible: checked 
         }))}
       />
+      
+      {/* Настройка цвета поручней - отображается только если поручни включены */}
+      {elevator.visibility.handrails && (
+        <div style={{ marginLeft: '20px', marginTop: '8px', marginBottom: '12px' }}>
+          <ColorPicker
+            label="Цвет поручней:"
+            value={elevator.materials.handrails}
+            onChange={(value) => dispatch(setMaterial({ part: 'handrails', color: value }))}
+          />
+        </div>
+      )}
       
       <CheckboxInput
         id="showControlPanel"

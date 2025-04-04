@@ -94,12 +94,14 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
 
   // Материал для экрана
   const displayMaterial = useMemo(
-    () => 
-      new THREE.MeshStandardMaterial({
-        color: panelColor,
+    () => {
+      const rimColor = colorUtils.lightenColor(panelColor, 1.3); // Делаем обводку ещё светлее для лучшего контраста
+      return new THREE.MeshStandardMaterial({
+        color: rimColor,
         emissive: lightsOn ? panelColor : "#000000",
         emissiveIntensity: lightsOn ? 0.5 : 0.0,
-      }),
+      })
+    },
     [panelColor, lightsOn]
   );
 
@@ -173,7 +175,7 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         </RoundedBox>
         
         {/* Сам экран */}
-        <RoundedBox position={[0, 0, 0.009]} args={[0.2, 0.03, 0.001]} radius={0.005} smoothness={4}>
+        <RoundedBox position={[0, 0, 0.010]} args={[0.2, 0.03, 0.001]} radius={0.009} smoothness={4}>
           <primitive object={displayMaterial} attach="material" />
         </RoundedBox>
       </group>
