@@ -302,6 +302,14 @@ const DoorLogoControls: React.FC<DoorLogoControlsProps> = ({ elevator }) => {
             leftLabel="Влево"
             rightLabel="Вправо"
           />
+          
+          <ColorPicker
+            label="Цвет логотипа:"
+            value={elevator.doorLogo?.color ?? '#ffffff'}
+            onChange={(value) => dispatch(setDoorLogo({ 
+              color: value 
+            }))}
+          />
         </>
       )}
     </div>

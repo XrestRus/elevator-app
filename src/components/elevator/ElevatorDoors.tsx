@@ -21,6 +21,7 @@ interface ElevatorDoorsProps {
   logoScale?: number; // Масштаб логотипа
   logoOffsetY?: number; // Смещение логотипа по вертикали
   logoOffsetX?: number; // Смещение логотипа по горизонтали
+  logoColor?: string; // Цвет логотипа
 }
 
 /**
@@ -35,6 +36,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
   logoScale = 1,
   logoOffsetY = 0,
   logoOffsetX = 0,
+  logoColor = '#253D98',
 }) => {
   // Оптимизированные настройки анимации для более плавного открытия/закрытия
   const animConfig = {
@@ -91,14 +93,16 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
       transparent: true,
       side: THREE.FrontSide,
       map: logoMap,
-      emissive: new THREE.Color(0xffffff),
+      // Применяем указанный цвет для логотипа
+      color: new THREE.Color(logoColor),
+      emissive: new THREE.Color(logoColor),
       emissiveMap: logoMap,
       emissiveIntensity: 0.2,
       alphaTest: 0.1,
     });
     
     return material;
-  }, [logoMap, showLogo]);
+  }, [logoMap, showLogo, logoColor]);
   
   // Создаем геометрию для логотипа с явной настройкой нормалей
   const logoGeometry = useMemo(() => {

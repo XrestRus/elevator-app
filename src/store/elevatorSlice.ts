@@ -168,6 +168,7 @@ export interface DoorLogoOptions {
   scale?: number;
   offsetY?: number;
   offsetX?: number; // Смещение логотипа по горизонтали
+  color?: string; // Цвет логотипа
 }
 
 /**
@@ -308,7 +309,8 @@ const initialState: ElevatorState = {
     enabled: true,
     scale: 1.2,
     offsetY: 0.25,
-    offsetX: 0.16
+    offsetX: 0.16,
+    color: '#253D98'
   }
 };
 

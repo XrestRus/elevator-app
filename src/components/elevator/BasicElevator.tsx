@@ -960,6 +960,7 @@ const BasicElevator: React.FC = () => {
         logoScale={elevator.doorLogo?.scale}
         logoOffsetY={elevator.doorLogo?.offsetY}
         logoOffsetX={elevator.doorLogo?.offsetX}
+        logoColor={elevator.doorLogo?.color}
       />
 
       {/* Поручни - с оптимизацией */}
