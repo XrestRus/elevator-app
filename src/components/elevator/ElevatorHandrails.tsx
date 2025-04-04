@@ -1,5 +1,5 @@
 import React from "react";
-import { Box } from "@react-three/drei";
+import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import MakeHoverable from "../ui/makeHoverable";
 import colorUtils from "../../utils/colorUtils";
@@ -17,7 +17,7 @@ interface ElevatorHandrailsProps {
 }
 
 /**
- * Компонент для отображения поручней в лифте
+ * Компонент для отображения поручней в лифте с Т-образной формой
  */
 const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
   dimensions,
@@ -35,58 +35,102 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
   
   // Создаем обертки для левого и правого поручней
   const leftHandrail = (
-    <group position={[-dimensions.width / 2 + 0.03, -0.1, 0]}>
-      {/* Основная часть поручня */}
-      <Box
+    <group position={[-dimensions.width / 2 + 0.06, -0.1, 0]}>
+      {/* Основная горизонтальная часть поручня (рукоять) */}
+      <RoundedBox
         position={[0, 0, 0]}
-        args={[0.03, 0.08, dimensions.depth * 0.6]}
+        args={[0.04, 0.03, dimensions.depth * 0.6]}
+        radius={0.01}
+        smoothness={4}
         castShadow
+        receiveShadow
       >
         <primitive object={handrailMaterial} attach="material" />
-      </Box>
-      {/* Крепления к стене (верхнее и нижнее) */}
-      <Box
-        position={[-0.015, 0, dimensions.depth * 0.25]}
-        args={[0.03, 0.03, 0.03]}
+      </RoundedBox>
+      
+      {/* Вертикальные крепления к стене (ножки Т-образной формы) - выдвинутые от стены */}
+      <RoundedBox
+        position={[-0.06, 0, dimensions.depth * 0.25]}
+        args={[0.08, 0.025, 0.025]}
+        radius={0.005}
+        smoothness={4}
         castShadow
+        receiveShadow
       >
         <primitive object={handrailMaterial} attach="material" />
-      </Box>
-      <Box
-        position={[-0.015, 0, -dimensions.depth * 0.25]}
-        args={[0.03, 0.03, 0.03]}
+      </RoundedBox>
+      
+      <RoundedBox
+        position={[-0.06, 0, 0]}
+        args={[0.08, 0.025, 0.025]}
+        radius={0.005}
+        smoothness={4}
         castShadow
+        receiveShadow
       >
         <primitive object={handrailMaterial} attach="material" />
-      </Box>
+      </RoundedBox>
+      
+      <RoundedBox
+        position={[-0.06, 0, -dimensions.depth * 0.25]}
+        args={[0.08, 0.025, 0.025]}
+        radius={0.005}
+        smoothness={4}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </RoundedBox>
     </group>
   );
   
   const rightHandrail = (
-    <group position={[dimensions.width / 2 - 0.03, -0.1, 0]}>
-      {/* Основная часть поручня */}
-      <Box
+    <group position={[dimensions.width / 2 - 0.06, -0.1, 0]}>
+      {/* Основная горизонтальная часть поручня (рукоять) */}
+      <RoundedBox
         position={[0, 0, 0]}
-        args={[0.03, 0.08, dimensions.depth * 0.6]}
+        args={[0.04, 0.03, dimensions.depth * 0.6]}
+        radius={0.01}
+        smoothness={4}
         castShadow
+        receiveShadow
       >
         <primitive object={handrailMaterial} attach="material" />
-      </Box>
-      {/* Крепления к стене (верхнее и нижнее) */}
-      <Box
-        position={[0.015, 0, dimensions.depth * 0.25]}
-        args={[0.03, 0.03, 0.03]}
+      </RoundedBox>
+      
+      {/* Вертикальные крепления к стене (ножки Т-образной формы) - выдвинутые от стены */}
+      <RoundedBox
+        position={[0.06, 0, dimensions.depth * 0.25]}
+        args={[0.08, 0.025, 0.025]}
+        radius={0.005}
+        smoothness={4}
         castShadow
+        receiveShadow
       >
         <primitive object={handrailMaterial} attach="material" />
-      </Box>
-      <Box
-        position={[0.015, 0, -dimensions.depth * 0.25]}
-        args={[0.03, 0.03, 0.03]}
+      </RoundedBox>
+      
+      <RoundedBox
+        position={[0.06, 0, 0]}
+        args={[0.08, 0.025, 0.025]}
+        radius={0.005}
+        smoothness={4}
         castShadow
+        receiveShadow
       >
         <primitive object={handrailMaterial} attach="material" />
-      </Box>
+      </RoundedBox>
+      
+      <RoundedBox
+        position={[0.06, 0, -dimensions.depth * 0.25]}
+        args={[0.08, 0.025, 0.025]}
+        radius={0.005}
+        smoothness={4}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={handrailMaterial} attach="material" />
+      </RoundedBox>
     </group>
   );
 
@@ -96,17 +140,18 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       <MakeHoverable
         name="Левый поручень"
         type="Элемент безопасности"
-        description="Поручень для обеспечения устойчивости пассажиров"
+        description="Т-образный поручень для обеспечения устойчивости пассажиров"
         material="Нержавеющая сталь"
         dimensions={{
-          width: 0.03,
-          height: 0.08,
+          width: 0.04,
+          height: 0.03,
           depth: dimensions.depth * 0.6
         }}
         additionalInfo={{
           color: getHandrailColor(),
-          texture: "Глянцевая поверхность",
-          "Расположение": "Левая стена"
+          texture: "Металлическая поверхность со скругленными краями",
+          "Расположение": "Левая стена",
+          "Форма": "Т-образная конструкция с выступающими креплениями"
         }}
         requiresDoubleClick={false}
       >
@@ -117,17 +162,18 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
       <MakeHoverable
         name="Правый поручень"
         type="Элемент безопасности"
-        description="Поручень для обеспечения устойчивости пассажиров"
+        description="Т-образный поручень для обеспечения устойчивости пассажиров"
         material="Нержавеющая сталь"
         dimensions={{
-          width: 0.03,
-          height: 0.08,
+          width: 0.04,
+          height: 0.03,
           depth: dimensions.depth * 0.6
         }}
         additionalInfo={{
           color: getHandrailColor(),
-          texture: "Глянцевая поверхность",
-          "Расположение": "Правая стена"
+          texture: "Металлическая поверхность со скругленными краями",
+          "Расположение": "Правая стена",
+          "Форма": "Т-образная конструкция с выступающими креплениями"
         }}
         requiresDoubleClick={false}
       >

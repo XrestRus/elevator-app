@@ -51,9 +51,9 @@ const createNumberTexture = (text: string): THREE.Texture => {
 };
 
 const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallColor }) => {
-  // Создаем цвет панели чуть светлее цвета стен для контраста
+  // Создаем цвет панели значительно светлее цвета стен для лучшего контраста
   const panelColor = useMemo(() => {
-    return colorUtils.lightenColor(wallColor, 1.05);
+    return colorUtils.lightenColor(wallColor, 1.25);
   }, [wallColor]);
 
   // Создаем цвет рамки панели темнее цвета панели
@@ -61,9 +61,9 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     return colorUtils.darkenColor(panelColor, 0.8);
   }, [panelColor]);
 
-  // Создаем цвет кнопок чуть светлее цвета стен
+  // Создаем цвет кнопок еще светлее цвета стен
   const buttonColor = useMemo(() => {
-    return colorUtils.lightenColor(wallColor, 1.1);
+    return colorUtils.lightenColor(wallColor, 1.35);
   }, [wallColor]);
 
   // Материал для основной панели (светлый)
@@ -71,10 +71,10 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
     () =>
       new THREE.MeshStandardMaterial({
         color: panelColor,
-        metalness: 0.3,
-        roughness: 0.4,
+        metalness: 0.5,
+        roughness: 0.2,
         emissive: lightsOn ? panelColor : "#000000",
-        emissiveIntensity: lightsOn ? 0.05 : 0,
+        emissiveIntensity: lightsOn ? 0.08 : 0,
       }),
     [panelColor, lightsOn]
   );
@@ -235,9 +235,9 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
         {/* Создаем материалы для кнопок дверей с соответствующими символами */}
         {(() => {
           const openButtonMaterial = new THREE.MeshStandardMaterial({
-            color: panelColor,
-            metalness: 0.8,
-            roughness: 0.2,
+            color: buttonColor,
+            metalness: 0.9,
+            roughness: 0.1,
             emissive: 'black',
             emissiveIntensity: lightsOn ? 0.5 : 0.0,
             map: openDoorsTexture,
@@ -246,9 +246,9 @@ const ElevatorPanel: React.FC<ElevatorPanelProps> = ({ position, lightsOn, wallC
           });
           
           const closeButtonMaterial = new THREE.MeshStandardMaterial({
-            color: panelColor,
-            metalness: 0.8,
-            roughness: 0.2,
+            color: buttonColor,
+            metalness: 0.9,
+            roughness: 0.1,
             emissive: 'black',
             emissiveIntensity: lightsOn ? 0.5 : 0.0,
             map: closeDoorsTexture,

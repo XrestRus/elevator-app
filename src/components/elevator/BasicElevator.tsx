@@ -784,17 +784,20 @@ const BasicElevator: React.FC = () => {
     [actualWallMaterial]
   );
 
-  // Материал для поручней (наследует цвет стен)
+  // Материал для поручней (наследует цвет стен, но делает их светлее)
   const handrailMaterial = useMemo(
     () => {
+      // Используем цвет стен, но делаем его светлее
       const color = new THREE.Color(materials.walls);
-      // Делаем цвет немного темнее
-      color.multiplyScalar(0.9);
-      return new THREE.MeshStandardMaterial({
+      color.multiplyScalar(1.2); // Делаем светлее для лучшего контраста со стенами
+      
+      return new THREE.MeshPhysicalMaterial({
         color: color,
-        metalness: 0.6,
-        roughness: 0.3,
-        envMapIntensity: 1.0,
+        metalness: 0.9,
+        roughness: 0.1,
+        envMapIntensity: 1.5,
+        clearcoat: 0.3, // Добавляем легкое покрытие лаком для глянца
+        clearcoatRoughness: 0.1, // Делаем покрытие гладким
       });
     },
     [materials.walls]
@@ -804,8 +807,8 @@ const BasicElevator: React.FC = () => {
   const doorFrameMaterial = useMemo(
     () => {
       const color = new THREE.Color(materials.walls);
-      // Делаем цвет немного темнее для контраста
-      color.multiplyScalar(0.7);
+      // Делаем цвет немного светлее для контраста
+      color.multiplyScalar(1.1);
       return new THREE.MeshStandardMaterial({
         color: color,
         metalness: 0.8,
