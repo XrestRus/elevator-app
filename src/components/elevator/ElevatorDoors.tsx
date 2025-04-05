@@ -73,7 +73,7 @@ const ElevatorDoors: React.FC<ElevatorDoorsProps> = ({
 
   // Загружаем текстуру логотипа, если он включен
   const logoTexture = useMemo(() => {
-    return showLogo ? "/textures/logo1i_upscaled.png" : "/textures/dummy.png";
+    return showLogo ? "./textures/logo1i_upscaled.png" : "./textures/dummy.png";
   }, [showLogo]);
 
   // Используем хук для загрузки текстуры - всегда вызываем, но используем только при showLogo=true
