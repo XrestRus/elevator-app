@@ -87,7 +87,7 @@ function Elevator() {
 **Пример динамической текстуры**:
 ```javascript
 const [wallTexture, setWallTexture] = useState("metal");
-const texture = useLoader(TextureLoader, `/textures/${wallTexture}.jpg`);
+const texture = useLoader(TextureLoader, `./textures/${wallTexture}.jpg`);
 
 // В рендере:
 <Box>

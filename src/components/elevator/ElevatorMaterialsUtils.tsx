@@ -161,7 +161,7 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
  */
 export const createTexturePaths = (
   pbrPaths: ReturnType<typeof loadPBRTextures>,
-  dummyTexturePath: string = "/textures/example/wood_0066_1k_HoQeAg/wood_0066_color_1k.jpg"
+  dummyTexturePath: string = "./textures/example/wood_0066_1k_HoQeAg/wood_0066_color_1k.jpg"
 ) => {
   // Формируем объект с путями к текстурам
   const result: Record<string, string> = {

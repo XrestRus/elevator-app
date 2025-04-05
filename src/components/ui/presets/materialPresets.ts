@@ -243,7 +243,7 @@ export const materialPresets: MaterialPreset[] = [
     apply: (dispatch) => {
       resetToDefault(dispatch);
       
-      const woodTexture = "/textures/example/wood_0066_1k_HoQeAg";
+      const woodTexture = "./textures/example/wood_0066_1k_HoQeAg";
       dispatch(setMaterial({ part: 'walls', color: '#B08C63' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#EFE4D5' }));
       dispatch(setMaterial({ part: 'floor', color: '#5D3A1A' }));
@@ -275,7 +275,7 @@ export const materialPresets: MaterialPreset[] = [
     apply: (dispatch) => {
       resetToDefault(dispatch);
       
-      const metalTexture = "/textures/example/metal_0019_1k_NrVP9t";
+      const metalTexture = "./textures/example/metal_0019_1k_NrVP9t";
       dispatch(setMaterial({ part: 'walls', color: '#C0C0C0' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#E5E5E5' }));
       dispatch(setMaterial({ part: 'floor', color: '#2C2C2C' }));
@@ -294,7 +294,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       dispatch(setTexture({ part: 'walls', value: metalTexture }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
-      dispatch(setTexture({ part: 'floor', value: "/textures/example/metal_0044_1k_QzepB1" }));
+      dispatch(setTexture({ part: 'floor', value: "./textures/example/metal_0044_1k_QzepB1" }));
       dispatch(setTexture({ part: 'doors', value: metalTexture }));
       dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
       dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
@@ -307,7 +307,7 @@ export const materialPresets: MaterialPreset[] = [
     apply: (dispatch) => {
       resetToDefault(dispatch);
       
-      const metalTexture = "/textures/example/metal_0071_1k_HD5XFx";
+      const metalTexture = "./textures/example/metal_0071_1k_HD5XFx";
       dispatch(setMaterial({ part: 'walls', color: '#202020' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#121212' }));
       dispatch(setMaterial({ part: 'floor', color: '#181818' }));
@@ -326,7 +326,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'controlPanel', value: 0.3 }));
       dispatch(setTexture({ part: 'walls', value: metalTexture }));
       dispatch(setTexture({ part: 'ceiling', value: metalTexture }));
-      dispatch(setTexture({ part: 'floor', value: "/textures/example/metal_0082_1k_je0RXH" }));
+      dispatch(setTexture({ part: 'floor', value: "./textures/example/metal_0082_1k_je0RXH" }));
       dispatch(setTexture({ part: 'doors', value: metalTexture }));
       dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
       dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
@@ -358,7 +358,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'controlPanel', value: 0.15 }));
       
       // Добавляем ледяную текстуру для передней стены
-      const iceTexture = "/textures/example/metal_0016_1k_bN2ZC3";
+      const iceTexture = "./textures/example/metal_0016_1k_bN2ZC3";
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: null }));
@@ -406,7 +406,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'floor', value: 0.5 }));
       dispatch(setRoughness({ part: 'controlPanel', value: 0.4 }));
       
-      const woodTexture = "/textures/example/wood_0066_1k_HoQeAg";
+      const woodTexture = "./textures/example/wood_0066_1k_HoQeAg";
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: woodTexture }));
@@ -456,7 +456,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'floor', value: 0.7 }));
       dispatch(setRoughness({ part: 'controlPanel', value: 0.5 }));
       
-      const woodTexture = "/textures/example/wood_0066_1k_HoQeAg";
+      const woodTexture = "./textures/example/wood_0066_1k_HoQeAg";
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: woodTexture }));
@@ -508,7 +508,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'floor', value: 0.2 }));
       dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
       
-      const metalTexture = "/textures/example/metal_0082_1k_je0RXH";
+      const metalTexture = "./textures/example/metal_0082_1k_je0RXH";
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
       dispatch(setTexture({ part: 'floor', value: metalTexture }));
