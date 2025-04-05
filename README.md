@@ -1,6 +1,85 @@
 # AI Elevator - Конфигуратор 3D лифтов
-## Общее
-- https://cardesigner.kone.com/#/new-buildings/global/n-monospace-exp/edit/blank
+
+## Обзор проекта
+
+AI Elevator — это интерактивный 3D конфигуратор кабин лифтов, разработанный с использованием React, Three.js и React Three Fiber. Приложение позволяет пользователям визуализировать различные конфигурации лифтов с возможностью настройки размеров, материалов, освещения и интерьера в режиме реального времени.
+
+## Технический стек
+
+- **Frontend**: React 19, TypeScript
+- **3D-визуализация**: Three.js, React Three Fiber, React Three Drei
+- **Управление состоянием**: Redux Toolkit, Zustand
+- **UI компоненты**: Chakra UI, Framer Motion
+- **Сборка и разработка**: Vite, TypeScript
+
+## Архитектура проекта
+
+Проект построен по модульной архитектуре, разделяя ответственность между различными компонентами:
+
+- **Компоненты 3D-сцены** (`src/components/elevator/`) - отвечают за рендеринг лифта и его элементов
+- **Управление состоянием** (`src/store/`) - Redux слой для управления параметрами лифта
+- **UI-компоненты** (`src/components/ui/`) - пользовательские элементы управления для настройки лифта
+- **Утилиты** (`src/utils/`) - вспомогательные функции для оптимизации и работы с 3D
+
+### Работа с текстурами и материалами
+
+Управление текстурами и материалами построено по принципу PBR (Physically Based Rendering) для реалистичной визуализации:
+
+#### Загрузка текстур
+
+Загрузка текстур происходит через хук `useTexturesManager` в файле `src/components/elevator/materials/TexturesManager.tsx`:
+
+1. **Определение путей к текстурам**:
+   ```typescript
+   const wallTexturePath = materials.texture?.walls || "";
+   const floorTexturePath = materials.texture?.floor || "";
+   // и т.д.
+   ```
+
+2. **Подготовка PBR-путей к текстурам** через функцию `loadPBRTextures`:
+   ```typescript
+   const wallPBRPaths = useMemo(
+     () => loadPBRTextures(wallTexturePath),
+     [wallTexturePath]
+   );
+   ```
+
+3. **Формирование структурированных объектов с путями** через `createTexturePaths`:
+   ```typescript
+   const wallPaths = useMemo(
+     () => createTexturePaths(wallPBRPaths, dummyTexturePath),
+     [wallPBRPaths]
+   );
+   ```
+
+4. **Фактическая загрузка текстур** с помощью хука `useTexture` из библиотеки `@react-three/drei`:
+   ```typescript
+   const wallTextures = useTexture(wallPaths);
+   const floorTextures = useTexture(floorPaths);
+   // и т.д.
+   ```
+
+5. **Оптимизация текстур** в зависимости от производительности устройства:
+   ```typescript
+   useEffect(() => {
+     // Оптимизация для устройств с разной производительностью
+     Object.values(wallTextures).forEach(optimizeTexture);
+     // и т.д.
+   }, [wallTextures, floorTextures, ...]);
+   ```
+
+6. **Создание PBR материалов** на основе загруженных текстур:
+   ```typescript
+   const wallPBRMaterial = useMemo(
+     () => createPBRMaterial(
+       wallTextures, 
+       wallPBRPaths.textureType, 
+       materials.walls,
+       // и другие параметры
+     ),
+     [wallTextures, ...]
+   );
+   ```
 
 ## Деплой на GitHub Pages
 
@@ -167,7 +246,33 @@ const textureOptions = [
 
 Вы можете вручную переключаться между режимами качества в отладочной панели.
 
-### Ресурсы для текстур
+## Запуск проекта
+
+### Системные требования
+- Node.js 18+
+- npm 8+ или yarn 1.22+
+
+### Установка зависимостей
+```
+npm install
+```
+
+### Запуск в режиме разработки
+```
+npm run dev
+```
+
+### Сборка проекта
+```
+npm run build
+```
+
+### Локальный предпросмотр собранного проекта
+```
+npm run preview
+```
+
+## Ресурсы для текстур
 
 - https://www.texturecan.com/category/Ground/
 - https://ambientcg.com/ - отличный источник бесплатных PBR текстур
