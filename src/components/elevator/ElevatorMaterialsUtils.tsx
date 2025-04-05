@@ -71,9 +71,7 @@ export const loadPBRTextures = (baseTexturePath: string | null) => {
   }
 
   // Исправляем путь, чтобы он правильно начинался с /public
-  const fixedBasePath = baseTexturePath.startsWith("/")
-    ? baseTexturePath
-    : `/${baseTexturePath}`;
+  const fixedBasePath = baseTexturePath;
 
   /**
    * Определяем тип текстуры из пути
