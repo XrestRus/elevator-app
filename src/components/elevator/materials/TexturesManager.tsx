@@ -45,7 +45,7 @@ export const useTexturesManager = (
 
   // Для предотвращения ошибок загрузки, используем заглушки для отсутствующих текстур
   // Создаем фиктивную текстуру размером 1x1 пиксель для использования в качестве заглушки
-  const dummyTexturePath = "/textures/dummy.png"; // Путь к заглушке
+  const dummyTexturePath = "./textures/dummy.png"; // Путь к заглушке
 
   // Всегда включаем хотя бы одну текстуру (заглушку), чтобы хук useTexture всегда вызывался
   const wallPaths = useMemo(
