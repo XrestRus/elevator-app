@@ -1,22 +1,19 @@
 import React, { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
 
 /**
  * Компонент для создания мягких теней с помощью управления общим освещением
  */
 const SoftShadowEnhancer: React.FC = () => {
   const { scene } = useThree();
-  const isHighPerformance = useSelector((state: RootState) => 
-    state.elevator.performance?.highPerformance || false);
+  const isHighPerformance = true
   
   useEffect(() => {
     // Создаем куб-текстуру с мягким светом
     const generateEnvironmentMap = () => {
       // Создаем небольшую светло-серую текстуру для равномерного освещения
-      const size = isHighPerformance ? 512 : 256; // Увеличиваем размер для лучшего качества
+      const size = 512
       const cubeData = new Uint8Array(size * size * 3);
       
       // Заполняем текстуру градиентом от верха (светлее) к низу (темнее)
