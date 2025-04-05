@@ -272,48 +272,6 @@ const DoorLogoControls: React.FC<DoorLogoControlsProps> = ({ elevator }) => {
       
       {(elevator.doorLogo?.enabled ?? false) && (
         <>
-          <RangeSlider
-            label="Масштаб логотипа:"
-            min={0.5}
-            max={2}
-            step={0.1}
-            value={elevator.doorLogo?.scale ?? 1}
-            onChange={(value) => dispatch(setDoorLogo({ 
-              scale: value 
-            }))}
-            centerLabel={(value) => `${value.toFixed(1)}x`}
-            leftLabel="0.5x"
-            rightLabel="2.0x"
-          />
-          
-          <RangeSlider
-            label="Смещение по вертикали:"
-            min={-1}
-            max={1}
-            step={0.05}
-            value={elevator.doorLogo?.offsetY ?? 0}
-            onChange={(value) => dispatch(setDoorLogo({ 
-              offsetY: value 
-            }))}
-            centerLabel={(value) => `${value.toFixed(2)} м`}
-            leftLabel="-1.0 м"
-            rightLabel="1.0 м"
-          />
-          
-          <RangeSlider
-            label="Смещение по горизонтали:"
-            min={-0.5}
-            max={0.5}
-            step={0.02}
-            value={elevator.doorLogo?.offsetX ?? 0}
-            onChange={(value) => dispatch(setDoorLogo({ 
-              offsetX: value 
-            }))}
-            centerLabel={(value) => `${value.toFixed(2)} м`}
-            leftLabel="Влево"
-            rightLabel="Вправо"
-          />
-          
           <ColorPicker
             label="Цвет логотипа:"
             value={elevator.doorLogo?.color ?? '#ffffff'}

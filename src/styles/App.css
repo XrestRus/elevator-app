@@ -24,3 +24,14 @@ body {
 canvas {
   display: block;
 } 
+
+/* Адаптация для 3D сцены с учетом боковой панели */
+.canvas-container {
+  height: 100%;
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.canvas-container.full-width {
+  margin-left: 0;
+  width: 100%;
+} 

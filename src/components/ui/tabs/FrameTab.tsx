@@ -114,7 +114,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
         rightLabel="Широкий (100°)"
       />
 
-      <RangeSlider
+      {/* <RangeSlider
         label="Высота камеры:"
         min={0.1}
         max={1.8}
@@ -125,7 +125,7 @@ const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
         leftLabel="Очень низко"
         rightLabel="Высоко"
         disabled={elevator.camera.freeCamera}
-      />
+      /> */}
 
       <CheckboxInput
         id="freeCameraMode"
@@ -173,27 +173,6 @@ const CameraSection: React.FC<CameraSectionProps> = ({ elevator }) => {
           </div>
         </div>
       )}
-
-      {/* Отображение координат камеры */}
-      <div
-        style={{
-          marginTop: "8px",
-          padding: "8px",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "4px",
-        }}
-      >
-        <p style={{ fontWeight: "bold", margin: "0 0 4px" }}>
-          Текущее положение камеры:
-        </p>
-        <div style={{ fontFamily: "monospace", fontSize: "13px" }}>
-          X: {elevator.camera.position?.x ?? 0}
-          <br />
-          Y: {elevator.camera.position?.y ?? 0}
-          <br />
-          Z: {elevator.camera.position?.z ?? 0}
-        </div>
-      </div>
     </div>
   );
 };

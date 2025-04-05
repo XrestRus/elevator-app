@@ -1,6 +1,5 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import './styles/App.css';
-import './styles/ObjectInfoPanel.css';
 import './styles/UIPanel.css';
 import { Suspense, useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
@@ -19,8 +18,6 @@ import {
 import { PerformanceOptimizer } from './utils/optimization';
 import SoftShadowEnhancer from './components/camera/SoftShadowEnhancer';
 import type { RootState } from './store/store';
-import ObjectHoverHandler from './components/ui/ObjectHoverHandler';
-import ObjectInfoPanel from './components/ui/ObjectInfoPanel';
 
 /**
  * Компонент для изменения цвета фона сцены
@@ -128,9 +125,6 @@ function App() {
   
   return (
     <div className="app-container">
-      {/* Панель информации об объекте */}
-      <ObjectInfoPanel />
-      
       <div className="canvas-container">
         <Canvas
           shadows={isHighPerformance}
@@ -208,9 +202,6 @@ function App() {
               showAxes={debugSettings.showAxes}
               showGizmo={debugSettings.showGizmo}
             />
-            
-            {/* Компонент для обработки наведения на объекты должен быть внутри Canvas */}
-            <ObjectHoverHandler />
           </Suspense>
         </Canvas>
       </div>

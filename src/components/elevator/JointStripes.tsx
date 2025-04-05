@@ -1,9 +1,6 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 import { JointOptions } from "../../store/elevatorSlice";
-import { useDispatch } from "react-redux";
-import { setJoints } from "../../store/elevatorSlice";
-import MakeHoverable from "../../components/ui/makeHoverable";
 
 /**
  * Свойства компонента стыков между стенами
@@ -35,8 +32,6 @@ const JointStripes: React.FC<JointStripesProps> = ({
   jointStripeMaterial,
   jointOptions,
 }) => {
-  const dispatch = useDispatch();
-  
   // Мемоизированный массив данных о стыках и их преобразованиях
   const jointInfos = useMemo<JointInfo[]>(() => {
     // Если материал не определен или стыки отключены, возвращаем пустой массив
@@ -93,7 +88,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
       position: [
         -dimensions.width / 2 + jointWidth / 2,
         0,
-        dimensions.depth / 2 - (jointWidth * 1),
+        dimensions.depth / 2 - jointWidth * 1,
       ],
       args: [
         jointWidth + protrusion,
@@ -108,7 +103,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
       position: [
         dimensions.width / 2 - jointWidth / 2,
         0,
-        dimensions.depth / 2 - (jointWidth * 1),
+        dimensions.depth / 2 - jointWidth * 1,
       ],
       args: [
         jointWidth + protrusion,
@@ -280,50 +275,32 @@ const JointStripes: React.FC<JointStripesProps> = ({
     if (!jointStripeMaterial || !jointOptions?.enabled) {
       return [];
     }
-    
+
     const elements: React.ReactElement[] = [];
-    
+
     // Для каждого стыка создаем отдельный элемент
-    jointInfos.forEach((joint, index) => {  
-      // Обработчик клика по стыку
-      const handleJointClick = (jointName: string) => {
-        dispatch(setJoints({ selectedJoint: jointName }));
-      };
-    
+    jointInfos.forEach((joint, index) => {
       elements.push(
-        <MakeHoverable
+        <mesh
+          position={joint.position}
+          castShadow={false}
           key={`joint-${index}`}
-          name={joint.name}
-          type="Стык элементов"
-          description="Декоративная накладка на стыке элементов лифта"
-          material={`Материал: ${jointOptions.material || 'металл'}`}
-          dimensions={{
-            width: joint.args[0],
-            height: joint.args[1],
-            depth: joint.args[2]
-          }}
-          additionalInfo={{
-            "Толщина": `${(jointOptions.width || 4)} мм`,
-            "Выступ": `${(jointOptions.protrusion || 3)} мм`
-          }}
-          onSelect={() => handleJointClick(joint.name)}
         >
-          <mesh
-            position={joint.position}
-            castShadow={false}
-          >
-            <boxGeometry args={joint.args} />
-            <primitive object={jointStripeMaterial} attach="material" />
-          </mesh>
-        </MakeHoverable>
+          <boxGeometry args={joint.args} />
+          <primitive object={jointStripeMaterial} attach="material" />
+        </mesh>
       );
     });
-    
+
     return elements;
-  }, [jointInfos, jointStripeMaterial, jointOptions, dispatch]);
+  }, [jointInfos, jointStripeMaterial, jointOptions]);
 
   // Если материал не определен или стыки отключены, возвращаем null
-  if (!jointStripeMaterial || !jointOptions?.enabled || jointInfos.length === 0) {
+  if (
+    !jointStripeMaterial ||
+    !jointOptions?.enabled ||
+    jointInfos.length === 0
+  ) {
     return null;
   }
 

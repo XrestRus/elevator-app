@@ -390,66 +390,6 @@ const elevatorSlice = createSlice({
       state.materials.metalness[part] = value;
     },
     
-    // Обновление эмиссии (свечения поверхности)
-    setEmission: (state, action: PayloadAction<{ part?: keyof Omit<Materials['emission'], 'color' | 'enabled'>, value?: number, color?: string, enabled?: boolean }>) => {
-      const { part, value, color, enabled } = action.payload;
-      
-      if (part && typeof value === 'number') {
-        state.materials.emission[part] = value;
-      }
-      
-      if (color !== undefined) {
-        state.materials.emission.color = color;
-      }
-      
-      if (enabled !== undefined) {
-        state.materials.emission.enabled = enabled;
-      }
-    },
-    
-    // Обновление прозрачности
-    setTransparency: (state, action: PayloadAction<{ part?: keyof Omit<Materials['transparency'], 'enabled'>, value?: number, enabled?: boolean }>) => {
-      const { part, value, enabled } = action.payload;
-      
-      if (part && typeof value === 'number') {
-        state.materials.transparency[part] = value;
-      }
-      
-      if (enabled !== undefined) {
-        state.materials.transparency.enabled = enabled;
-      }
-    },
-    
-    // Обновление преломления
-    setRefraction: (state, action: PayloadAction<{ part?: keyof Omit<Materials['refraction'], 'enabled'>, value?: number, enabled?: boolean }>) => {
-      const { part, value, enabled } = action.payload;
-      
-      if (part && typeof value === 'number') {
-        state.materials.refraction[part] = value;
-      }
-      
-      if (enabled !== undefined) {
-        state.materials.refraction.enabled = enabled;
-      }
-    },
-    
-    // Обновление анизотропности
-    setAnisotropy: (state, action: PayloadAction<{ part?: keyof Omit<Materials['anisotropy'], 'direction' | 'enabled'>, value?: number, direction?: number, enabled?: boolean }>) => {
-      const { part, value, direction, enabled } = action.payload;
-      
-      if (part && typeof value === 'number') {
-        state.materials.anisotropy[part] = value;
-      }
-      
-      if (direction !== undefined) {
-        state.materials.anisotropy.direction = direction;
-      }
-      
-      if (enabled !== undefined) {
-        state.materials.anisotropy.enabled = enabled;
-      }
-    },
-    
     // Обновление настроек освещения
     setLighting: (state, action: PayloadAction<Partial<LightingOptions>>) => {
       state.lighting = { ...state.lighting, ...action.payload };
@@ -531,10 +471,6 @@ export const {
   setTexture,
   setRoughness,
   setMetalness,
-  setEmission,
-  setTransparency,
-  setRefraction,
-  setAnisotropy,
   setLighting,
   setVisibility,
   setCamera,

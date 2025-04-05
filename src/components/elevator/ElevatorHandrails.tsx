@@ -1,8 +1,6 @@
 import React from "react";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
-import MakeHoverable from "../ui/makeHoverable";
-import colorUtils from "../../utils/colorUtils";
 
 /**
  * Свойства компонента поручней лифта
@@ -29,11 +27,6 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
   if (!isVisible) {
     return null;
   }
-  
-  // Получаем цвет материала поручней для отображения в тултипе
-  const getHandrailColor = () => {
-    return colorUtils.getMaterialColor(handrailMaterial);
-  };
   
   // Создаем обертки для левого и правого стандартных поручней
   const leftHandrail = (
@@ -233,114 +226,15 @@ const ElevatorHandrails: React.FC<ElevatorHandrailsProps> = ({
 
   return (
     <>
-      {/* Стандартные поручни с возможностью наведения */}
-      <MakeHoverable
-        name="Левый поручень"
-        type="Элемент безопасности"
-        description="Т-образный поручень для обеспечения устойчивости пассажиров"
-        material="Нержавеющая сталь"
-        dimensions={{
-          width: 0.04,
-          height: 0.03,
-          depth: dimensions.depth * 0.6
-        }}
-        additionalInfo={{
-          color: getHandrailColor(),
-          texture: "Металлическая поверхность со скругленными краями",
-          "Расположение": "Левая стена",
-          "Форма": "Т-образная конструкция с выступающими креплениями"
-        }}
-        requiresDoubleClick={false}
-      >
-        {leftHandrail}
-      </MakeHoverable>
-      
-      <MakeHoverable
-        name="Правый поручень"
-        type="Элемент безопасности"
-        description="Т-образный поручень для обеспечения устойчивости пассажиров"
-        material="Нержавеющая сталь"
-        dimensions={{
-          width: 0.04,
-          height: 0.03,
-          depth: dimensions.depth * 0.6
-        }}
-        additionalInfo={{
-          color: getHandrailColor(),
-          texture: "Металлическая поверхность со скругленными краями",
-          "Расположение": "Правая стена",
-          "Форма": "Т-образная конструкция с выступающими креплениями"
-        }}
-        requiresDoubleClick={false}
-      >
-        {rightHandrail}
-      </MakeHoverable>
+      {leftHandrail}
+      {rightHandrail}
       
       {/* Нижние поручни (ближе к полу) */}
       {showLowerHandrails && (
         <>
-          <MakeHoverable
-            name="Левый нижний поручень"
-            type="Элемент безопасности и декора"
-            description="Узкая защитная панель у основания стены для предотвращения повреждений"
-            material="Нержавеющая сталь"
-            dimensions={{
-              width: 0.05,
-              height: 0.12,
-              depth: dimensions.depth
-            }}
-            additionalInfo={{
-              color: getHandrailColor(),
-              texture: "Металлическая поверхность со скругленными краями",
-              "Расположение": "Левая стена, нижний уровень",
-              "Форма": "Монолитная защитная панель"
-            }}
-            requiresDoubleClick={false}
-          >
-            {leftLowerHandrail}
-          </MakeHoverable>
-          
-          <MakeHoverable
-            name="Правый нижний поручень"
-            type="Элемент безопасности и декора"
-            description="Узкая защитная панель у основания стены для предотвращения повреждений"
-            material="Нержавеющая сталь"
-            dimensions={{
-              width: 0.05,
-              height: 0.12,
-              depth: dimensions.depth
-            }}
-            additionalInfo={{
-              color: getHandrailColor(),
-              texture: "Металлическая поверхность со скругленными краями",
-              "Расположение": "Правая стена, нижний уровень",
-              "Форма": "Монолитная защитная панель"
-            }}
-            requiresDoubleClick={false}
-          >
-            {rightLowerHandrail}
-          </MakeHoverable>
-          
-          <MakeHoverable
-            name="Задний нижний поручень"
-            type="Элемент безопасности и декора"
-            description="Узкая защитная панель у основания задней стены для завершения защитного контура"
-            material="Нержавеющая сталь"
-            dimensions={{
-              width: dimensions.width,
-              height: 0.12,
-              depth: 0.05
-            }}
-            additionalInfo={{
-              color: getHandrailColor(),
-              texture: "Металлическая поверхность со скругленными краями",
-              "Расположение": "Задняя стена, нижний уровень",
-              "Форма": "Монолитная защитная панель"
-            }}
-            requiresDoubleClick={false}
-          >
-            {backLowerHandrail}
-          </MakeHoverable>
+          {leftLowerHandrail}
+          {rightLowerHandrail}
+          {backLowerHandrail}
         </>
       )}
     </>

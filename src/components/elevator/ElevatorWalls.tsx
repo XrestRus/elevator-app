@@ -1,8 +1,6 @@
 import React from "react";
 import { Box } from "@react-three/drei";
 import * as THREE from "three";
-import MakeHoverable from "../ui/makeHoverable";
-import colorUtils from "../../utils/colorUtils";
 
 /**
  * Свойства компонента стен лифта
@@ -27,11 +25,6 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
   sideWallMaterial,
   frontWallMaterial,
 }) => {
-  // Получаем цвета материалов для отображения в тултипе
-  const getBackWallColor = () => colorUtils.getMaterialColor(backWallMaterial);
-  const getSideWallColor = () => colorUtils.getMaterialColor(sideWallMaterial);
-  const getFrontWallColor = () => colorUtils.getMaterialColor(frontWallMaterial);
-
   // Создаем компоненты стен с поддержкой наведения
   const BackWall = (
     <Box
@@ -43,7 +36,7 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       <primitive object={backWallMaterial} attach="material" />
     </Box>
   );
-  
+
   const LeftWall = (
     <Box
       position={[-dimensions.width / 2, 0, 0]}
@@ -54,7 +47,7 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       <primitive object={sideWallMaterial} attach="material" />
     </Box>
   );
-  
+
   const RightWall = (
     <Box
       position={[dimensions.width / 2, 0, 0]}
@@ -65,17 +58,17 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       <primitive object={sideWallMaterial} attach="material" />
     </Box>
   );
-  
+
   const TopFrame = (
     <Box
       position={[0, dimensions.height / 2 - 0.15, dimensions.depth / 2]}
-      args={[dimensions.width - .8, 0.3, 0.07]}
+      args={[dimensions.width - 0.8, 0.3, 0.07]}
       castShadow
     >
       <primitive object={frontWallMaterial} attach="material" />
     </Box>
   );
-  
+
   const LeftFrame = (
     <Box
       position={[-dimensions.width / 2 + 0.2, 0, dimensions.depth / 2]}
@@ -85,7 +78,7 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
       <primitive object={frontWallMaterial} attach="material" />
     </Box>
   );
-  
+
   const RightFrame = (
     <Box
       position={[dimensions.width / 2 - 0.2, 0, dimensions.depth / 2]}
@@ -99,126 +92,19 @@ const ElevatorWalls: React.FC<ElevatorWallsProps> = ({
   return (
     <>
       {/* Задняя стена */}
-      <MakeHoverable
-        name="Задняя стена"
-        type="Элемент конструкции"
-        description="Задняя стена лифта"
-        material="Стандартный материал стен"
-        dimensions={{
-          width: dimensions.width,
-          height: dimensions.height,
-          depth: 0.05
-        }}
-        additionalInfo={{
-          color: getBackWallColor(),
-          texture: "Матовая поверхность"
-        }}
-        requiresDoubleClick={false}
-      >
-        {BackWall}
-      </MakeHoverable>
-
+      {BackWall}
       {/* Левая стена */}
-      <MakeHoverable
-        name="Левая стена"
-        type="Элемент конструкции"
-        description="Боковая стена лифта"
-        material="Стандартный материал стен"
-        dimensions={{
-          width: 0.05,
-          height: dimensions.height,
-          depth: dimensions.depth
-        }}
-        additionalInfo={{
-          color: getSideWallColor(),
-          texture: "Матовая поверхность"
-        }}
-        requiresDoubleClick={false}
-      >
-        {LeftWall}
-      </MakeHoverable>
-
+      {LeftWall}
       {/* Правая стена */}
-      <MakeHoverable
-        name="Правая стена"
-        type="Элемент конструкции"
-        description="Боковая стена лифта"
-        material="Стандартный материал стен"
-        dimensions={{
-          width: 0.05,
-          height: dimensions.height,
-          depth: dimensions.depth
-        }}
-        additionalInfo={{
-          color: getSideWallColor(),
-          texture: "Матовая поверхность"
-        }}
-        requiresDoubleClick={false}
-      >
-        {RightWall}
-      </MakeHoverable>
-
+      {RightWall}
       {/* Верхняя перемычка над дверью */}
-      <MakeHoverable
-        name="Верхняя перемычка"
-        type="Элемент конструкции"
-        description="Верхняя часть дверного проема"
-        material="Материал передней стены"
-        dimensions={{
-          width: dimensions.width - 0.2,
-          height: 0.3,
-          depth: 0.07
-        }}
-        additionalInfo={{
-          color: getFrontWallColor(),
-          texture: "Настраиваемая поверхность"
-        }}
-        requiresDoubleClick={false}
-      >
-        {TopFrame}
-      </MakeHoverable>
-
+      {TopFrame}
       {/* Левая боковая панель передней стены */}
-      <MakeHoverable
-        name="Левая панель передней стены"
-        type="Элемент конструкции"
-        description="Боковая часть дверного проема"
-        material="Материал передней стены"
-        dimensions={{
-          width: 0.4,
-          height: dimensions.height,
-          depth: 0.07
-        }}
-        additionalInfo={{
-          color: getFrontWallColor(),
-          texture: "Настраиваемая поверхность"
-        }}
-        requiresDoubleClick={false}
-      >
-        {LeftFrame}
-      </MakeHoverable>
-
+      {LeftFrame}
       {/* Правая боковая панель передней стены */}
-      <MakeHoverable
-        name="Правая панель передней стены"
-        type="Элемент конструкции"
-        description="Боковая часть дверного проема"
-        material="Материал передней стены"
-        dimensions={{
-          width: 0.4,
-          height: dimensions.height,
-          depth: 0.07
-        }}
-        additionalInfo={{
-          color: getFrontWallColor(),
-          texture: "Настраиваемая поверхность"
-        }}
-        requiresDoubleClick={false}
-      >
-        {RightFrame}
-      </MakeHoverable>
+      {RightFrame}
     </>
   );
 };
 
-export default ElevatorWalls; 
+export default ElevatorWalls;

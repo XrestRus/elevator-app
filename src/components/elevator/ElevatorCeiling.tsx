@@ -1,8 +1,6 @@
 import React from "react";
 import { Box } from "@react-three/drei";
 import * as THREE from "three";
-import MakeHoverable from "../ui/makeHoverable";
-import colorUtils from "../../utils/colorUtils";
 
 /**
  * Свойства компонента потолка лифта
@@ -25,9 +23,6 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
   ceilingMaterial,
   wallsColor = "#CCCCCC", // Значение по умолчанию для цвета стен
 }) => {
-  // Получаем цвет материала потолка для отображения в тултипе
-  const getCeilingColor = () => colorUtils.getMaterialColor(ceilingMaterial);
-  
   // Рассчитываем размеры потолка с зазором по бокам
   const gapSize = 0.06; // Размер зазора по краям (6 см)
   const ceilingWidth = dimensions.width - gapSize * 2;
@@ -129,30 +124,8 @@ const ElevatorCeiling: React.FC<ElevatorCeilingProps> = ({
     </>
   );
   
-  // Получаем цвет материала полос для отображения в тултипе
-  const getTrimColor = () => colorUtils.getMaterialColor(trimMaterial);
-  
   return (
-    <MakeHoverable
-      name="Потолок лифта"
-      type="Элемент конструкции"
-      description="Верхняя поверхность лифта, на которой расположены светильники"
-      material="Материал потолка"
-      dimensions={{
-        width: ceilingWidth,
-        height: ceilingThickness,
-        depth: ceilingDepth
-      }}
-      additionalInfo={{
-        color: getCeilingColor(),
-        "Цвет полос": getTrimColor(),
-        texture: "Матовая поверхность со встроенным освещением",
-        "Особенность": "Подвесной потолок с металлическими полосами по периметру"
-      }}
-      requiresDoubleClick={false}
-    >
-      {Ceiling}
-    </MakeHoverable>
+    Ceiling
   );
 };
 

@@ -8,11 +8,7 @@ import {
   setDecorationStripes,
   setMirrorOptions,
   setLighting,
-  setEmission,
   setMirrorSurface,
-  setTransparency,
-  setRefraction,
-  setAnisotropy
 } from "../../../store/elevatorSlice";
 
 /**
@@ -58,33 +54,6 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setTexture({ part: 'doors', value: null }));
   dispatch(setTexture({ part: 'frontWall', value: null }));
   dispatch(setTexture({ part: 'controlPanel', value: null }));
-  
-  // Сбрасываем свечение
-  dispatch(setEmission({ enabled: false, color: '#ffffff' }));
-  dispatch(setEmission({ part: 'walls', value: 0 }));
-  dispatch(setEmission({ part: 'ceiling', value: 0 }));
-  dispatch(setEmission({ part: 'doors', value: 0 }));
-  dispatch(setEmission({ part: 'floor', value: 0 }));
-  dispatch(setEmission({ part: 'controlPanel', value: 0 }));
-  
-  // Сбрасываем прозрачность
-  dispatch(setTransparency({ enabled: false }));
-  dispatch(setTransparency({ part: 'walls', value: 0 }));
-  dispatch(setTransparency({ part: 'ceiling', value: 0 }));
-  dispatch(setTransparency({ part: 'doors', value: 0 }));
-  dispatch(setTransparency({ part: 'floor', value: 0 }));
-  dispatch(setTransparency({ part: 'controlPanel', value: 0 }));
-  
-  // Сбрасываем преломление
-  dispatch(setRefraction({ enabled: false }));
-  dispatch(setRefraction({ part: 'walls', value: 1.5 }));
-  dispatch(setRefraction({ part: 'ceiling', value: 1.5 }));
-  dispatch(setRefraction({ part: 'doors', value: 1.5 }));
-  dispatch(setRefraction({ part: 'floor', value: 1.5 }));
-  dispatch(setRefraction({ part: 'controlPanel', value: 1.5 }));
-  
-  // Сбрасываем анизотропию
-  dispatch(setAnisotropy({ enabled: false }));
   
   // Сбрасываем зеркало
   dispatch(setMirrorSurface({ part: 'walls', value: false }));
@@ -399,14 +368,7 @@ export const materialPresets: MaterialPreset[] = [
       
       // Настройка освещения
       dispatch(setLighting({ count: 4, color: '#E0F0FF', intensity: 1.0, diffusion: 0.9, enabled: true, type: 'square' }));
-      // Добавляем слабое свечение
-      dispatch(setEmission({ enabled: true, color: '#A0C0FF' }));
-      dispatch(setEmission({ part: 'walls', value: 0.2 }));
-      dispatch(setEmission({ part: 'ceiling', value: 0.3 }));
-      dispatch(setEmission({ part: 'doors', value: 0.1 }));
-      dispatch(setEmission({ part: 'floor', value: 0.05 }));
-      dispatch(setEmission({ part: 'controlPanel', value: 0.05 }));
-      
+
       dispatch(setDecorationStripes({ 
         enabled: true,
         count: 2, 
@@ -556,15 +518,7 @@ export const materialPresets: MaterialPreset[] = [
       
       // Настройка освещения
       dispatch(setLighting({ count: 6, color: '#2080FF', intensity: 0.7, diffusion: 0.9, enabled: true, type: 'spotlight' }));
-      
-      // Добавляем свечение
-      dispatch(setEmission({ enabled: true, color: '#30C5FF' }));
-      dispatch(setEmission({ part: 'walls', value: 0.3 }));
-      dispatch(setEmission({ part: 'ceiling', value: 0.1 }));
-      dispatch(setEmission({ part: 'doors', value: 0.4 }));
-      dispatch(setEmission({ part: 'floor', value: 0.05 }));
-      dispatch(setEmission({ part: 'controlPanel', value: 0.05 }));
-      
+  
       // Зеркальные поверхности
       dispatch(setMirrorSurface({ part: 'walls', value: true }));
       dispatch(setMirrorOptions({ width: 1.5, height: 1.8, type: 'triple', position: 0 }));
