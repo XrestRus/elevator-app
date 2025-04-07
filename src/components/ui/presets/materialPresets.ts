@@ -415,7 +415,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
       
       // Настройка освещения
-      dispatch(setLighting({ count: 3, color: '#FFEBCD', intensity: 1, diffusion: 0.1, enabled: true, type: 'plafond' }));
+      dispatch(setLighting({ count: 3, color: '#FFEBCD', intensity: 1, diffusion: 0.1, enabled: true, type: 'spotlight' }));
       // Зеркало
       dispatch(setMirrorSurface({ part: 'walls', value: false }));
       dispatch(setMirrorOptions({ width: 1.0, height: 1.5, type: 'full', position: 0 }));
@@ -465,7 +465,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
       
       // Настройка освещения
-      dispatch(setLighting({ count: 4, color: '#F5F5DC', intensity: 0.7, diffusion: 0.8, enabled: true, type: 'plafond' }));
+      dispatch(setLighting({ count: 4, color: '#F5F5DC', intensity: 0.7, diffusion: 0.8, enabled: true, type: 'spotlight' }));
       // Зеркало
       dispatch(setMirrorSurface({ part: 'walls', value: false }));
       dispatch(setMirrorOptions({ width: 1.0, height: 1.4, type: 'double', position: 0 }));
