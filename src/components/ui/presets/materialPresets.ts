@@ -367,7 +367,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'controlPanel', value: iceTexture }));
       
       // Настройка освещения
-      dispatch(setLighting({ count: 4, color: '#E0F0FF', intensity: 1.0, diffusion: 0.9, enabled: true, type: 'square' }));
+      dispatch(setLighting({ count: 4, color: '#E0F0FF', intensity: 1.0, diffusion: 0.9, enabled: true, type: 'spotlight' }));
 
       dispatch(setDecorationStripes({ 
         enabled: true,
