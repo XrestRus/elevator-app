@@ -1,10 +1,10 @@
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
-import { 
-  setMaterial, 
-  setMetalness, 
-  setRoughness, 
-  setTexture, 
+import {
+  setMaterial,
+  setMetalness,
+  setRoughness,
+  setTexture,
   setDecorationStripes,
   setMirrorOptions,
   setLighting,
@@ -32,21 +32,21 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setMaterial({ part: 'doors', color: '#A9A9A9' }));
   dispatch(setMaterial({ part: 'handrails', color: '#808080' }));
   dispatch(setMaterial({ part: 'controlPanel', color: '#A9A9A9' }));
-  
+
   // Сбрасываем металличность
   dispatch(setMetalness({ part: 'walls', value: 0.1 }));
   dispatch(setMetalness({ part: 'ceiling', value: 0.1 }));
   dispatch(setMetalness({ part: 'doors', value: 0.3 }));
   dispatch(setMetalness({ part: 'floor', value: 0.1 }));
   dispatch(setMetalness({ part: 'controlPanel', value: 0.1 }));
-  
+
   // Сбрасываем шероховатость
   dispatch(setRoughness({ part: 'walls', value: 0.4 }));
   dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
   dispatch(setRoughness({ part: 'doors', value: 0.3 }));
   dispatch(setRoughness({ part: 'floor', value: 0.7 }));
   dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
-  
+
   // Сбрасываем текстуры
   dispatch(setTexture({ part: 'walls', value: null }));
   dispatch(setTexture({ part: 'ceiling', value: null }));
@@ -54,16 +54,16 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setTexture({ part: 'doors', value: null }));
   dispatch(setTexture({ part: 'frontWall', value: null }));
   dispatch(setTexture({ part: 'controlPanel', value: null }));
-  
+
   // Сбрасываем зеркало
   dispatch(setMirrorSurface({ part: 'walls', value: false }));
   dispatch(setMirrorOptions({ width: 1.2, height: 1.5, type: 'full', position: 0 }));
-  
+
   // Сбрасываем освещение
   dispatch(setLighting({ count: 4, color: '#FFFFFF', intensity: 8, diffusion: 0.7, enabled: true, type: 'spotlight' }));
-  
+
   // Сбрасываем декоративные полосы
-  dispatch(setDecorationStripes({ 
+  dispatch(setDecorationStripes({
     enabled: false,
     count: 4,
     width: 0.05,
@@ -86,7 +86,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Стандартный',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#E8E8E8' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#F5F5F5' }));
       dispatch(setMaterial({ part: 'floor', color: '#F5F5F5' }));
@@ -117,7 +117,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Золотой',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#D4AF37' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#D4AF37' }));
       dispatch(setMaterial({ part: 'floor', color: '#332211' }));
@@ -148,7 +148,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Серебряный',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#C0C0C0' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#C0C0C0' }));
       dispatch(setMaterial({ part: 'floor', color: '#303030' }));
@@ -179,7 +179,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Медный',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#B87333' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#B87333' }));
       dispatch(setMaterial({ part: 'floor', color: '#2D2D2D' }));
@@ -210,7 +210,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Минимализм',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#F2F2F2' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#FFFFFF' }));
       dispatch(setMaterial({ part: 'floor', color: '#333333' }));
@@ -242,7 +242,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Классическое дерево',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       const woodTexture = "./textures/example/wood_0066_1k_HoQeAg";
       dispatch(setMaterial({ part: 'walls', color: '#B08C63' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#EFE4D5' }));
@@ -274,7 +274,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Современный металл',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       const metalTexture = "./textures/example/metal_0019_1k_NrVP9t";
       dispatch(setMaterial({ part: 'walls', color: '#C0C0C0' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#E5E5E5' }));
@@ -302,43 +302,11 @@ export const materialPresets: MaterialPreset[] = [
     }
   },
   {
-    id: 'elegant-dark',
-    label: 'Элегантный тёмный',
-    apply: (dispatch) => {
-      resetToDefault(dispatch);
-      
-      const metalTexture = "./textures/example/metal_0071_1k_HD5XFx";
-      dispatch(setMaterial({ part: 'walls', color: '#202020' }));
-      dispatch(setMaterial({ part: 'ceiling', color: '#121212' }));
-      dispatch(setMaterial({ part: 'floor', color: '#181818' }));
-      dispatch(setMaterial({ part: 'doors', color: '#404040' }));
-      dispatch(setMaterial({ part: 'handrails', color: '#333333' }));
-      dispatch(setMaterial({ part: 'controlPanel', color: '#404040' }));
-      dispatch(setMetalness({ part: 'walls', value: 0.8 }));
-      dispatch(setMetalness({ part: 'ceiling', value: 0.9 }));
-      dispatch(setMetalness({ part: 'doors', value: 0.7 }));
-      dispatch(setMetalness({ part: 'floor', value: 0.8 }));
-      dispatch(setMetalness({ part: 'controlPanel', value: 0.7 }));
-      dispatch(setRoughness({ part: 'walls', value: 0.3 }));
-      dispatch(setRoughness({ part: 'ceiling', value: 0.2 }));
-      dispatch(setRoughness({ part: 'doors', value: 0.3 }));
-      dispatch(setRoughness({ part: 'floor', value: 0.2 }));
-      dispatch(setRoughness({ part: 'controlPanel', value: 0.3 }));
-      dispatch(setTexture({ part: 'walls', value: metalTexture }));
-      dispatch(setTexture({ part: 'ceiling', value: metalTexture }));
-      dispatch(setTexture({ part: 'floor', value: "./textures/example/metal_0082_1k_je0RXH" }));
-      dispatch(setTexture({ part: 'doors', value: metalTexture }));
-      dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
-      dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
-      dispatch(setDecorationStripes({ color: '#C0C0C0', material: 'metal' }));
-    }
-  },
-  {
     id: 'ice-crystal',
     label: 'Ледяной кристалл',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#E0F0FF' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#FFFFFF' }));
       dispatch(setMaterial({ part: 'floor', color: '#D0E0F0' }));
@@ -355,7 +323,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'doors', value: 0.15 }));
       dispatch(setRoughness({ part: 'floor', value: 0.2 }));
       dispatch(setRoughness({ part: 'controlPanel', value: 0.15 }));
-      
+
       // Добавляем ледяную текстуру для передней стены
       const iceTexture = "./textures/example/metal_0016_1k_bN2ZC3";
       dispatch(setTexture({ part: 'walls', value: null }));
@@ -365,12 +333,12 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'frontWall', value: iceTexture }));
       dispatch(setTexture({ part: 'controlPanel', value: iceTexture }));
 
-      dispatch(setDecorationStripes({ 
+      dispatch(setDecorationStripes({
         enabled: true,
-        count: 2, 
-        width: 0.02, 
-        material: 'glossy', 
-        color: '#FFFFFF', 
+        count: 2,
+        width: 0.02,
+        material: 'glossy',
+        color: '#FFFFFF',
         orientation: 'vertical',
         spacing: 0.5,
         skipMirrorWall: false,
@@ -384,7 +352,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Тёплый бордо',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#6D071A' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#F0F0F0' }));
       dispatch(setMaterial({ part: 'floor', color: '#421C17' }));
@@ -401,7 +369,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'doors', value: 0.4 }));
       dispatch(setRoughness({ part: 'floor', value: 0.5 }));
       dispatch(setRoughness({ part: 'controlPanel', value: 0.4 }));
-      
+
       const woodTexture = "./textures/example/wood_0066_1k_HoQeAg";
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
@@ -409,16 +377,16 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: null }));
       dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
-      
+
       // Зеркало
       dispatch(setMirrorSurface({ part: 'walls', value: false }));
       dispatch(setMirrorOptions({ width: 1.0, height: 1.5, type: 'full', position: 0 }));
-      dispatch(setDecorationStripes({ 
+      dispatch(setDecorationStripes({
         enabled: true,
-        count: 4, 
-        width: 0.01, 
-        material: 'metal', 
-        color: '#D4AF37', 
+        count: 4,
+        width: 0.01,
+        material: 'metal',
+        color: '#D4AF37',
         orientation: 'horizontal',
         spacing: 0.3,
         skipMirrorWall: true,
@@ -432,7 +400,7 @@ export const materialPresets: MaterialPreset[] = [
     label: 'Лесная зелень',
     apply: (dispatch) => {
       resetToDefault(dispatch);
-      
+
       dispatch(setMaterial({ part: 'walls', color: '#2E4033' }));
       dispatch(setMaterial({ part: 'ceiling', color: '#ECECE7' }));
       dispatch(setMaterial({ part: 'floor', color: '#3D291B' }));
@@ -449,7 +417,7 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setRoughness({ part: 'doors', value: 0.5 }));
       dispatch(setRoughness({ part: 'floor', value: 0.7 }));
       dispatch(setRoughness({ part: 'controlPanel', value: 0.5 }));
-      
+
       const woodTexture = "./textures/example/wood_0066_1k_HoQeAg";
       dispatch(setTexture({ part: 'walls', value: null }));
       dispatch(setTexture({ part: 'ceiling', value: null }));
@@ -457,73 +425,26 @@ export const materialPresets: MaterialPreset[] = [
       dispatch(setTexture({ part: 'doors', value: null }));
       dispatch(setTexture({ part: 'frontWall', value: woodTexture }));
       dispatch(setTexture({ part: 'controlPanel', value: woodTexture }));
-      
+
       // Зеркало
       dispatch(setMirrorSurface({ part: 'walls', value: false }));
       dispatch(setMirrorOptions({ width: 1.0, height: 1.4, type: 'double', position: 0 }));
-      dispatch(setDecorationStripes({ 
+      dispatch(setDecorationStripes({
         enabled: true,
-        count: 2, 
-        width: 0.04, 
-        material: 'wood', 
-        color: '#6D4C41', 
+        count: 2,
+        width: 0.04,
+        material: 'wood',
+        color: '#6D4C41',
         orientation: 'horizontal',
         spacing: 1.0,
         skipMirrorWall: true,
         offset: 0.8,
         showOnDoors: false
       }));
-    }
-  },
-  {
-    id: 'futuristic-neon',
-    label: 'Футуристический неон',
-    apply: (dispatch) => {
-      resetToDefault(dispatch);
-      
-      dispatch(setMaterial({ part: 'walls', color: '#050A14' }));
-      dispatch(setMaterial({ part: 'ceiling', color: '#080E1C' }));
-      dispatch(setMaterial({ part: 'floor', color: '#101820' }));
-      dispatch(setMaterial({ part: 'doors', color: '#121820' }));
-      dispatch(setMaterial({ part: 'handrails', color: '#30C5FF' }));
-      dispatch(setMaterial({ part: 'controlPanel', color: '#121820' }));
-      
-      dispatch(setMetalness({ part: 'walls', value: 0.7 }));
-      dispatch(setMetalness({ part: 'ceiling', value: 0.7 }));
-      dispatch(setMetalness({ part: 'doors', value: 0.8 }));
-      dispatch(setMetalness({ part: 'floor', value: 0.8 }));
-      dispatch(setMetalness({ part: 'controlPanel', value: 0.8 }));
-      
-      dispatch(setRoughness({ part: 'walls', value: 0.2 }));
-      dispatch(setRoughness({ part: 'ceiling', value: 0.1 }));
-      dispatch(setRoughness({ part: 'doors', value: 0.1 }));
-      dispatch(setRoughness({ part: 'floor', value: 0.2 }));
-      dispatch(setRoughness({ part: 'controlPanel', value: 0.1 }));
-      
-      const metalTexture = "./textures/example/metal_0082_1k_je0RXH";
-      dispatch(setTexture({ part: 'walls', value: null }));
-      dispatch(setTexture({ part: 'ceiling', value: null }));
-      dispatch(setTexture({ part: 'floor', value: metalTexture }));
-      dispatch(setTexture({ part: 'doors', value: null }));
-      dispatch(setTexture({ part: 'frontWall', value: metalTexture }));
-      dispatch(setTexture({ part: 'controlPanel', value: metalTexture }));
-      
+
       // Зеркальные поверхности
       dispatch(setMirrorSurface({ part: 'walls', value: true }));
       dispatch(setMirrorOptions({ width: 1.5, height: 1.8, type: 'triple', position: 0 }));
-      
-      dispatch(setDecorationStripes({ 
-        enabled: true,
-        count: 4, 
-        width: 0.01, 
-        material: 'glossy', 
-        color: '#30C5FF', 
-        orientation: 'horizontal',
-        spacing: 0.4,
-        skipMirrorWall: false,
-        offset: 0.3,
-        showOnDoors: true
-      }));
     }
   }
 ]; 
