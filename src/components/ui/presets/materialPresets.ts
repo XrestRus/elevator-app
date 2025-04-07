@@ -60,7 +60,7 @@ const resetToDefault = (dispatch: ThunkDispatch<unknown, unknown, AnyAction>) =>
   dispatch(setMirrorOptions({ width: 1.2, height: 1.5, type: 'full', position: 0 }));
   
   // Сбрасываем освещение
-  dispatch(setLighting({ count: 4, color: '#FFFFFF', intensity: 0.8, diffusion: 0.7, enabled: true, type: 'plafond' }));
+  dispatch(setLighting({ count: 4, color: '#FFFFFF', intensity: 0.8, diffusion: 0.7, enabled: true, type: 'spotlight' }));
   
   // Сбрасываем декоративные полосы
   dispatch(setDecorationStripes({ 
