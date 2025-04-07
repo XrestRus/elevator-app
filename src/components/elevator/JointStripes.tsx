@@ -71,7 +71,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
     joints.push({
       name: "Стык задней и правой стены",
       position: [
-        dimensions.width / 2 - jointWidth / 2,
+        (dimensions.width / 2 - jointWidth / 2),
         0,
         -dimensions.depth / 2 + jointWidth / 2,
       ],
@@ -88,7 +88,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
       position: [
         -dimensions.width / 2 + jointWidth / 2,
         0,
-        dimensions.depth / 2 - jointWidth * 1,
+        (dimensions.depth / 2 - jointWidth * 1) + .002,
       ],
       args: [
         jointWidth + protrusion,
@@ -101,9 +101,9 @@ const JointStripes: React.FC<JointStripesProps> = ({
     joints.push({
       name: "Стык передней и правой стены",
       position: [
-        dimensions.width / 2 - jointWidth / 2,
+        (dimensions.width / 2 - jointWidth / 2),
         0,
-        dimensions.depth / 2 - jointWidth * 1,
+        (dimensions.depth / 2 - jointWidth * 1) + .002,
       ],
       args: [
         jointWidth + protrusion,
@@ -112,114 +112,7 @@ const JointStripes: React.FC<JointStripesProps> = ({
       ],
     });
 
-    // Горизонтальные стыки между стенами и полом/потолком
-
-    // Стык между левой стеной и полом
-    joints.push({
-      name: "Стык левой стены и пола",
-      position: [
-        -dimensions.width / 2 + jointWidth / 2,
-        -dimensions.height / 2 + jointWidth / 2,
-        0,
-      ],
-      args: [
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-        dimensions.depth + 0.01,
-      ],
-    });
-
-    // Стык между правой стеной и полом
-    joints.push({
-      name: "Стык правой стены и пола",
-      position: [
-        dimensions.width / 2 - jointWidth / 2,
-        -dimensions.height / 2 + jointWidth / 2,
-        0,
-      ],
-      args: [
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-        dimensions.depth + 0.01,
-      ],
-    });
-
-    // Стык между задней стеной и полом
-    joints.push({
-      name: "Стык задней стены и пола",
-      position: [
-        0,
-        -dimensions.height / 2 + jointWidth / 2,
-        -dimensions.depth / 2 + jointWidth / 2,
-      ],
-      args: [
-        dimensions.width + protrusion,
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-      ],
-    });
-
-    // Стык между передней стеной и полом (исключая пространство для дверей)
-    // Левая часть стыка передней стены
-    joints.push({
-      name: "Стык пола и левой части передней стены",
-      position: [
-        -dimensions.width / 5,
-        -dimensions.height / 2 + jointWidth / 2,
-        dimensions.depth / 2.02 - jointWidth / 2,
-      ],
-      args: [
-        dimensions.width / 1.6,
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-      ],
-    });
-
-    // Правая часть стыка передней стены
-    joints.push({
-      name: "Стык пола и правой части передней стены",
-      position: [
-        dimensions.width / 5,
-        -dimensions.height / 2 + jointWidth / 2,
-        dimensions.depth / 2.02 - jointWidth / 2,
-      ],
-      args: [
-        dimensions.width / 1.6,
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-      ],
-    });
-
-    // Стык между левой стеной и потолком
-    joints.push({
-      name: "Стык левой стены и потолка",
-      position: [
-        -dimensions.width / 2 + jointWidth / 2,
-        dimensions.height / 2 - jointWidth / 2,
-        0,
-      ],
-      args: [
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-        dimensions.depth + 0.01,
-      ],
-    });
-
-    // Стык между правой стеной и потолком
-    joints.push({
-      name: "Стык правой стены и потолка",
-      position: [
-        dimensions.width / 2 - jointWidth / 2,
-        dimensions.height / 2 - jointWidth / 2,
-        0,
-      ],
-      args: [
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-        dimensions.depth + 0.01,
-      ],
-    });
-
+    
     // Стык между задней стеной и потолком
     joints.push({
       name: "Стык задней стены и потолка",
@@ -230,37 +123,6 @@ const JointStripes: React.FC<JointStripesProps> = ({
       ],
       args: [
         dimensions.width + protrusion,
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-      ],
-    });
-
-    // Стык между передней стеной и потолком (исключая пространство для дверей)
-    // Левая часть стыка передней стены
-    joints.push({
-      name: "Стык потолка и левой части передней стены",
-      position: [
-        -dimensions.width / 6,
-        dimensions.height / 2 - jointWidth / 2,
-        dimensions.depth / 2.02 - jointWidth / 2,
-      ],
-      args: [
-        dimensions.width / 1.5,
-        jointWidth + protrusion,
-        jointWidth + protrusion,
-      ],
-    });
-
-    // Правая часть стыка передней стены
-    joints.push({
-      name: "Стык потолка и правой части передней стены",
-      position: [
-        dimensions.width / 6,
-        dimensions.height / 2 - jointWidth / 2,
-        dimensions.depth / 2.02 - jointWidth / 2,
-      ],
-      args: [
-        dimensions.width / 1.5,
         jointWidth + protrusion,
         jointWidth + protrusion,
       ],

@@ -422,8 +422,8 @@ export const useMaterialsManager = (
   const jointStripeMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: "#cccccc",
-      metalness: 0.0, // Увеличиваем металличность
-      roughness: 1, // Уменьшаем шероховатость для более заметного блеска
+      metalness: .4, // Увеличиваем металличность
+      roughness: .2 // Уменьшаем шероховатость для более заметного блеска
     });
   }, []);
 
